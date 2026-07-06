@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SASTUDIO — Arquitetura & Design</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Inter:wght@300;400;600&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div id="grain"></div>
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<div id="loading"><span></span></div>
+
+<div id="hero">
+  <div id="h-tag">Arquitetura &amp; Design</div>
+  <h1 id="h-name">SASTUDIO</h1>
+  <div id="h-rule"></div>
+  <div id="h-desc">Transformamos espaços em experiências únicas</div>
+</div>
+
+
+<nav id="nav">
+  <a href="#" class="logo">SASTUDIO</a>
+  <ul class="nav-links">
+    <li><a href="https://sastudio.brand22creativeagency.pt/projects/" id="nav-projects">Projects</a></li>
+    <li><a href="#">About</a></li>
+    <li><a href="#">Contact</a></li>
+  </ul>
+  <button id="nav-burger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+
+
+<div id="nav-mobile">
+  <ul>
+    <li><a href="https://sastudio.brand22creativeagency.pt/projects/">Projects</a></li>
+    <li><a href="#">About</a></li>
+    <li><a href="#">Contact</a></li>
+  </ul>
+</div>
+
+
+
+<div id="vp">
+  <div id="gallery">
+    <!-- preenchido dinamicamente via WordPress REST API -->
+  </div>
+</div>
+
+
+<!-- ══ ABOUT PANEL ══ -->
+<div id="about-panel">
+  <div id="about-inner">
+    <div id="about-hero">
+      <h2 id="about-title">About SASTUDIO</h2>
+    </div>
+    <div id="about-body">
+      <div id="about-text">
+        <p>Based in Porto, Portugal, Sastudio is an award-winning creative studio that operates at the intersection of the architecture realm with social entrepreneurship. With an impact-driven mindset, the practice dwells on community design, educational, cultural and residential facilities, and aims to leverage architecture for problem-solving at wide scales, searching for solutions that push beyond the practice's standards.</p>
+        <p>Focusing in reshaping a future where spaces contribute to life betterment, we believe that through forward-thinking and creativity, design can be a strategic tool to translate needs in smart solutions, fostering sustainable environments and creating societal value.</p>
+      </div>
+      <div id="about-text-right">
+        <p>With a holistic and innovative approach, we are constantly reinventing our process and strive to continuously challenge the most conventional ideas by not settling for the present day solutions, always looking for the added value of each project to its context and all its stakeholders.</p>
+      </div>
+    </div>
+    
+  </div>
+  <footer class="site-footer">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <span class="footer-logo">SASTUDIO</span>
+        <p class="footer-about-text">Transformamos espaços<br>em experiências únicas.</p>
+      </div>
+      <div class="footer-col">
+        <span class="footer-col-label">Navigation</span>
+        <ul class="footer-nav">
+          <li><a href="https://sastudio.brand22creativeagency.pt/projects/">Projects</a></li>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <span class="footer-col-label">Contact</span>
+        <span class="footer-address">Porto, Portugal</span>
+        <a href="mailto:info@sastudio.pt" class="footer-email">info@sastudio.pt</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-copy">© 2026 SASTUDIO. Todos os direitos reservados.</span>
+      <div class="footer-social">
+        <a href="https://www.instagram.com/sastudio.pt/" class="footer-social-icon" aria-label="Instagram" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+        </a>
+        <a href="https://www.linkedin.com/company/sastudio/" class="footer-social-icon" aria-label="LinkedIn" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="8" y1="11" x2="8" y2="17"/><line x1="8" y1="7.5" x2="8" y2="8.5" stroke-width="2.2"/><path d="M12 17v-4c0-1.1.9-2 2-2s2 .9 2 2v4"/></svg>
+        </a>
+        <a href="https://www.facebook.com/sastudio.pt.architecture/" class="footer-social-icon" aria-label="Facebook" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+        </a>
+      </div>
+    </div>
+  </footer>
+</div>
+
+
+
+<!-- ══ PROJECTS LIST ══ -->
+<div id="projects-list">
+  <div id="pl-inner">
+    <div id="pl-header">
+      <div>
+        <span id="pl-label">Projetos</span>
+        <p id="pl-tagline">Transformamos espaços em experiências únicas</p>
+      </div>
+      <span id="pl-count"></span>
+    </div>
+    <div id="pl-controls">
+      <div id="pl-filters"></div>
+      <div id="pl-search-wrap">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8.5" cy="8.5" r="5.5"/><line x1="13" y1="13" x2="18" y2="18"/></svg>
+        <input id="pl-search" type="text" placeholder="Pesquisar projetos…" autocomplete="off" />
+      </div>
+    </div>
+    <div id="pl-grid"></div>
+  </div>
+  <footer class="site-footer">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <span class="footer-logo">SASTUDIO</span>
+        <p class="footer-about-text">Transformamos espaços<br>em experiências únicas.</p>
+      </div>
+      <div class="footer-col">
+        <span class="footer-col-label">Navigation</span>
+        <ul class="footer-nav">
+          <li><a href="https://sastudio.brand22creativeagency.pt/projects/">Projects</a></li>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <span class="footer-col-label">Contact</span>
+        <span class="footer-address">Porto, Portugal</span>
+        <a href="mailto:info@sastudio.pt" class="footer-email">info@sastudio.pt</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-copy">© 2026 SASTUDIO. Todos os direitos reservados.</span>
+      <div class="footer-social">
+        <a href="https://www.instagram.com/sastudio.pt/" class="footer-social-icon" aria-label="Instagram" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+        </a>
+        <a href="https://www.linkedin.com/company/sastudio/" class="footer-social-icon" aria-label="LinkedIn" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="8" y1="11" x2="8" y2="17"/><line x1="8" y1="7.5" x2="8" y2="8.5" stroke-width="2.2"/><path d="M12 17v-4c0-1.1.9-2 2-2s2 .9 2 2v4"/></svg>
+        </a>
+        <a href="https://www.facebook.com/sastudio.pt.architecture/" class="footer-social-icon" aria-label="Facebook" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+        </a>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- ══ CONTACT PANEL ══ -->
+<div id="contact-panel">
+  <div id="cp-inner">
+    <div id="cp-heading-section">
+      <h2 id="cp-title">CONTACT</h2>
+      <div id="cp-divider"></div>
+    </div>
+    <div id="cp-body">
+      <div id="cp-left">
+        <p>Contact us at: <a href="mailto:info@sastudio.pt" class="cp-contact-link">info@sastudio.pt</a></p>
+        <p>Praça do Cel. Pacheco 2 &nbsp;|&nbsp; 4050-453 Porto, Portugal</p>
+      </div>
+      <div id="cp-right">
+        <p>We are constantly looking for talented and motivated people. For inquiries do not hesitate to reach out, we look forward to hearing from you!</p>
+      </div>
+    </div>
+    <div id="cp-social-card">
+      <a href="https://www.instagram.com/sastudio.pt/" aria-label="Instagram" class="cp-social-link" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+      </a>
+      <a href="https://www.facebook.com/sastudio.pt.architecture/" aria-label="Facebook" class="cp-social-link" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+      </a>
+      <a href="https://www.linkedin.com/company/sastudio/" aria-label="LinkedIn" class="cp-social-link" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="8" y1="11" x2="8" y2="17"/><line x1="8" y1="7.5" x2="8" y2="8.5" stroke-width="2.2"/><path d="M12 17v-4c0-1.1.9-2 2-2s2 .9 2 2v4"/></svg>
+      </a>
+    </div>
+  </div>
+  
+</div>
+
+<!-- ══ LIGHTBOX ══ -->
+<div id="lightbox">
+  <div id="lb-img"><img src="" alt="" /><video id="lb-hover-video" muted loop playsinline preload="none"></video></div>
+
+  <div id="lb-view">
+    <section id="lb-hero">
+      <div id="lb-slides"></div>
+      <div id="lb-hero-ui">
+        <div id="lb-top-bar">
+          <span class="lb-logo">SASTUDIO</span>
+          <div id="lb-top-right">
+            <ul class="lb-nav-links">
+              <li><a href="https://sastudio.brand22creativeagency.pt/projects/">Projects</a></li>
+              <li><a href="#">About</a></li>
+              <li><a href="#">Contact</a></li>
+            </ul>
+          </div>
+        </div>
+        <div id="lb-title-block">
+          <div id="lb-proj-meta"></div>
+          <h2 id="lb-proj-title"></h2>
+        </div>
+      </div>
+      <div id="lb-image-nav">
+        <button id="lb-prev">&#8249;</button>
+        <span id="lb-img-count"></span>
+        <button id="lb-next">&#8250;</button>
+      </div>
+      <div id="lb-scroll-cue">Scroll ↓</div>
+    </section>
+    <section id="lb-content-section">
+      <div id="lb-loader"><span>A carregar projeto</span></div>
+      <div id="lb-main">
+        <div id="lb-content"></div>
+        <div id="lb-acf"></div>
+      </div>
+      <div id="lb-gallery"></div>
+      <div id="lb-related">
+        <p class="lb-related-label">Confira outros projetos</p>
+        <div id="lb-related-grid"></div>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <span class="footer-logo">SASTUDIO</span>
+          <p class="footer-about-text">Transformamos espaços<br>em experiências únicas.</p>
+        </div>
+        <div class="footer-col">
+          <span class="footer-col-label">Navigation</span>
+          <ul class="footer-nav">
+            <li><a href="https://sastudio.brand22creativeagency.pt/projects/">Projects</a></li>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <span class="footer-col-label">Contact</span>
+          <span class="footer-address">Porto, Portugal</span>
+          <a href="mailto:info@sastudio.pt" class="footer-email">info@sastudio.pt</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span class="footer-copy">© 2026 SASTUDIO. Todos os direitos reservados.</span>
+        <div class="footer-social">
+          <a href="https://www.instagram.com/sastudio.pt/" class="footer-social-icon" aria-label="Instagram" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+          </a>
+          <a href="https://www.linkedin.com/company/sastudio/" class="footer-social-icon" aria-label="LinkedIn" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="8" y1="11" x2="8" y2="17"/><line x1="8" y1="7.5" x2="8" y2="8.5" stroke-width="2.2"/><path d="M12 17v-4c0-1.1.9-2 2-2s2 .9 2 2v4"/></svg>
+          </a>
+          <a href="#" class="footer-social-icon" aria-label="Pinterest">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.24 2.65 7.86 6.39 9.29-.09-.78-.17-1.98.03-2.83.19-.78 1.27-5.36 1.27-5.36s-.32-.65-.32-1.6c0-1.5.87-2.63 1.95-2.63.92 0 1.36.69 1.36 1.52 0 .92-.59 2.31-.9 3.59-.25 1.07.53 1.94 1.58 1.94 1.9 0 3.17-2.44 3.17-5.32 0-2.19-1.47-3.84-4.14-3.84-3.03 0-4.92 2.27-4.92 4.82 0 .83.24 1.41.61 1.87.17.2.19.28.13.51-.04.17-.15.57-.19.72-.06.23-.24.31-.44.23-1.24-.51-1.82-1.88-1.82-3.42 0-2.54 2.15-5.62 6.42-5.62 3.44 0 5.72 2.5 5.72 5.19 0 3.57-1.97 6.24-4.88 6.24-.98 0-1.9-.52-2.21-1.11l-.61 2.34c-.19.72-.6 1.45-.94 2.01.71.21 1.46.33 2.23.33 5.52 0 10-4.48 10-10S17.52 2 12 2z"/></svg>
+          </a>
+        </div>
+      </div>
+    </footer>
+  </div>
+</div>
+
+<div id="hud">
+  <span>Scroll para zoom</span>
+  <span class="sep">·</span>
+  <span>Arraste para explorar</span>
+</div>
+<div id="zoom-label">100%</div>
+
+  <script src="animacao.js"></script>
+</body>
+</html>
