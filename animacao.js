@@ -629,24 +629,48 @@ document.addEventListener('keydown', e => {
 });
 
 function openProject(pic) {
+  const id       = +pic.dataset.id;
   const href     = pic.dataset.href;
+  const title    = pic.querySelector('.pic-title')?.textContent || '';
+  const meta     = pic.dataset.sub || '';
   const featSrc  = pic.querySelector('img').src;
   const hoverGif = pic.dataset.hoverGif || '';
   currentFeatSrc  = featSrc;
   currentHoverGif = hoverGif;
 
-  /* mantém o efeito de zoom na imagem clicada; no fim navega a sério
-     para a página real do projeto (Single Project) */
+  /* populate UI */
+  lbProjTitle.textContent = title;
+  lbProjMeta.textContent  = meta;
+  if (lbExtLink) lbExtLink.href = href || '#';
+  lbContent.classList.remove('visible');
+  lbContent.innerHTML     = '';
+  lbLoader.style.display  = 'flex';
+  lbView.scrollTop        = 0;
+  populateRelated(pic);
+  flushPrefetchQueue();
+
+  slideImages = hoverGif ? [hoverGif, featSrc] : [featSrc];
+  buildSlides(slideImages);
+
   lbImgEl.src = featSrc;
+  lbHoverVid.src = hoverGif || '';
+  lbHoverVid.style.opacity = '0';
   gsap.set(lbImg, { clearProps: 'all' });
   gsap.set(lbImg, { display: 'block', scale: 0.02, opacity: 0, transformOrigin: 'center center' });
+  gsap.set(lbClose, { opacity: 0, pointerEvents: 'none' });
+  lbView.classList.remove('show');
   lb.classList.add('open');
 
   gsap.to(lbImg, {
     scale: 1, opacity: 1,
     duration: 0.85, ease: 'power2.out',
     onComplete: () => {
-      if (href) window.location.href = href;
+      lbView.classList.add('show');
+      gsap.to(lbImg, { opacity: 0, duration: 0.2,
+        onComplete: () => { lbImg.style.display = 'none'; }
+      });
+      gsap.to(lbClose, { opacity: 1, pointerEvents: 'all', duration: 0.4, ease: 'power2.out' });
+      fetchProjectContent(id);
     }
   });
 }
