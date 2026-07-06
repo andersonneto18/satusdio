@@ -629,9 +629,15 @@ document.addEventListener('keydown', e => {
 });
 
 function openProject(pic) {
-  const id       = +pic.dataset.id;
-  const href     = pic.dataset.href;
-  const title    = pic.querySelector('.pic-title')?.textContent || '';
+  const r       = pic.getBoundingClientRect();
+  const id      = +pic.dataset.id;
+  const href    = pic.dataset.href;
+  const title   = pic.querySelector('.pic-title')?.textContent || '';
+
+  try {
+    const path = href ? new URL(href).pathname : null;
+    if (path) history.pushState({ projectId: id }, title, path);
+  } catch (_) {}
   const meta     = pic.dataset.sub || '';
   const featSrc  = pic.querySelector('img').src;
   const hoverGif = pic.dataset.hoverGif || '';
