@@ -314,6 +314,7 @@ function initCanvas() {
 
   let s = 1, tx = initCx, ty = 0;
   let tS = 1, tTx = initCx, tTy = 0;
+  let rawTx = initCx, rawTy = 0;
   let vx = 0, vy = 0;
   let drag = false, dragMoved = false, pmx = 0, pmy = 0;
 
@@ -344,10 +345,20 @@ function initCanvas() {
     return { xMin, xMax, yMin, yMax };
   }
 
+  /* deixa ir um pouco além do limite, com resistência crescente (efeito elástico) */
+  function rubberBand(value, min, max) {
+    const RESIST = 0.35;
+    if (value < min) return min - (min - value) * RESIST;
+    if (value > max) return max + (value - max) * RESIST;
+    return value;
+  }
+
   function clamp() {
     const b = getBounds(tS);
+    if (drag) return; /* enquanto arrasta, o próprio mousemove/touchmove aplica o elástico */
     tTx = Math.max(b.xMin, Math.min(b.xMax, tTx));
     tTy = Math.max(b.yMin, Math.min(b.yMax, tTy));
+    rawTx = tTx; rawTy = tTy;
   }
 
   (function tick() {
@@ -406,6 +417,7 @@ function initCanvas() {
     if (e.target.closest('nav')) return;
     drag = true; dragMoved = false;
     pmx = e.clientX; pmy = e.clientY; vx = vy = 0;
+    rawTx = tTx; rawTy = tTy;
     document.body.classList.add('grabbing');
     document.body.classList.remove('on-pic');
   });
@@ -414,7 +426,10 @@ function initCanvas() {
     if (!drag) return;
     vx = e.clientX - pmx; vy = e.clientY - pmy;
     if (Math.abs(vx) > 4 || Math.abs(vy) > 4) dragMoved = true;
-    tTx += vx; tTy += vy;
+    rawTx += vx; rawTy += vy;
+    const b = getBounds(tS);
+    tTx = rubberBand(rawTx, b.xMin, b.xMax);
+    tTy = rubberBand(rawTy, b.yMin, b.yMax);
     pmx = e.clientX; pmy = e.clientY;
   });
 
@@ -435,6 +450,7 @@ function initCanvas() {
     if (e.touches.length === 1) {
       drag = true; dragMoved = false;
       pmx = e.touches[0].clientX; pmy = e.touches[0].clientY; vx = vy = 0;
+      rawTx = tTx; rawTy = tTy;
     } else if (e.touches.length === 2) {
       drag = false;
       lastDist = Math.hypot(e.touches[1].clientX - e.touches[0].clientX, e.touches[1].clientY - e.touches[0].clientY);
@@ -446,7 +462,10 @@ function initCanvas() {
     if (e.touches.length === 1 && drag) {
       vx = e.touches[0].clientX - pmx; vy = e.touches[0].clientY - pmy;
       if (Math.abs(vx) > 4 || Math.abs(vy) > 4) dragMoved = true;
-      tTx += vx; tTy += vy;
+      rawTx += vx; rawTy += vy;
+      const b = getBounds(tS);
+      tTx = rubberBand(rawTx, b.xMin, b.xMax);
+      tTy = rubberBand(rawTy, b.yMin, b.yMax);
       pmx = e.touches[0].clientX; pmy = e.touches[0].clientY;
     } else if (e.touches.length === 2) {
       const d  = Math.hypot(e.touches[1].clientX - e.touches[0].clientX, e.touches[1].clientY - e.touches[0].clientY);
