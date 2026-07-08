@@ -37,18 +37,18 @@
     body.grabbing #cursor-ring { transform: translate(-50%,-50%) scale(3.2); opacity: 0.06; }
     body.on-nav #cursor,
     body.on-nav #cursor-ring   { opacity: 0; }
-    nav, nav * { cursor: pointer; }
+    #nav, #nav * { cursor: pointer; }
     #nav-burger { cursor: pointer; }
 
     /* ── NAV ── */
-    nav {
+    #nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 500;
       padding: 1.4rem 3rem;
       display: flex; align-items: center;
       background: transparent;
       opacity: 0; pointer-events: none; transition: opacity 0.6s ease;
     }
-    nav.ready { pointer-events: all; }
+    #nav.ready { pointer-events: all; }
     .logo {
       font-family: 'Cormorant Garamond', serif;
       font-size: 1.45rem; font-weight: 500; letter-spacing: 0.5em;
@@ -1117,7 +1117,7 @@
 
     @media (max-width: 768px) {
       /* NAV */
-      nav { padding: 1rem 1.2rem; }
+      #nav { padding: 1rem 1.2rem; }
       .nav-links { display: none; }
       #nav-burger { display: flex; }
 
