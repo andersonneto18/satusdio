@@ -153,8 +153,10 @@ window.addEventListener('load', async () => {
     el.addEventListener('mouseleave', () => document.body.classList.remove('on-pic'));
   });
   const navEl = document.getElementById('nav');
-  navEl.addEventListener('mouseenter', () => document.body.classList.add('on-nav'));
-  navEl.addEventListener('mouseleave', () => document.body.classList.remove('on-nav'));
+  if (navEl) {
+    navEl.addEventListener('mouseenter', () => document.body.classList.add('on-nav'));
+    navEl.addEventListener('mouseleave', () => document.body.classList.remove('on-nav'));
+  }
 
   const lbTopBar = document.getElementById('lb-top-bar');
   if (lbTopBar) {
@@ -273,8 +275,10 @@ function entrance() {
     .to('#h-desc', { opacity: 1, y: 0, duration: 0.55, ease: 'power2.out' }, 0.85)
     .call(() => {
       const done = () => {
-        nav.style.opacity = '1';
-        nav.classList.add('ready');
+        if (nav) {
+          nav.style.opacity = '1';
+          nav.classList.add('ready');
+        }
         gsap.to([hud, zl], { opacity: 1, duration: 0.8 });
         setTimeout(() => gsap.to(hud, { opacity: 0, duration: 1 }), 4000);
         initCanvas();
