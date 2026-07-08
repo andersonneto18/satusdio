@@ -50,9 +50,7 @@ add_shortcode('single_projetos', function () {
         }
     }
 
-    // html_entity_decode aqui evita duplicar a codificação (ex: "&" a aparecer
-    // literalmente como "&#038;") quando o título já vem com entidades do WP.
-    $title    = html_entity_decode( get_the_title($post_id), ENT_QUOTES, 'UTF-8' );
+    $title    = get_the_title($post_id);
     $year     = get_the_date('Y', $post_id);
     $feat_url = get_the_post_thumbnail_url($post_id, 'full');
 
@@ -289,12 +287,11 @@ add_shortcode('single_projetos', function () {
           $r_terms = get_the_terms($rp->ID, $tax);
           if ( $r_terms && ! is_wp_error($r_terms) && ! empty($r_terms) ) { $r_cat = $r_terms[0]->name; break; }
         }
-        $r_sub   = $r_cat ? ($r_cat . ' · ' . $r_year) : $r_year;
-        $r_title = html_entity_decode( get_the_title($rp->ID), ENT_QUOTES, 'UTF-8' );
+        $r_sub = $r_cat ? ($r_cat . ' · ' . $r_year) : $r_year;
       ?>
         <a class="sp-rel-card" href="<?php echo esc_url(get_permalink($rp->ID)); ?>">
-          <div class="sp-rel-card-img-wrap"><img src="<?php echo esc_url($r_img); ?>" alt="<?php echo esc_attr($r_title); ?>" loading="lazy"/></div>
-          <div class="sp-rel-card-title"><?php echo esc_html($r_title); ?></div>
+          <div class="sp-rel-card-img-wrap"><img src="<?php echo esc_url($r_img); ?>" alt="<?php echo esc_attr(get_the_title($rp->ID)); ?>" loading="lazy"/></div>
+          <div class="sp-rel-card-title"><?php echo esc_html(get_the_title($rp->ID)); ?></div>
           <div class="sp-rel-card-sub"><?php echo esc_html($r_sub); ?></div>
         </a>
       <?php endforeach; ?>
@@ -305,34 +302,11 @@ add_shortcode('single_projetos', function () {
 
 <script>
 (function () {
-  /* Percorre os elementos "pais" do nosso conteúdo à procura de algum
-     wrapper (do tema ou de um popup do Elementor) que tenha scroll
-     vertical próprio — isso cria uma segunda scrollbar e bloqueia o
-     scroll normal da página. Em vez de adivinhar nomes de classes,
-     corrige-se aqui o que encontrar mesmo, seja qual for a classe. */
-  function fixAncestorScroll() {
-    var el = document.getElementById('sp-root');
-    if (!el) return;
-    el = el.parentElement;
-    while (el && el !== document.body) {
-      var cs = window.getComputedStyle(el);
-      if (cs.overflowY === 'auto' || cs.overflowY === 'scroll' || cs.overflow === 'auto' || cs.overflow === 'scroll') {
-        el.style.setProperty('overflow', 'visible', 'important');
-        el.style.setProperty('overflow-y', 'visible', 'important');
-        el.style.setProperty('height', 'auto', 'important');
-        el.style.setProperty('max-height', 'none', 'important');
-        el.style.setProperty('position', 'static', 'important');
-      }
-      el = el.parentElement;
-    }
-  }
-
   /* Cria as tags <video> só depois de a página estar carregada, para o
      tema (The7/MediaElement.js) não as apanhar e as embrulhar no player
      nativo dele — se não existir nenhuma <video> quando esse script corre,
      ele não tem nada para "roubar". */
   window.addEventListener('load', function () {
-    fixAncestorScroll();
     document.querySelectorAll('#sp-slides .sp-slide[data-video-src]').forEach(function (slide) {
       var vid = document.createElement('video');
       vid.src = slide.dataset.videoSrc;
