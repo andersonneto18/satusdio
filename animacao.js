@@ -790,6 +790,7 @@ async function fetchProjectContent(id) {
       }));
     }
     const data = await projectCache.get(id);
+    if (!data) throw new Error('Sem dados do projeto (fetch falhou ou foi bloqueado)');
 
     const acf = data.acf || {};
 
