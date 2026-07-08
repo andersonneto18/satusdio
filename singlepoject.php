@@ -102,6 +102,28 @@ add_shortcode('single_projetos', function () {
      Nesta página isso bloqueia o scroll normal — contraria-se aqui. */
   html, body { overflow: auto !important; height: auto !important; }
 
+  /* Se este template estiver a ser renderizado dentro de um wrapper com
+     scroll próprio (ex: popup do Elementor), isso cria uma segunda
+     scrollbar e bloqueia o scroll normal da página. Neutraliza-se aqui,
+     forçando o wrapper a comportar-se como conteúdo normal do documento. */
+  .elementor-popup-modal,
+  .dialog-widget-content,
+  .dialog-message,
+  .elementor-popup-modal__content,
+  div[data-elementor-type="popup"] {
+    position: static !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    width: auto !important;
+    transform: none !important;
+  }
+  .dialog-lightbox-widget,
+  .elementor-popup-modal .dialog-lightbox-widget {
+    background: none !important;
+    position: static !important;
+  }
+
   #sp-root, #sp-root * { box-sizing: border-box; }
   #sp-root { font-family: 'Inter', sans-serif; color: #151512; }
 
