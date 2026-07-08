@@ -95,6 +95,8 @@ add_shortcode('single_projetos', function () {
     ob_start();
     ?>
 <style>
+  @view-transition { navigation: auto; }
+
   /* O CSS partilhado ("Galeria Portfolio", ativo em todo o site) põe
      overflow:hidden no body para a home (app fullscreen sem scroll nativo).
      Nesta página isso bloqueia o scroll normal — contraria-se aqui. */
