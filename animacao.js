@@ -1202,6 +1202,23 @@ function initParallax() {
   let activePic = null;
   let activeVid = null;
 
+  function leaveActivePic() {
+    if (!activePic) return;
+    const img = activePic.querySelector('img');
+    activePic.style.zIndex = '';
+    gsap.to(img, { scale: 1.06, duration: 0.85, ease: 'power3.out' });
+    if (activeVid) {
+      const vid = activeVid;
+      gsap.to(vid, { opacity: 0, duration: 0.3, onComplete: () => {
+        vid.pause();
+        vid.currentTime = 0;
+      }});
+      activeVid = null;
+    }
+    document.body.classList.remove('on-pic');
+    activePic = null;
+  }
+
   window.addEventListener('mousemove', e => {
     if (document.body.classList.contains('grabbing')) return;
 
@@ -1209,19 +1226,7 @@ function initParallax() {
     const pic = el?.closest('.pic');
 
     if (pic !== activePic) {
-      /* sai do card anterior */
-      if (activePic) {
-        const img = activePic.querySelector('img');
-        activePic.style.zIndex = '';
-        gsap.to(img, { scale: 1.06, duration: 0.85, ease: 'power3.out' });
-        if (activeVid) {
-          gsap.to(activeVid, { opacity: 0, duration: 0.3, onComplete: () => {
-            activeVid.pause();
-            activeVid.currentTime = 0;
-          }});
-          activeVid = null;
-        }
-      }
+      if (activePic) leaveActivePic();
       /* entra no novo card */
       if (pic) {
         const img = pic.querySelector('img');
@@ -1234,10 +1239,16 @@ function initParallax() {
           vid.play().catch(() => {});
           gsap.to(vid, { opacity: 1, duration: 0.45, ease: 'power2.out' });
         }
-      } else {
-        document.body.classList.remove('on-pic');
+        activePic = pic;
       }
-      activePic = pic || null;
     }
   });
+
+  /* se o rato sair da janela do browser por completo (barra de endereço,
+     outra aba, fora do ecrã) ou a página perder o foco, garante que o
+     vídeo em hover para na mesma — senão fica "preso" a tocar sozinho */
+  document.addEventListener('mouseout', e => {
+    if (!e.relatedTarget) leaveActivePic();
+  });
+  window.addEventListener('blur', leaveActivePic);
 }
