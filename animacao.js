@@ -326,8 +326,9 @@ function initCanvas() {
   const pics = document.querySelectorAll('.pic');
   const zl   = document.getElementById('zoom-label');
 
-  const initCx = gallery.offsetWidth > window.innerWidth
-    ? -Math.round((gallery.offsetWidth - window.innerWidth) / 2) : 0;
+  /* começa encostado à esquerda (sem centrar) — as colunas seguintes
+     só aparecem ao rolar, tal como na referência */
+  const initCx = 0;
 
   let s = 1, tx = initCx, ty = 0;
   let tS = 1, tTx = initCx, tTy = 0;
