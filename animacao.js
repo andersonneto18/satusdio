@@ -180,10 +180,10 @@ window.addEventListener('load', async () => {
    MASONRY LAYOUT
 ══════════════════════════════════════════════════ */
 const COL_CONFIG = [
-  { maxW: 480,  cols: 2, gap: 8,  canvasScale: 1.15 },
-  { maxW: 768,  cols: 3, gap: 8,  canvasScale: 1.15 },
-  { maxW: 1024, cols: 3, gap: 10, canvasScale: 1.2  },
-  { maxW: Infinity, cols: 4, gap: 10, canvasScale: 1.25 },
+  { maxW: 480,  cols: 2, gap: 8  },
+  { maxW: 768,  cols: 3, gap: 8  },
+  { maxW: 1024, cols: 3, gap: 10 },
+  { maxW: Infinity, cols: 4, gap: 10 },
 ];
 
 function getMasonryConfig() {
@@ -191,28 +191,35 @@ function getMasonryConfig() {
   return COL_CONFIG.find(c => vw <= c.maxW);
 }
 
+/* Cada "coluna visível" cabe inteira na altura do ecrã (sem scroll vertical).
+   Quando uma coluna já não tem espaço para a próxima imagem, abre-se uma
+   coluna nova à direita — é isso que faz o número de imagens por coluna
+   variar (como na referência) e o scroll horizontal ir revelando mais. */
 function layoutMasonry() {
-  const { cols, gap, canvasScale } = getMasonryConfig();
+  const { cols, gap } = getMasonryConfig();
   const vw   = window.innerWidth;
-  const W    = Math.round(vw * canvasScale);
-  gallery.style.width = W + 'px';
+  const vh   = window.innerHeight;
+  const colW = (vw - gap * (cols + 1)) / cols;
+  const maxH = vh - gap * 2;
 
-  const colW = (W - gap * (cols + 1)) / cols;
-  /* todas as colunas começam alinhadas no topo — sem desfasamento */
-  const colH = new Array(cols).fill(gap);
+  const colH = []; // cresce conforme for preciso — não tem tamanho fixo
   const pics = Array.from(gallery.querySelectorAll('.pic'));
 
   pics.forEach((pic, idx) => {
-    /* preenche sempre a coluna mais vazia — nunca deixa nenhuma para
-       trás, ao contrário de heurísticas que "pontuam" a escolha */
-    const minH = Math.min(...colH);
-    const ci   = colH.indexOf(minH);
-
-    /* usa a proporção real da imagem (vinda do WordPress) para a altura,
-       criando a variedade de tamanhos naturalmente, sem cortar nada;
-       só recorre à altura fixa de reserva se não soubermos as dimensões */
     const aspect = parseFloat(pic.dataset.aspect);
     const h = aspect ? colW / aspect : BASE_H[idx % BASE_H.length];
+
+    /* procura a coluna mais vazia que ainda tenha espaço para esta imagem */
+    let ci = -1, minH = Infinity;
+    colH.forEach((height, i) => {
+      if (height + h <= maxH && height < minH) { minH = height; ci = i; }
+    });
+
+    /* nenhuma coluna existente tem espaço — abre uma nova à direita */
+    if (ci === -1) {
+      colH.push(gap);
+      ci = colH.length - 1;
+    }
 
     pic.style.left   = gap + ci * (colW + gap) + 'px';
     pic.style.top    = colH[ci] + 'px';
@@ -222,7 +229,9 @@ function layoutMasonry() {
     colH[ci] += h + gap;
   });
 
-  gallery.style.height = (Math.max(...colH) + gap) + 'px';
+  const totalCols = Math.max(colH.length, cols);
+  gallery.style.width  = (totalCols * (colW + gap) + gap) + 'px';
+  gallery.style.height = vh + 'px';
 }
 
 window.addEventListener('resize', () => {
