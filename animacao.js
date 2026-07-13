@@ -222,6 +222,7 @@ function layoutMasonry() {
       if (count > 0 && next > maxH) break;
       used = next;
       count++;
+      if (count >= 3) break; /* nunca mais de 3 imagens por coluna */
     }
 
     const group = pics.slice(idx, idx + count);
