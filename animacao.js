@@ -182,6 +182,8 @@ function getMasonryConfig() {
   return COL_CONFIG.find(c => vw <= c.maxW);
 }
 
+let galleryScale = 1;
+
 function layoutMasonry() {
   const { cols, gap, offsets, canvasScale } = getMasonryConfig();
   const vw   = window.innerWidth;
@@ -205,7 +207,11 @@ function layoutMasonry() {
     colH[ci] += h + gap;
   });
 
-  gallery.style.height = (Math.max(...colH) + gap) + 'px';
+  /* escala a grelha toda para preencher exatamente a altura do ecrã,
+     sem sobrar espaço em branco em cima/baixo (edge-to-edge) */
+  const naturalH = Math.max(...colH) + gap;
+  gallery.style.height = naturalH + 'px';
+  galleryScale = window.innerHeight / naturalH;
 }
 
 window.addEventListener('resize', () => {
@@ -305,14 +311,14 @@ function entrance() {
    CANVAS — navegação só horizontal, via scroll (sem arrastar, sem zoom)
 ══════════════════════════════════════════════════ */
 function initCanvas() {
-  const initCx = gallery.offsetWidth > window.innerWidth
-    ? -Math.round((gallery.offsetWidth - window.innerWidth) / 2) : 0;
+  const initCx = (gallery.offsetWidth * galleryScale) > window.innerWidth
+    ? -Math.round((gallery.offsetWidth * galleryScale - window.innerWidth) / 2) : 0;
 
   let tx = initCx, tTx = initCx, rawTx = initCx;
 
   function getBounds() {
     const W  = window.innerWidth;
-    const gW = gallery.offsetWidth;
+    const gW = gallery.offsetWidth * galleryScale;
     const mg = 55;
     return { xMin: -(gW - W) - mg, xMax: mg };
   }
@@ -333,7 +339,7 @@ function initCanvas() {
 
   (function tick() {
     tx += (tTx - tx) * 0.085;
-    gallery.style.transform = `translateX(${tx}px)`;
+    gallery.style.transform = `translateX(${tx}px) scale(${galleryScale})`;
     requestAnimationFrame(tick);
   })();
 
