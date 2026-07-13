@@ -66,34 +66,23 @@
     }
     #nav.ready { pointer-events: all; }
     .nav-links {
-      position: absolute; left: 50%; transform: translateX(-50%);
-      display: flex; gap: 0; list-style: none;
-      background: rgba(255,255,255,0.92);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border: 1px solid rgba(21,21,18,0.08);
-      border-radius: 999px;
-      padding: 0.35rem 0.5rem;
-      box-shadow: 0 4px 24px rgba(21,21,18,0.09);
+      margin-left: auto;
+      display: flex; gap: 2.4rem; list-style: none;
     }
     .nav-links a {
       display: block;
-      font-size: 0.62rem; letter-spacing: 0.24em; font-weight: 400;
-      text-transform: uppercase; color: rgba(21,21,18,0.65);
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem; font-weight: 500;
+      color: #fff;
       text-decoration: none;
-      padding: 0.65rem 1.6rem;
-      border-radius: 999px;
-      transition: color 0.2s, background 0.2s, color 0.2s;
-      position: relative;
+      mix-blend-mode: difference;
+      transition: opacity 0.2s;
     }
     .nav-links a:hover {
-      color: var(--text);
-      background: rgba(21,21,18,0.09);
+      opacity: 0.6;
     }
     .nav-links a.nav-active {
-      color: var(--text);
-      background: rgba(21,21,18,0.09);
-      font-weight: 600;
+      font-weight: 700;
     }
 
     /* ── VIEWPORT ── */
