@@ -414,10 +414,12 @@ function initCanvas() {
     const gW = gallery.offsetWidth;
     const gH = gallery.offsetHeight;
     const mg = 55;
+    /* xMax/yMax = 0: nunca deixa ver espaço em branco antes da primeira
+       coluna (só há folga elástica no fim da galeria, não no início) */
     const xMin = -(gW * sc - W) - mg;
-    const xMax = mg;
+    const xMax = 0;
     const yMin = -(gH * sc - H) - mg;
-    const yMax = mg;
+    const yMax = 0;
     return { xMin, xMax, yMin, yMax };
   }
 
