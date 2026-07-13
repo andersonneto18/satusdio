@@ -401,7 +401,20 @@ function initCanvas() {
     if (lb.classList.contains('open')) return;
     if (e.target.closest('#projects-list, #about-panel')) return;
     e.preventDefault();
-    zoomAt(e.clientX, e.clientY, e.deltaY < 0 ? 1.1 : 0.91);
+
+    /* pinch-to-zoom no trackpad (ou ctrl+scroll) continua a fazer zoom */
+    if (e.ctrlKey) {
+      zoomAt(e.clientX, e.clientY, e.deltaY < 0 ? 1.1 : 0.91);
+      return;
+    }
+
+    /* scroll normal revela mais imagens, deslocando a galeria na horizontal —
+       usa o maior delta (vertical do rato ou horizontal do trackpad).
+       o clamp() do tick já corrige os limites a cada frame (sem drag=true),
+       por isso nunca fica "preso" fora dos limites. */
+    const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    rawTx -= delta * 1.3;
+    tTx = rawTx;
   }, { passive: false });
 
   window.addEventListener('mousedown', e => {
