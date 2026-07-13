@@ -387,7 +387,10 @@ function initCanvas() {
     requestAnimationFrame(tick);
   })();
 
-  /* scroll do rato move só para os lados */
+  /* scroll do rato move só para os lados; depois de parar de rodar a
+     roda, "solta" e encaixa dentro do limite (bounce elástico) — sem
+     isto, ao passar do limite ficava preso esticado para sempre */
+  let wheelSettleTimer = null;
   window.addEventListener('wheel', e => {
     if (lb.classList.contains('open')) return;
     if (e.target.closest('#projects-list, #about-panel, #contact-panel')) return;
@@ -395,6 +398,9 @@ function initCanvas() {
     rawTx -= e.deltaY;
     const b = getBounds();
     tTx = rubberBand(rawTx, b.xMin, b.xMax);
+
+    clearTimeout(wheelSettleTimer);
+    wheelSettleTimer = setTimeout(clamp, 120);
   }, { passive: false });
 
   /* clique num projeto abre-o */
