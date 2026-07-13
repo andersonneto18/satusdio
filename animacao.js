@@ -170,14 +170,13 @@ window.addEventListener('load', async () => {
 /* ══════════════════════════════════════════════════
    MASONRY LAYOUT
 ══════════════════════════════════════════════════ */
-/* targetCount = quantas imagens cada coluna deve ter, empilhadas, ocupando
-   sempre TODA a altura do ecrã (sem cortar nada). approxCols só serve de
-   referência para saber se a largura resultante ainda faz sentido. */
+/* approxCols = quantas colunas cabem à largura normal do ecrã — usado só
+   para calcular a largura de referência de uma coluna. */
 const BREAKPOINTS = [
-  { maxW: 480,  gap: 8,  targetCount: 1, approxCols: 2 },
-  { maxW: 768,  gap: 8,  targetCount: 2, approxCols: 3 },
-  { maxW: 1024, gap: 10, targetCount: 2, approxCols: 3 },
-  { maxW: Infinity, gap: 10, targetCount: 3, approxCols: 4 },
+  { maxW: 480,  gap: 8,  approxCols: 2 },
+  { maxW: 768,  gap: 8,  approxCols: 3 },
+  { maxW: 1024, gap: 10, approxCols: 3 },
+  { maxW: Infinity, gap: 10, approxCols: 4 },
 ];
 
 function getMasonryConfig() {
@@ -197,13 +196,15 @@ function colWidthFor(group, count, gap, maxH) {
   return (maxH - gap * (count + 1)) / sumInv;
 }
 
-/* Cada coluna tem sempre `targetCount` imagens a preencher toda a altura
-   do ecrã (sem scroll vertical, sem cortar imagens) — quando esse número
-   resultaria numa coluna desproporcionalmente larga/estreita, reduz para
-   menos imagens nessa coluna. Novas colunas abrem-se à direita, reveladas
-   ao fazer scroll horizontal. */
+/* Para cada coluna: primeiro descobre quantas imagens cabem naturalmente
+   (à largura normal do ecrã) até enchar a altura — isso dá o número de
+   imagens certo para o conteúdo real (2, 3, ou o que fizer sentido).
+   Só depois ajusta a largura dessa coluna, dentro de um intervalo
+   controlado, para fechar exatamente a altura do ecrã sem deixar vão
+   nem esticar demais. Novas colunas abrem-se à direita, reveladas ao
+   fazer scroll horizontal. */
 function layoutMasonry() {
-  const { gap, targetCount, approxCols } = getMasonryConfig();
+  const { gap, approxCols } = getMasonryConfig();
   const vw    = window.innerWidth;
   const vh    = window.innerHeight;
   const maxH  = vh - gap * 2;
@@ -213,24 +214,25 @@ function layoutMasonry() {
   let idx = 0, x = gap;
 
   while (idx < pics.length) {
-    let count = Math.min(targetCount, pics.length - idx);
+    /* quantas imagens cabem nesta coluna à largura normal */
+    let count = 0, used = gap;
+    while (idx + count < pics.length) {
+      const h    = baseColW / picAspect(pics[idx + count]);
+      const next = used + h + gap;
+      if (count > 0 && next > maxH) break;
+      used = next;
+      count++;
+    }
+
     const group = pics.slice(idx, idx + count);
     let colW = colWidthFor(group, count, gap, maxH);
 
-    /* larga/estreita demais para o número de imagens pedido — usa menos */
-    while (count > 1 && (colW > baseColW * 1.4 || colW < baseColW * 0.6)) {
-      count--;
-      colW = colWidthFor(group, count, gap, maxH);
-    }
-
-    /* mesmo com 1 imagem só, uma foto muito "larga" (pouca altura à
-       largura normal) faria a fórmula disparar para uma coluna gigante —
-       trava sempre dentro de um intervalo razoável, mesmo que essa
-       coluna em concreto não preencha 100% da altura */
-    colW = Math.max(baseColW * 0.55, Math.min(baseColW * 1.5, colW));
+    /* só ajusta dentro de um intervalo razoável — evita tanto a coluna
+       gigante (imagem muito larga sozinha) como o vão em branco */
+    colW = Math.max(baseColW * 0.6, Math.min(baseColW * 1.5, colW));
 
     let y = gap;
-    group.slice(0, count).forEach(pic => {
+    group.forEach(pic => {
       const h = colW / picAspect(pic);
       pic.style.left   = x + 'px';
       pic.style.top    = y + 'px';
