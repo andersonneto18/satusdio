@@ -223,6 +223,12 @@ function layoutMasonry() {
       colW = colWidthFor(group, count, gap, maxH);
     }
 
+    /* mesmo com 1 imagem só, uma foto muito "larga" (pouca altura à
+       largura normal) faria a fórmula disparar para uma coluna gigante —
+       trava sempre dentro de um intervalo razoável, mesmo que essa
+       coluna em concreto não preencha 100% da altura */
+    colW = Math.max(baseColW * 0.55, Math.min(baseColW * 1.5, colW));
+
     let y = gap;
     group.slice(0, count).forEach(pic => {
       const h = colW / picAspect(pic);
