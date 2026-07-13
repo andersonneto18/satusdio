@@ -196,13 +196,36 @@ function colWidthFor(group, count, gap, maxH) {
   return (maxH - gap * (count + 1)) / sumInv;
 }
 
-/* Para cada coluna: primeiro descobre quantas imagens cabem naturalmente
-   (à largura normal do ecrã) até enchar a altura — isso dá o número de
-   imagens certo para o conteúdo real (2, 3, ou o que fizer sentido).
-   Só depois ajusta a largura dessa coluna, dentro de um intervalo
-   controlado, para fechar exatamente a altura do ecrã sem deixar vão
-   nem esticar demais. Novas colunas abrem-se à direita, reveladas ao
-   fazer scroll horizontal. */
+/* Gera a sequência de quantas imagens cada coluna leva (3, 2, 3, 2...),
+   mas corrige o fim para nunca sobrar uma coluna com 1 imagem sozinha —
+   junta/reparte com a coluna anterior nesse caso. */
+function computeColumnCounts(n) {
+  const counts = [];
+  let remaining = n, i = 0;
+  while (remaining > 0) {
+    const target = (i % 2 === 0) ? 3 : 2;
+    const c = Math.min(target, remaining);
+    counts.push(c);
+    remaining -= c;
+    i++;
+  }
+  if (counts.length >= 2 && counts[counts.length - 1] === 1) {
+    const last = counts.length - 1, prev = last - 1;
+    if (counts[prev] > 2) {
+      counts[prev]--;
+      counts[last]++;
+    } else {
+      counts[prev] += counts[last];
+      counts.pop();
+    }
+  }
+  return counts;
+}
+
+/* Para cada coluna: usa a contagem já decidida (computeColumnCounts) e
+   ajusta a largura dessa coluna, dentro de um intervalo controlado, para
+   fechar exatamente a altura do ecrã sem deixar vão nem esticar demais.
+   Novas colunas abrem-se à direita, reveladas ao fazer scroll horizontal. */
 function layoutMasonry() {
   const { gap, approxCols } = getMasonryConfig();
   const vw    = window.innerWidth;
@@ -210,16 +233,12 @@ function layoutMasonry() {
   const maxH  = vh - gap * 2;
   const baseColW = (vw - gap * (approxCols + 1)) / approxCols;
 
-  const pics = Array.from(gallery.querySelectorAll('.pic'));
-  let idx = 0, x = gap, colIdx = 0;
+  const pics   = Array.from(gallery.querySelectorAll('.pic'));
+  const counts = computeColumnCounts(pics.length);
 
-  while (idx < pics.length) {
-    /* alterna 3, 2, 3, 2... por coluna — dá o ritmo editorial (em vez de
-       deixar "o que couber" decidir e acabar com várias colunas de 3
-       seguidas) */
-    const target = (colIdx % 2 === 0) ? 3 : 2;
-    const count  = Math.min(target, pics.length - idx);
+  let idx = 0, x = gap;
 
+  counts.forEach((count, colIdx) => {
     const group = pics.slice(idx, idx + count);
 
     if (count === 2) {
@@ -262,8 +281,7 @@ function layoutMasonry() {
     }
 
     idx += count;
-    colIdx++;
-  }
+  });
 
   gallery.style.width  = x + 'px';
   gallery.style.height = vh + 'px';
