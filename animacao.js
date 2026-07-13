@@ -395,10 +395,18 @@ function initCanvas() {
   let s = 1, tx = initCx, ty = 0;
   let tS = 1, tTx = initCx, tTy = 0;
   let rawTx = initCx, rawTy = 0;
-  let vx = 0, vy = 0;
-  let drag = false, dragMoved = false, pmx = 0, pmy = 0;
+  let drag = false, dragMoved = false;
+  let dragOriginTx = 0, dragOriginTy = 0, dragStartX = 0, dragStartY = 0;
 
   let mpx = 0, mpy = 0;
+
+  /* puxão elástico ao arrastar: o deslocamento nunca passa muito de
+     ELASTIC_MAX, e ao soltar volta sempre para onde estava antes —
+     arrastar é só um efeito, não navega permanentemente */
+  const ELASTIC_MAX = 90;
+  function elasticPull(delta) {
+    return ELASTIC_MAX * delta / (ELASTIC_MAX + Math.abs(delta));
+  }
 
   function getBounds(sc) {
     const W  = window.innerWidth;
@@ -411,14 +419,6 @@ function initCanvas() {
     const yMin = -(gH * sc - H) - mg;
     const yMax = mg;
     return { xMin, xMax, yMin, yMax };
-  }
-
-  /* deixa ir um pouco além do limite, com resistência crescente (efeito elástico) */
-  function rubberBand(value, min, max) {
-    const RESIST = 0.35;
-    if (value < min) return min - (min - value) * RESIST;
-    if (value > max) return max + (value - max) * RESIST;
-    return value;
   }
 
   function clamp() {
@@ -483,21 +483,19 @@ function initCanvas() {
   window.addEventListener('mousedown', e => {
     if (e.target.closest('nav')) return;
     drag = true; dragMoved = false;
-    pmx = e.clientX; pmy = e.clientY; vx = vy = 0;
-    rawTx = tTx; rawTy = tTy;
+    dragOriginTx = tTx; dragOriginTy = tTy;
+    dragStartX = e.clientX; dragStartY = e.clientY;
     document.body.classList.add('grabbing');
     document.body.classList.remove('on-pic');
   });
 
   window.addEventListener('mousemove', e => {
     if (!drag) return;
-    vx = e.clientX - pmx; vy = e.clientY - pmy;
-    if (Math.abs(vx) > 4 || Math.abs(vy) > 4) dragMoved = true;
-    rawTx += vx; rawTy += vy;
-    const b = getBounds(tS);
-    tTx = rubberBand(rawTx, b.xMin, b.xMax);
-    tTy = rubberBand(rawTy, b.yMin, b.yMax);
-    pmx = e.clientX; pmy = e.clientY;
+    const dx = e.clientX - dragStartX;
+    const dy = e.clientY - dragStartY;
+    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) dragMoved = true;
+    tTx = dragOriginTx + elasticPull(dx);
+    tTy = dragOriginTy + elasticPull(dy);
   });
 
   window.addEventListener('mouseup', e => {
@@ -507,8 +505,9 @@ function initCanvas() {
       const pic = e.target.closest('.pic');
       if (pic?.dataset.href) openProject(pic);
     }
-    tTx += vx * 7; tTy += vy * 7;
-    clamp();
+    /* solta o elástico — volta sempre para onde estava antes de arrastar */
+    tTx = dragOriginTx; tTy = dragOriginTy;
+    rawTx = tTx; rawTy = tTy;
     document.body.classList.remove('grabbing');
   });
 
@@ -516,8 +515,8 @@ function initCanvas() {
   window.addEventListener('touchstart', e => {
     if (e.touches.length === 1) {
       drag = true; dragMoved = false;
-      pmx = e.touches[0].clientX; pmy = e.touches[0].clientY; vx = vy = 0;
-      rawTx = tTx; rawTy = tTy;
+      dragOriginTx = tTx; dragOriginTy = tTy;
+      dragStartX = e.touches[0].clientX; dragStartY = e.touches[0].clientY;
     } else if (e.touches.length === 2) {
       drag = false;
       lastDist = Math.hypot(e.touches[1].clientX - e.touches[0].clientX, e.touches[1].clientY - e.touches[0].clientY);
@@ -527,13 +526,11 @@ function initCanvas() {
   window.addEventListener('touchmove', e => {
     e.preventDefault();
     if (e.touches.length === 1 && drag) {
-      vx = e.touches[0].clientX - pmx; vy = e.touches[0].clientY - pmy;
-      if (Math.abs(vx) > 4 || Math.abs(vy) > 4) dragMoved = true;
-      rawTx += vx; rawTy += vy;
-      const b = getBounds(tS);
-      tTx = rubberBand(rawTx, b.xMin, b.xMax);
-      tTy = rubberBand(rawTy, b.yMin, b.yMax);
-      pmx = e.touches[0].clientX; pmy = e.touches[0].clientY;
+      const dx = e.touches[0].clientX - dragStartX;
+      const dy = e.touches[0].clientY - dragStartY;
+      if (Math.abs(dx) > 4 || Math.abs(dy) > 4) dragMoved = true;
+      tTx = dragOriginTx + elasticPull(dx);
+      tTy = dragOriginTy + elasticPull(dy);
     } else if (e.touches.length === 2) {
       const d  = Math.hypot(e.touches[1].clientX - e.touches[0].clientX, e.touches[1].clientY - e.touches[0].clientY);
       const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
@@ -543,7 +540,11 @@ function initCanvas() {
   }, { passive: false });
 
   window.addEventListener('touchend', () => {
-    if (drag) { drag = false; tTx += vx * 7; tTy += vy * 7; clamp(); }
+    if (drag) {
+      drag = false;
+      tTx = dragOriginTx; tTy = dragOriginTy;
+      rawTx = tTx; rawTy = tTy;
+    }
   });
 
   window.addEventListener('dblclick', e => {
