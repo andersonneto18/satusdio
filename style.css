@@ -23,13 +23,13 @@
     #site-logo {
       position: fixed; top: 1.8rem; left: 2.4rem; z-index: 600;
       font-family: 'Cormorant Garamond', serif;
-      font-size: 1.3rem; font-weight: 600; letter-spacing: 0.4em;
+      font-size: 2.4rem; font-weight: 600; letter-spacing: 0.3em;
       color: #fff;
       text-decoration: none;
       mix-blend-mode: difference;
     }
     @media (max-width: 768px) {
-      #site-logo { top: 1.2rem; left: 1.2rem; font-size: 1.05rem; letter-spacing: 0.3em; }
+      #site-logo { top: 1.2rem; left: 1.2rem; font-size: 1.5rem; letter-spacing: 0.22em; }
     }
 
     /* ── CURSOR ── */
