@@ -179,11 +179,16 @@ window.addEventListener('load', async () => {
 /* ══════════════════════════════════════════════════
    MASONRY LAYOUT
 ══════════════════════════════════════════════════ */
+/* colScale encolhe a largura da coluna um pouco além do "vw / cols" —
+   como a altura de cada imagem vem da proporção real (colW / aspect),
+   uma coluna mais estreita resulta em imagens mais baixas, o que deixa
+   caber 3 por coluna com mais frequência (como na referência), em vez
+   de ficar quase sempre preso em apenas 2. */
 const COL_CONFIG = [
-  { maxW: 480,  cols: 2, gap: 8  },
-  { maxW: 768,  cols: 3, gap: 8  },
-  { maxW: 1024, cols: 3, gap: 10 },
-  { maxW: Infinity, cols: 4, gap: 10 },
+  { maxW: 480,  cols: 2, gap: 8,  colScale: 0.92 },
+  { maxW: 768,  cols: 3, gap: 8,  colScale: 0.90 },
+  { maxW: 1024, cols: 3, gap: 10, colScale: 0.90 },
+  { maxW: Infinity, cols: 4, gap: 10, colScale: 0.88 },
 ];
 
 function getMasonryConfig() {
@@ -196,10 +201,10 @@ function getMasonryConfig() {
    coluna nova à direita — é isso que faz o número de imagens por coluna
    variar (como na referência) e o scroll horizontal ir revelando mais. */
 function layoutMasonry() {
-  const { cols, gap } = getMasonryConfig();
+  const { cols, gap, colScale } = getMasonryConfig();
   const vw   = window.innerWidth;
   const vh   = window.innerHeight;
-  const colW = (vw - gap * (cols + 1)) / cols;
+  const colW = ((vw - gap * (cols + 1)) / cols) * colScale;
   const maxH = vh - gap * 2;
 
   const colH = []; // cresce conforme for preciso — não tem tamanho fixo
