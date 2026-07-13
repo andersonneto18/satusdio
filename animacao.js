@@ -318,18 +318,6 @@ function initCanvas() {
   let vx = 0, vy = 0;
   let drag = false, dragMoved = false, pmx = 0, pmy = 0;
 
-  const wobbleFac = Array.from(pics).map((_, i) => 0.65 + (i * 0.11) % 0.6);
-
-  const floatP = Array.from(pics).map((_, i) => ({
-    ay: 2.5 + (i * 0.6) % 2.5,
-    ax: 0.6 + (i * 0.2) % 0.8,
-    wy: 0.00110 + (i % 7) * 0.00008,
-    wx: 0.00080 + (i % 5) * 0.00007,
-    py: i * 0.83,
-    px: i * 1.24,
-  }));
-
-  let floatStart = null;
   let mpx = 0, mpy = 0;
 
   function getBounds(sc) {
@@ -363,8 +351,6 @@ function initCanvas() {
 
   (function tick() {
     const now = performance.now();
-    if (!floatStart) floatStart = now;
-    const floatEase = Math.min(1, (now - floatStart) / 2500);
 
     clamp();
     const lf = 0.085;
@@ -379,18 +365,6 @@ function initCanvas() {
     mpy += (mpyTarget - mpy) * 0.035;
 
     gallery.style.transform = `translate(${tx + mpx}px,${ty + mpy}px) scale(${s})`;
-
-    const pX = tTx - tx, pY = tTy - ty;
-    const wZ = Math.max(-5.5, Math.min(5.5, pX * 0.017));
-    const wX = Math.max(-3,   Math.min(3,   pY * 0.011));
-
-    pics.forEach((p, i) => {
-      const fp = floatP[i];
-      const fy = Math.sin(now * fp.wy + fp.py) * fp.ay * floatEase;
-      const fx = Math.sin(now * fp.wx + fp.px) * fp.ax * floatEase;
-      const f  = wobbleFac[i];
-      gsap.set(p, { rotationZ: wZ * f, rotationX: wX * f, y: fy, x: fx, transformPerspective: 1100 });
-    });
 
     zl.textContent = Math.round(s * 100) + '%';
     requestAnimationFrame(tick);
