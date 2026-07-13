@@ -224,22 +224,24 @@ function layoutMasonry() {
     const type   = classifyAspect(aspect);
     const h      = aspect ? colW / aspect : BASE_H[idx % BASE_H.length];
 
-    /* entre as colunas mais curtas, escolhe a que melhor mantém o ritmo:
-       evita repetir o mesmo tipo na mesma coluna, e evita duas imagens
-       "muito altas" lado a lado nas colunas vizinhas */
+    /* prioridade nº1: preencher sempre a coluna mais vazia (nunca deixar
+       nenhuma coluna esquecida). O ritmo (evitar repetir tipo, evitar
+       duas "muito altas" lado a lado) só desempata entre colunas quase
+       empatadas — nunca pesa mais do que a diferença real de altura. */
     const minH = Math.min(...colH);
+    const TOLERANCE = 40; // px — só considera "quase tão curta" dentro disto
     const candidates = colH
       .map((height, i) => ({ i, height }))
-      .filter(c => c.height <= minH + h * 0.6)
+      .filter(c => c.height <= minH + TOLERANCE)
       .sort((a, b) => a.height - b.height);
 
     let ci = candidates[0].i;
     let bestScore = -Infinity;
     candidates.forEach(c => {
       let score = -c.height;
-      if (colLastType[c.i] === type) score -= 400;
+      if (colLastType[c.i] === type) score -= 15;
       if (type === 'tall' && (colLastType[c.i - 1] === 'tall' || colLastType[c.i + 1] === 'tall')) {
-        score -= 600;
+        score -= 20;
       }
       if (score > bestScore) { bestScore = score; ci = c.i; }
     });
