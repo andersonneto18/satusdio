@@ -2,15 +2,6 @@ function esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-/* Heights base — ciclam pelo número de projetos */
-const BASE_H = [
-  240, 320, 185, 265, 200, 145,
-  285, 190, 310, 215, 165, 295,
-  225, 175, 330, 200, 255, 170,
-  285, 210, 160, 315, 188, 248,
-  168, 305, 220
-];
-
 const WP_API_BASE    = 'https://sastudio.brand22creativeagency.pt/wp-json/wp/v2';
 const WP_API         = `${WP_API_BASE}/projects?_embed&per_page=100&orderby=date&order=desc`;
 const CUSTOM_API     = WP_API_BASE.replace('/wp/v2', '/sastudio/v2');
@@ -179,63 +170,74 @@ window.addEventListener('load', async () => {
 /* ══════════════════════════════════════════════════
    MASONRY LAYOUT
 ══════════════════════════════════════════════════ */
-/* colScale encolhe a largura da coluna um pouco além do "vw / cols" —
-   como a altura de cada imagem vem da proporção real (colW / aspect),
-   uma coluna mais estreita resulta em imagens mais baixas, o que deixa
-   caber 3 por coluna com mais frequência (como na referência), em vez
-   de ficar quase sempre preso em apenas 2. */
-const COL_CONFIG = [
-  { maxW: 480,  cols: 2, gap: 8,  colScale: 0.92 },
-  { maxW: 768,  cols: 3, gap: 8,  colScale: 0.90 },
-  { maxW: 1024, cols: 3, gap: 10, colScale: 0.90 },
-  { maxW: Infinity, cols: 4, gap: 10, colScale: 0.88 },
+/* targetCount = quantas imagens cada coluna deve ter, empilhadas, ocupando
+   sempre TODA a altura do ecrã (sem cortar nada). approxCols só serve de
+   referência para saber se a largura resultante ainda faz sentido. */
+const BREAKPOINTS = [
+  { maxW: 480,  gap: 8,  targetCount: 1, approxCols: 2 },
+  { maxW: 768,  gap: 8,  targetCount: 2, approxCols: 3 },
+  { maxW: 1024, gap: 10, targetCount: 2, approxCols: 3 },
+  { maxW: Infinity, gap: 10, targetCount: 3, approxCols: 4 },
 ];
 
 function getMasonryConfig() {
   const vw = window.innerWidth;
-  return COL_CONFIG.find(c => vw <= c.maxW);
+  return BREAKPOINTS.find(c => vw <= c.maxW);
 }
 
-/* Cada "coluna visível" cabe inteira na altura do ecrã (sem scroll vertical).
-   Quando uma coluna já não tem espaço para a próxima imagem, abre-se uma
-   coluna nova à direita — é isso que faz o número de imagens por coluna
-   variar (como na referência) e o scroll horizontal ir revelando mais. */
+function picAspect(pic) {
+  const a = parseFloat(pic.dataset.aspect);
+  return (isFinite(a) && a > 0) ? a : 1.5;
+}
+
+/* Larguras da coluna necessária para que `count` imagens, empilhadas com
+   a sua proporção real, preencham exatamente maxH (sem cortar nada). */
+function colWidthFor(group, count, gap, maxH) {
+  const sumInv = group.slice(0, count).reduce((s, p) => s + 1 / picAspect(p), 0);
+  return (maxH - gap * (count + 1)) / sumInv;
+}
+
+/* Cada coluna tem sempre `targetCount` imagens a preencher toda a altura
+   do ecrã (sem scroll vertical, sem cortar imagens) — quando esse número
+   resultaria numa coluna desproporcionalmente larga/estreita, reduz para
+   menos imagens nessa coluna. Novas colunas abrem-se à direita, reveladas
+   ao fazer scroll horizontal. */
 function layoutMasonry() {
-  const { cols, gap, colScale } = getMasonryConfig();
-  const vw   = window.innerWidth;
-  const vh   = window.innerHeight;
-  const colW = ((vw - gap * (cols + 1)) / cols) * colScale;
-  const maxH = vh - gap * 2;
+  const { gap, targetCount, approxCols } = getMasonryConfig();
+  const vw    = window.innerWidth;
+  const vh    = window.innerHeight;
+  const maxH  = vh - gap * 2;
+  const baseColW = (vw - gap * (approxCols + 1)) / approxCols;
 
-  const colH = []; // cresce conforme for preciso — não tem tamanho fixo
   const pics = Array.from(gallery.querySelectorAll('.pic'));
+  let idx = 0, x = gap;
 
-  pics.forEach((pic, idx) => {
-    const aspect = parseFloat(pic.dataset.aspect);
-    const h = aspect ? colW / aspect : BASE_H[idx % BASE_H.length];
+  while (idx < pics.length) {
+    let count = Math.min(targetCount, pics.length - idx);
+    const group = pics.slice(idx, idx + count);
+    let colW = colWidthFor(group, count, gap, maxH);
 
-    /* procura a coluna mais vazia que ainda tenha espaço para esta imagem */
-    let ci = -1, minH = Infinity;
-    colH.forEach((height, i) => {
-      if (height + h <= maxH && height < minH) { minH = height; ci = i; }
-    });
-
-    /* nenhuma coluna existente tem espaço — abre uma nova à direita */
-    if (ci === -1) {
-      colH.push(gap);
-      ci = colH.length - 1;
+    /* larga/estreita demais para o número de imagens pedido — usa menos */
+    while (count > 1 && (colW > baseColW * 1.4 || colW < baseColW * 0.6)) {
+      count--;
+      colW = colWidthFor(group, count, gap, maxH);
     }
 
-    pic.style.left   = gap + ci * (colW + gap) + 'px';
-    pic.style.top    = colH[ci] + 'px';
-    pic.style.width  = colW + 'px';
-    pic.style.height = h + 'px';
+    let y = gap;
+    group.slice(0, count).forEach(pic => {
+      const h = colW / picAspect(pic);
+      pic.style.left   = x + 'px';
+      pic.style.top    = y + 'px';
+      pic.style.width  = colW + 'px';
+      pic.style.height = h + 'px';
+      y += h + gap;
+    });
 
-    colH[ci] += h + gap;
-  });
+    x   += colW + gap;
+    idx += count;
+  }
 
-  const totalCols = Math.max(colH.length, cols);
-  gallery.style.width  = (totalCols * (colW + gap) + gap) + 'px';
+  gallery.style.width  = x + 'px';
   gallery.style.height = vh + 'px';
 }
 
