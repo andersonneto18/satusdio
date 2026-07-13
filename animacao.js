@@ -211,7 +211,7 @@ function layoutMasonry() {
   const baseColW = (vw - gap * (approxCols + 1)) / approxCols;
 
   const pics = Array.from(gallery.querySelectorAll('.pic'));
-  let idx = 0, x = gap;
+  let idx = 0, x = gap, colIdx = 0;
 
   while (idx < pics.length) {
     /* quantas imagens cabem nesta coluna à largura normal */
@@ -219,31 +219,58 @@ function layoutMasonry() {
     while (idx + count < pics.length) {
       const h    = baseColW / picAspect(pics[idx + count]);
       const next = used + h + gap;
-      if (count > 0 && next > maxH) break;
+      /* só considera parar por falta de espaço a partir da 2ª imagem —
+         nenhuma coluna pode ficar com apenas 1 (exceto se só sobrar 1
+         imagem no total) */
+      if (count >= 2 && next > maxH) break;
       used = next;
       count++;
       if (count >= 3) break; /* nunca mais de 3 imagens por coluna */
     }
 
     const group = pics.slice(idx, idx + count);
-    let colW = colWidthFor(group, count, gap, maxH);
 
-    /* só ajusta dentro de um intervalo razoável — evita tanto a coluna
-       gigante (imagem muito larga sozinha) como o vão em branco */
-    colW = Math.max(baseColW * 0.6, Math.min(baseColW * 1.5, colW));
+    if (count === 2) {
+      /* colunas de 2 imagens: uma sempre nitidamente maior que a outra
+         (60/40), largura normal — a imagem recorta (object-fit: cover)
+         em vez de esticar, por isso o corte não distorce nada */
+      const colW  = baseColW;
+      const availH = maxH - gap * 3;
+      const big   = availH * 0.6;
+      const small = availH * 0.4;
+      const heights = (colIdx % 2 === 0) ? [big, small] : [small, big];
 
-    let y = gap;
-    group.forEach(pic => {
-      const h = colW / picAspect(pic);
-      pic.style.left   = x + 'px';
-      pic.style.top    = y + 'px';
-      pic.style.width  = colW + 'px';
-      pic.style.height = h + 'px';
-      y += h + gap;
-    });
+      let y = gap;
+      group.forEach((pic, i) => {
+        pic.style.left   = x + 'px';
+        pic.style.top    = y + 'px';
+        pic.style.width  = colW + 'px';
+        pic.style.height = heights[i] + 'px';
+        y += heights[i] + gap;
+      });
 
-    x   += colW + gap;
+      x += colW + gap;
+    } else {
+      let colW = colWidthFor(group, count, gap, maxH);
+
+      /* prioriza preencher a tela toda — só trava em casos extremos */
+      colW = Math.max(baseColW * 0.6, Math.min(baseColW * 2.0, colW));
+
+      let y = gap;
+      group.forEach(pic => {
+        const h = colW / picAspect(pic);
+        pic.style.left   = x + 'px';
+        pic.style.top    = y + 'px';
+        pic.style.width  = colW + 'px';
+        pic.style.height = h + 'px';
+        y += h + gap;
+      });
+
+      x += colW + gap;
+    }
+
     idx += count;
+    colIdx++;
   }
 
   gallery.style.width  = x + 'px';
