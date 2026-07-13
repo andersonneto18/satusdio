@@ -174,7 +174,7 @@ const COL_CONFIG = [
   { maxW: 480,  cols: 5, gap: 14, offsets: [30, 90, 15, 65, 100], canvasScale: 2.4 },
   { maxW: 768,  cols: 5, gap: 18, offsets: [25, 75, 10, 55, 90],  canvasScale: 1.9 },
   { maxW: 1024, cols: 4, gap: 20, offsets: [30, 65, 12, 48],       canvasScale: 1   },
-  { maxW: Infinity, cols: 6, gap: 32, offsets: [30, 72, 14, 55, 88, 22], canvasScale: 1 },
+  { maxW: Infinity, cols: 4, gap: 28, offsets: [30, 90, 15, 65], canvasScale: 1.4 },
 ];
 
 function getMasonryConfig() {
