@@ -1209,7 +1209,10 @@ async function fetchProjectContent(id) {
   aboutPanel.addEventListener('wheel',      e => e.stopPropagation(), { passive: true });
 
   document.querySelectorAll('.nav-links a, .lb-nav-links a, #nav-mobile a, .footer-nav a').forEach(a => {
-    if (a.textContent.trim().toLowerCase() === 'about') {
+    /* só abre o painel interno se o link não tiver destino real —
+       links com href a sério (ex: /about/) navegam normalmente */
+    const href = a.getAttribute('href') || '#';
+    if (a.textContent.trim().toLowerCase() === 'about' && href === '#') {
       a.addEventListener('click', e => {
         e.preventDefault();
         aboutPanel.classList.contains('open') ? closeAbout() : openAbout();
@@ -1266,11 +1269,13 @@ async function fetchProjectContent(id) {
   contactPanel.addEventListener('touchstart', e => e.stopPropagation(), { passive: true });
   contactPanel.addEventListener('wheel',      e => e.stopPropagation(), { passive: true });
 
-  /* wiring — todos os links "Contact" no site */
+  /* wiring — todos os links "Contact" no site (só abre o painel interno
+     se o link não tiver destino real) */
   document.querySelectorAll(
     '.nav-links a, .lb-nav-links a, #nav-mobile a, .footer-nav a'
   ).forEach(a => {
-    if (a.textContent.trim().toLowerCase() === 'contact') {
+    const href = a.getAttribute('href') || '#';
+    if (a.textContent.trim().toLowerCase() === 'contact' && href === '#') {
       a.addEventListener('click', e => {
         e.preventDefault();
         contactPanel.classList.contains('open') ? closeContact() : openContact();
