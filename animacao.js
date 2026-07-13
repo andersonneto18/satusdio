@@ -65,7 +65,8 @@ async function fetchProjects() {
     if (!posts.length) throw new Error('Sem projetos');
 
     posts.forEach(post => {
-      const imgUrl = post._embedded?.['wp:featuredmedia']?.[0]?.source_url;
+      const media  = post._embedded?.['wp:featuredmedia']?.[0];
+      const imgUrl = media?.source_url;
       if (!imgUrl) return;
 
       const title = post.title.rendered;
@@ -74,11 +75,19 @@ async function fetchProjects() {
       const cat   = terms[0]?.name || '';
       const sub   = cat ? `${cat} · ${year}` : String(year);
 
+      /* proporção real da imagem (largura/altura), vinda do WordPress —
+         usada no layout para a caixa encaixar exatamente na imagem,
+         criando a variedade de alturas sem cortar nada */
+      const mw = media?.media_details?.width;
+      const mh = media?.media_details?.height;
+      const aspect = (mw && mh) ? mw / mh : null;
+
       const el = document.createElement('div');
       el.className    = 'pic';
       el.dataset.id       = post.id;
       el.dataset.href     = post.link;
       el.dataset.sub      = sub;
+      if (aspect) el.dataset.aspect = aspect;
       const hoverGif      = post.acf?.hover_gif || '';
       el.dataset.hoverGif = hoverGif;
       el.innerHTML    = `
@@ -171,10 +180,10 @@ window.addEventListener('load', async () => {
    MASONRY LAYOUT
 ══════════════════════════════════════════════════ */
 const COL_CONFIG = [
-  { maxW: 480,  cols: 5, gap: 14, offsets: [30, 90, 15, 65, 100], canvasScale: 2.4 },
-  { maxW: 768,  cols: 5, gap: 18, offsets: [25, 75, 10, 55, 90],  canvasScale: 1.9 },
-  { maxW: 1024, cols: 4, gap: 20, offsets: [30, 65, 12, 48],       canvasScale: 1   },
-  { maxW: Infinity, cols: 6, gap: 32, offsets: [30, 72, 14, 55, 88, 22], canvasScale: 1 },
+  { maxW: 480,  cols: 2, gap: 8,  canvasScale: 1.15 },
+  { maxW: 768,  cols: 3, gap: 8,  canvasScale: 1.15 },
+  { maxW: 1024, cols: 3, gap: 10, canvasScale: 1.2  },
+  { maxW: Infinity, cols: 4, gap: 10, canvasScale: 1.25 },
 ];
 
 function getMasonryConfig() {
@@ -183,19 +192,27 @@ function getMasonryConfig() {
 }
 
 function layoutMasonry() {
-  const { cols, gap, offsets, canvasScale } = getMasonryConfig();
+  const { cols, gap, canvasScale } = getMasonryConfig();
   const vw   = window.innerWidth;
   const W    = Math.round(vw * canvasScale);
   gallery.style.width = W + 'px';
 
   const colW = (W - gap * (cols + 1)) / cols;
-  const colH = [...offsets];
+  /* todas as colunas começam alinhadas no topo — sem desfasamento */
+  const colH = new Array(cols).fill(gap);
   const pics = Array.from(gallery.querySelectorAll('.pic'));
 
   pics.forEach((pic, idx) => {
+    /* preenche sempre a coluna mais vazia — nunca deixa nenhuma para
+       trás, ao contrário de heurísticas que "pontuam" a escolha */
     const minH = Math.min(...colH);
     const ci   = colH.indexOf(minH);
-    const h    = BASE_H[idx % BASE_H.length];
+
+    /* usa a proporção real da imagem (vinda do WordPress) para a altura,
+       criando a variedade de tamanhos naturalmente, sem cortar nada;
+       só recorre à altura fixa de reserva se não soubermos as dimensões */
+    const aspect = parseFloat(pic.dataset.aspect);
+    const h = aspect ? colW / aspect : BASE_H[idx % BASE_H.length];
 
     pic.style.left   = gap + ci * (colW + gap) + 'px';
     pic.style.top    = colH[ci] + 'px';
