@@ -65,8 +65,7 @@ async function fetchProjects() {
     if (!posts.length) throw new Error('Sem projetos');
 
     posts.forEach(post => {
-      const media   = post._embedded?.['wp:featuredmedia']?.[0];
-      const imgUrl  = media?.source_url;
+      const imgUrl = post._embedded?.['wp:featuredmedia']?.[0]?.source_url;
       if (!imgUrl) return;
 
       const title = post.title.rendered;
@@ -75,19 +74,11 @@ async function fetchProjects() {
       const cat   = terms[0]?.name || '';
       const sub   = cat ? `${cat} · ${year}` : String(year);
 
-      /* proporção real da imagem (largura/altura), vinda do WordPress —
-         usada no layout para a caixa encaixar exatamente na imagem,
-         sem cortar nada com object-fit:cover */
-      const mw = media?.media_details?.width;
-      const mh = media?.media_details?.height;
-      const aspect = (mw && mh) ? mw / mh : null;
-
       const el = document.createElement('div');
       el.className    = 'pic';
       el.dataset.id       = post.id;
       el.dataset.href     = post.link;
       el.dataset.sub      = sub;
-      if (aspect) el.dataset.aspect = aspect;
       const hoverGif      = post.acf?.hover_gif || '';
       el.dataset.hoverGif = hoverGif;
       el.innerHTML    = `
@@ -180,86 +171,41 @@ window.addEventListener('load', async () => {
    MASONRY LAYOUT
 ══════════════════════════════════════════════════ */
 const COL_CONFIG = [
-  { maxW: 640,  cols: 1, gap: 10, canvasScale: 1    },
-  { maxW: 1024, cols: 2, gap: 10, canvasScale: 1.05 },
-  { maxW: Infinity, cols: 4, gap: 10, canvasScale: 1.3 },
+  { maxW: 480,  cols: 5, gap: 14, offsets: [30, 90, 15, 65, 100], canvasScale: 2.4 },
+  { maxW: 768,  cols: 5, gap: 18, offsets: [25, 75, 10, 55, 90],  canvasScale: 1.9 },
+  { maxW: 1024, cols: 4, gap: 20, offsets: [30, 65, 12, 48],       canvasScale: 1   },
+  { maxW: Infinity, cols: 6, gap: 32, offsets: [30, 72, 14, 55, 88, 22], canvasScale: 1 },
 ];
-const GALLERY_MARGIN = 24;
 
 function getMasonryConfig() {
   const vw = window.innerWidth;
   return COL_CONFIG.find(c => vw <= c.maxW);
 }
 
-/* classifica a imagem pela proporção real, para a composição alternar
-   entre horizontal/quadrada/vertical/muito alta em vez de amontoar */
-function classifyAspect(aspect) {
-  if (!aspect || !isFinite(aspect)) return 'h';
-  if (aspect >= 2.0)  return 'pano';
-  if (aspect >= 1.15) return 'h';
-  if (aspect >= 0.85) return 'sq';
-  if (aspect >= 0.55) return 'v';
-  return 'tall';
-}
-
-let galleryScale = 1;
-
 function layoutMasonry() {
-  const { cols, gap, canvasScale } = getMasonryConfig();
-  const margin = GALLERY_MARGIN;
+  const { cols, gap, offsets, canvasScale } = getMasonryConfig();
   const vw   = window.innerWidth;
   const W    = Math.round(vw * canvasScale);
   gallery.style.width = W + 'px';
 
-  const colW        = (W - margin * 2 - gap * (cols - 1)) / cols;
-  const colH        = new Array(cols).fill(margin);
-  const colLastType = new Array(cols).fill(null);
+  const colW = (W - gap * (cols + 1)) / cols;
+  const colH = [...offsets];
   const pics = Array.from(gallery.querySelectorAll('.pic'));
 
   pics.forEach((pic, idx) => {
-    /* usa a proporção real da imagem quando disponível, para a caixa
-       encaixar exatamente nela (sem cortar nada); só recorre à altura
-       fixa de reserva se não soubermos as dimensões reais */
-    const aspect = parseFloat(pic.dataset.aspect);
-    const type   = classifyAspect(aspect);
-    const h      = aspect ? colW / aspect : BASE_H[idx % BASE_H.length];
-
-    /* prioridade nº1: preencher sempre a coluna mais vazia (nunca deixar
-       nenhuma coluna esquecida). O ritmo (evitar repetir tipo, evitar
-       duas "muito altas" lado a lado) só desempata entre colunas quase
-       empatadas — nunca pesa mais do que a diferença real de altura. */
     const minH = Math.min(...colH);
-    const TOLERANCE = 40; // px — só considera "quase tão curta" dentro disto
-    const candidates = colH
-      .map((height, i) => ({ i, height }))
-      .filter(c => c.height <= minH + TOLERANCE)
-      .sort((a, b) => a.height - b.height);
+    const ci   = colH.indexOf(minH);
+    const h    = BASE_H[idx % BASE_H.length];
 
-    let ci = candidates[0].i;
-    let bestScore = -Infinity;
-    candidates.forEach(c => {
-      let score = -c.height;
-      if (colLastType[c.i] === type) score -= 15;
-      if (type === 'tall' && (colLastType[c.i - 1] === 'tall' || colLastType[c.i + 1] === 'tall')) {
-        score -= 20;
-      }
-      if (score > bestScore) { bestScore = score; ci = c.i; }
-    });
-
-    pic.style.left   = margin + ci * (colW + gap) + 'px';
+    pic.style.left   = gap + ci * (colW + gap) + 'px';
     pic.style.top    = colH[ci] + 'px';
     pic.style.width  = colW + 'px';
     pic.style.height = h + 'px';
 
     colH[ci] += h + gap;
-    colLastType[ci] = type;
   });
 
-  /* escala a grelha toda para preencher exatamente a altura do ecrã,
-     sem sobrar espaço em branco em cima/baixo (edge-to-edge) */
-  const naturalH = Math.max(...colH) - gap + margin;
-  gallery.style.height = naturalH + 'px';
-  galleryScale = window.innerHeight / naturalH;
+  gallery.style.height = (Math.max(...colH) + gap) + 'px';
 }
 
 window.addEventListener('resize', () => {
@@ -313,6 +259,7 @@ function entrance() {
   const pics = document.querySelectorAll('.pic');
   const nav  = document.getElementById('nav');
   const hud  = document.getElementById('hud');
+  const zl   = document.getElementById('zoom-label');
   const hero = document.getElementById('hero');
 
   gsap.set(pics, {
@@ -332,7 +279,7 @@ function entrance() {
           nav.style.opacity = '1';
           nav.classList.add('ready');
         }
-        gsap.to(hud, { opacity: 1, duration: 0.8 });
+        gsap.to([hud, zl], { opacity: 1, duration: 0.8 });
         setTimeout(() => gsap.to(hud, { opacity: 0, duration: 1 }), 4000);
         initCanvas();
         initParallax();
@@ -356,17 +303,34 @@ function entrance() {
 }
 
 /* ══════════════════════════════════════════════════
-   CANVAS — navegação só horizontal, via scroll (sem arrastar, sem zoom)
+   CANVAS — zoom (scroll), pan (drag), wobble
 ══════════════════════════════════════════════════ */
 function initCanvas() {
-  /* começa sempre encostado ao início (esquerda), nunca centrado */
-  let tx = 0, tTx = 0, rawTx = 0;
+  const pics = document.querySelectorAll('.pic');
+  const zl   = document.getElementById('zoom-label');
 
-  function getBounds() {
+  const initCx = gallery.offsetWidth > window.innerWidth
+    ? -Math.round((gallery.offsetWidth - window.innerWidth) / 2) : 0;
+
+  let s = 1, tx = initCx, ty = 0;
+  let tS = 1, tTx = initCx, tTy = 0;
+  let rawTx = initCx, rawTy = 0;
+  let vx = 0, vy = 0;
+  let drag = false, dragMoved = false, pmx = 0, pmy = 0;
+
+  let mpx = 0, mpy = 0;
+
+  function getBounds(sc) {
     const W  = window.innerWidth;
-    const gW = gallery.offsetWidth * galleryScale;
+    const H  = window.innerHeight;
+    const gW = gallery.offsetWidth;
+    const gH = gallery.offsetHeight;
     const mg = 55;
-    return { xMin: -(gW - W) - mg, xMax: mg };
+    const xMin = -(gW * sc - W) - mg;
+    const xMax = mg;
+    const yMin = -(gH * sc - H) - mg;
+    const yMax = mg;
+    return { xMin, xMax, yMin, yMax };
   }
 
   /* deixa ir um pouco além do limite, com resistência crescente (efeito elástico) */
@@ -378,63 +342,121 @@ function initCanvas() {
   }
 
   function clamp() {
-    const b = getBounds();
+    const b = getBounds(tS);
+    if (drag) return; /* enquanto arrasta, o próprio mousemove/touchmove aplica o elástico */
     tTx = Math.max(b.xMin, Math.min(b.xMax, tTx));
-    rawTx = tTx;
+    tTy = Math.max(b.yMin, Math.min(b.yMax, tTy));
+    rawTx = tTx; rawTy = tTy;
   }
 
   (function tick() {
-    tx += (tTx - tx) * 0.085;
-    gallery.style.transform = `translateX(${tx}px) scale(${galleryScale})`;
+    const now = performance.now();
+
+    clamp();
+    const lf = 0.085;
+    s  += (tS  - s)  * lf;
+    tx += (tTx - tx) * lf;
+    ty += (tTy - ty) * lf;
+
+    const W = window.innerWidth, H = window.innerHeight;
+    const mpxTarget = drag ? 0 : ((mx - W / 2) / W) * -18;
+    const mpyTarget = drag ? 0 : ((my - H / 2) / H) * -11;
+    mpx += (mpxTarget - mpx) * 0.035;
+    mpy += (mpyTarget - mpy) * 0.035;
+
+    gallery.style.transform = `translate(${tx + mpx}px,${ty + mpy}px) scale(${s})`;
+
+    zl.textContent = Math.round(s * 100) + '%';
     requestAnimationFrame(tick);
   })();
 
-  /* scroll do rato move só para os lados; depois de parar de rodar a
-     roda, "solta" e encaixa dentro do limite (bounce elástico) — sem
-     isto, ao passar do limite ficava preso esticado para sempre */
-  let wheelSettleTimer = null;
+  function clampS(v) { return Math.max(0.8, Math.min(2.5, v)); }
+
+  function zoomAt(cx, cy, factor) {
+    const ns = clampS(tS * factor);
+    tTx = cx - (cx - tTx) * (ns / tS);
+    tTy = cy - (cy - tTy) * (ns / tS);
+    tS  = ns;
+    clamp();
+  }
+
   window.addEventListener('wheel', e => {
     if (lb.classList.contains('open')) return;
-    if (e.target.closest('#projects-list, #about-panel, #contact-panel')) return;
+    if (e.target.closest('#projects-list, #about-panel')) return;
     e.preventDefault();
-    rawTx -= e.deltaY;
-    const b = getBounds();
-    tTx = rubberBand(rawTx, b.xMin, b.xMax);
-
-    clearTimeout(wheelSettleTimer);
-    wheelSettleTimer = setTimeout(clamp, 120);
+    zoomAt(e.clientX, e.clientY, e.deltaY < 0 ? 1.1 : 0.91);
   }, { passive: false });
 
-  /* clique num projeto abre-o */
-  document.querySelectorAll('#gallery .pic').forEach(pic => {
-    pic.addEventListener('click', () => {
-      if (pic.dataset.href) openProject(pic);
-    });
+  window.addEventListener('mousedown', e => {
+    if (e.target.closest('nav')) return;
+    drag = true; dragMoved = false;
+    pmx = e.clientX; pmy = e.clientY; vx = vy = 0;
+    rawTx = tTx; rawTy = tTy;
+    document.body.classList.add('grabbing');
+    document.body.classList.remove('on-pic');
   });
 
-  /* toque (mobile) — arrastar move só na horizontal, como um swipe */
-  let touchActive = false, pmx = 0;
+  window.addEventListener('mousemove', e => {
+    if (!drag) return;
+    vx = e.clientX - pmx; vy = e.clientY - pmy;
+    if (Math.abs(vx) > 4 || Math.abs(vy) > 4) dragMoved = true;
+    rawTx += vx; rawTy += vy;
+    const b = getBounds(tS);
+    tTx = rubberBand(rawTx, b.xMin, b.xMax);
+    tTy = rubberBand(rawTy, b.yMin, b.yMax);
+    pmx = e.clientX; pmy = e.clientY;
+  });
+
+  window.addEventListener('mouseup', e => {
+    if (!drag) return;
+    drag = false;
+    if (!dragMoved) {
+      const pic = e.target.closest('.pic');
+      if (pic?.dataset.href) openProject(pic);
+    }
+    tTx += vx * 7; tTy += vy * 7;
+    clamp();
+    document.body.classList.remove('grabbing');
+  });
+
+  let lastDist = 0;
   window.addEventListener('touchstart', e => {
-    if (e.touches.length !== 1) return;
-    touchActive = true;
-    pmx = e.touches[0].clientX;
-    rawTx = tTx;
+    if (e.touches.length === 1) {
+      drag = true; dragMoved = false;
+      pmx = e.touches[0].clientX; pmy = e.touches[0].clientY; vx = vy = 0;
+      rawTx = tTx; rawTy = tTy;
+    } else if (e.touches.length === 2) {
+      drag = false;
+      lastDist = Math.hypot(e.touches[1].clientX - e.touches[0].clientX, e.touches[1].clientY - e.touches[0].clientY);
+    }
   }, { passive: true });
 
   window.addEventListener('touchmove', e => {
-    if (!touchActive || e.touches.length !== 1) return;
     e.preventDefault();
-    const vx = e.touches[0].clientX - pmx;
-    rawTx += vx;
-    const b = getBounds();
-    tTx = rubberBand(rawTx, b.xMin, b.xMax);
-    pmx = e.touches[0].clientX;
+    if (e.touches.length === 1 && drag) {
+      vx = e.touches[0].clientX - pmx; vy = e.touches[0].clientY - pmy;
+      if (Math.abs(vx) > 4 || Math.abs(vy) > 4) dragMoved = true;
+      rawTx += vx; rawTy += vy;
+      const b = getBounds(tS);
+      tTx = rubberBand(rawTx, b.xMin, b.xMax);
+      tTy = rubberBand(rawTy, b.yMin, b.yMax);
+      pmx = e.touches[0].clientX; pmy = e.touches[0].clientY;
+    } else if (e.touches.length === 2) {
+      const d  = Math.hypot(e.touches[1].clientX - e.touches[0].clientX, e.touches[1].clientY - e.touches[0].clientY);
+      const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+      zoomAt(cx, cy, d / lastDist); lastDist = d;
+    }
   }, { passive: false });
 
   window.addEventListener('touchend', () => {
-    if (!touchActive) return;
-    touchActive = false;
-    clamp();
+    if (drag) { drag = false; tTx += vx * 7; tTy += vy * 7; clamp(); }
+  });
+
+  window.addEventListener('dblclick', e => {
+    if (e.target.closest('nav')) return;
+    const reset = Math.abs(tS - 1) > 0.08 || Math.abs(tTx) > 8 || Math.abs(tTy) > 8;
+    if (reset) { tS = 1; tTx = 0; tTy = 0; } else { zoomAt(e.clientX, e.clientY, 2.2); }
   });
 }
 
@@ -1078,8 +1100,7 @@ async function fetchProjectContent(id) {
     if (lb.classList.contains('open')) closeProject();
     aboutPanel.classList.add('open');
     document.querySelectorAll('.nav-links a, .lb-nav-links a, #nav-mobile a, .footer-nav a').forEach(a => {
-      const t = a.textContent.trim().toLowerCase();
-      if (a.classList.contains('nav-about-link') || t === 'about' || t === 'sobre') a.classList.add('nav-active');
+      if (a.textContent.trim().toLowerCase() === 'about') a.classList.add('nav-active');
     });
   }
   function closeAbout() {
@@ -1092,8 +1113,7 @@ async function fetchProjectContent(id) {
   aboutPanel.addEventListener('wheel',      e => e.stopPropagation(), { passive: true });
 
   document.querySelectorAll('.nav-links a, .lb-nav-links a, #nav-mobile a, .footer-nav a').forEach(a => {
-    const t = a.textContent.trim().toLowerCase();
-    if (a.classList.contains('nav-about-link') || t === 'about' || t === 'sobre') {
+    if (a.textContent.trim().toLowerCase() === 'about') {
       a.addEventListener('click', e => {
         e.preventDefault();
         aboutPanel.classList.contains('open') ? closeAbout() : openAbout();
@@ -1136,8 +1156,7 @@ async function fetchProjectContent(id) {
     document.querySelectorAll(
       '.nav-links a, .lb-nav-links a, #nav-mobile a, .footer-nav a, .cp-nav-links a'
     ).forEach(a => {
-      const t = a.textContent.trim().toLowerCase();
-      if (a.classList.contains('nav-contact-link') || t === 'contact' || t === 'contato') a.classList.add('nav-active');
+      if (a.textContent.trim().toLowerCase() === 'contact') a.classList.add('nav-active');
     });
   }
 
@@ -1151,12 +1170,11 @@ async function fetchProjectContent(id) {
   contactPanel.addEventListener('touchstart', e => e.stopPropagation(), { passive: true });
   contactPanel.addEventListener('wheel',      e => e.stopPropagation(), { passive: true });
 
-  /* wiring — todos os links "Contact"/"Contato" no site */
+  /* wiring — todos os links "Contact" no site */
   document.querySelectorAll(
     '.nav-links a, .lb-nav-links a, #nav-mobile a, .footer-nav a'
   ).forEach(a => {
-    const t = a.textContent.trim().toLowerCase();
-    if (a.classList.contains('nav-contact-link') || t === 'contact' || t === 'contato') {
+    if (a.textContent.trim().toLowerCase() === 'contact') {
       a.addEventListener('click', e => {
         e.preventDefault();
         contactPanel.classList.contains('open') ? closeContact() : openContact();

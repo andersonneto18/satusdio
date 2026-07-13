@@ -21,15 +21,15 @@
 
     /* ── LOGO (efeito "revela o que está atrás", mesma técnica do cursor) ── */
     #site-logo {
-      position: fixed; top: 2rem; left: 2.4rem; z-index: 600;
+      position: fixed; top: 1.8rem; left: 2.4rem; z-index: 600;
       font-family: 'Cormorant Garamond', serif;
-      font-size: 2.4rem; font-weight: 600; letter-spacing: 0.35em;
+      font-size: 1.3rem; font-weight: 600; letter-spacing: 0.4em;
       color: #fff;
       text-decoration: none;
       mix-blend-mode: difference;
     }
     @media (max-width: 768px) {
-      #site-logo { top: 1.3rem; left: 1.2rem; font-size: 1.6rem; letter-spacing: 0.25em; }
+      #site-logo { top: 1.2rem; left: 1.2rem; font-size: 1.05rem; letter-spacing: 0.3em; }
     }
 
     /* ── CURSOR ── */
@@ -120,6 +120,8 @@
       cursor: none;
       will-change: transform, opacity;
       transform-style: preserve-3d;
+      border: 3px solid #fff;
+      box-shadow: 0 4px 18px rgba(21,21,18,0.14);
     }
 
     .pic-hover-vid {
