@@ -214,19 +214,11 @@ function layoutMasonry() {
   let idx = 0, x = gap, colIdx = 0;
 
   while (idx < pics.length) {
-    /* quantas imagens cabem nesta coluna à largura normal */
-    let count = 0, used = gap;
-    while (idx + count < pics.length) {
-      const h    = baseColW / picAspect(pics[idx + count]);
-      const next = used + h + gap;
-      /* só considera parar por falta de espaço a partir da 2ª imagem —
-         nenhuma coluna pode ficar com apenas 1 (exceto se só sobrar 1
-         imagem no total) */
-      if (count >= 2 && next > maxH) break;
-      used = next;
-      count++;
-      if (count >= 3) break; /* nunca mais de 3 imagens por coluna */
-    }
+    /* alterna 3, 2, 3, 2... por coluna — dá o ritmo editorial (em vez de
+       deixar "o que couber" decidir e acabar com várias colunas de 3
+       seguidas) */
+    const target = (colIdx % 2 === 0) ? 3 : 2;
+    const count  = Math.min(target, pics.length - idx);
 
     const group = pics.slice(idx, idx + count);
 
