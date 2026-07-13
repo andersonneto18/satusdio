@@ -180,49 +180,82 @@ window.addEventListener('load', async () => {
    MASONRY LAYOUT
 ══════════════════════════════════════════════════ */
 const COL_CONFIG = [
-  { maxW: 480,  cols: 5, gap: 14, offsets: [30, 90, 15, 65, 100], canvasScale: 2.4 },
-  { maxW: 768,  cols: 5, gap: 18, offsets: [25, 75, 10, 55, 90],  canvasScale: 1.9 },
-  { maxW: 1024, cols: 4, gap: 20, offsets: [30, 65, 12, 48],       canvasScale: 1   },
-  { maxW: Infinity, cols: 4, gap: 3, offsets: [0, 0, 0, 0], canvasScale: 1.4 },
+  { maxW: 640,  cols: 1, gap: 10, canvasScale: 1    },
+  { maxW: 1024, cols: 2, gap: 10, canvasScale: 1.05 },
+  { maxW: Infinity, cols: 4, gap: 10, canvasScale: 1.3 },
 ];
+const GALLERY_MARGIN = 24;
 
 function getMasonryConfig() {
   const vw = window.innerWidth;
   return COL_CONFIG.find(c => vw <= c.maxW);
 }
 
+/* classifica a imagem pela proporção real, para a composição alternar
+   entre horizontal/quadrada/vertical/muito alta em vez de amontoar */
+function classifyAspect(aspect) {
+  if (!aspect || !isFinite(aspect)) return 'h';
+  if (aspect >= 2.0)  return 'pano';
+  if (aspect >= 1.15) return 'h';
+  if (aspect >= 0.85) return 'sq';
+  if (aspect >= 0.55) return 'v';
+  return 'tall';
+}
+
 let galleryScale = 1;
 
 function layoutMasonry() {
-  const { cols, gap, offsets, canvasScale } = getMasonryConfig();
+  const { cols, gap, canvasScale } = getMasonryConfig();
+  const margin = GALLERY_MARGIN;
   const vw   = window.innerWidth;
   const W    = Math.round(vw * canvasScale);
   gallery.style.width = W + 'px';
 
-  const colW = (W - gap * (cols + 1)) / cols;
-  const colH = [...offsets];
+  const colW        = (W - margin * 2 - gap * (cols - 1)) / cols;
+  const colH        = new Array(cols).fill(margin);
+  const colLastType = new Array(cols).fill(null);
   const pics = Array.from(gallery.querySelectorAll('.pic'));
 
   pics.forEach((pic, idx) => {
-    const minH = Math.min(...colH);
-    const ci   = colH.indexOf(minH);
     /* usa a proporção real da imagem quando disponível, para a caixa
        encaixar exatamente nela (sem cortar nada); só recorre à altura
        fixa de reserva se não soubermos as dimensões reais */
     const aspect = parseFloat(pic.dataset.aspect);
-    const h = aspect ? colW / aspect : BASE_H[idx % BASE_H.length];
+    const type   = classifyAspect(aspect);
+    const h      = aspect ? colW / aspect : BASE_H[idx % BASE_H.length];
 
-    pic.style.left   = gap + ci * (colW + gap) + 'px';
+    /* entre as colunas mais curtas, escolhe a que melhor mantém o ritmo:
+       evita repetir o mesmo tipo na mesma coluna, e evita duas imagens
+       "muito altas" lado a lado nas colunas vizinhas */
+    const minH = Math.min(...colH);
+    const candidates = colH
+      .map((height, i) => ({ i, height }))
+      .filter(c => c.height <= minH + h * 0.6)
+      .sort((a, b) => a.height - b.height);
+
+    let ci = candidates[0].i;
+    let bestScore = -Infinity;
+    candidates.forEach(c => {
+      let score = -c.height;
+      if (colLastType[c.i] === type) score -= 400;
+      if (type === 'tall' && (colLastType[c.i - 1] === 'tall' || colLastType[c.i + 1] === 'tall')) {
+        score -= 600;
+      }
+      if (score > bestScore) { bestScore = score; ci = c.i; }
+    });
+
+    pic.style.left   = margin + ci * (colW + gap) + 'px';
     pic.style.top    = colH[ci] + 'px';
     pic.style.width  = colW + 'px';
     pic.style.height = h + 'px';
 
     colH[ci] += h + gap;
+    colLastType[ci] = type;
   });
 
   /* escala a grelha toda para preencher exatamente a altura do ecrã,
      sem sobrar espaço em branco em cima/baixo (edge-to-edge) */
-  const naturalH = Math.max(...colH) + gap;
+  const naturalH = Math.max(...colH) - gap + margin;
   gallery.style.height = naturalH + 'px';
   galleryScale = window.innerHeight / naturalH;
 }
