@@ -259,7 +259,6 @@ function entrance() {
   const pics = document.querySelectorAll('.pic');
   const nav  = document.getElementById('nav');
   const hud  = document.getElementById('hud');
-  const zl   = document.getElementById('zoom-label');
   const hero = document.getElementById('hero');
 
   gsap.set(pics, {
@@ -279,7 +278,7 @@ function entrance() {
           nav.style.opacity = '1';
           nav.classList.add('ready');
         }
-        gsap.to([hud, zl], { opacity: 1, duration: 0.8 });
+        gsap.to(hud, { opacity: 1, duration: 0.8 });
         setTimeout(() => gsap.to(hud, { opacity: 0, duration: 1 }), 4000);
         initCanvas();
         initParallax();
@@ -303,34 +302,19 @@ function entrance() {
 }
 
 /* ══════════════════════════════════════════════════
-   CANVAS — zoom (scroll), pan (drag), wobble
+   CANVAS — navegação só horizontal, via scroll (sem arrastar, sem zoom)
 ══════════════════════════════════════════════════ */
 function initCanvas() {
-  const pics = document.querySelectorAll('.pic');
-  const zl   = document.getElementById('zoom-label');
-
   const initCx = gallery.offsetWidth > window.innerWidth
     ? -Math.round((gallery.offsetWidth - window.innerWidth) / 2) : 0;
 
-  let s = 1, tx = initCx, ty = 0;
-  let tS = 1, tTx = initCx, tTy = 0;
-  let rawTx = initCx, rawTy = 0;
-  let vx = 0, vy = 0;
-  let drag = false, dragMoved = false, pmx = 0, pmy = 0;
+  let tx = initCx, tTx = initCx, rawTx = initCx;
 
-  let mpx = 0, mpy = 0;
-
-  function getBounds(sc) {
+  function getBounds() {
     const W  = window.innerWidth;
-    const H  = window.innerHeight;
     const gW = gallery.offsetWidth;
-    const gH = gallery.offsetHeight;
     const mg = 55;
-    const xMin = -(gW * sc - W) - mg;
-    const xMax = mg;
-    const yMin = -(gH * sc - H) - mg;
-    const yMax = mg;
-    return { xMin, xMax, yMin, yMax };
+    return { xMin: -(gW - W) - mg, xMax: mg };
   }
 
   /* deixa ir um pouco além do limite, com resistência crescente (efeito elástico) */
@@ -342,121 +326,57 @@ function initCanvas() {
   }
 
   function clamp() {
-    const b = getBounds(tS);
-    if (drag) return; /* enquanto arrasta, o próprio mousemove/touchmove aplica o elástico */
+    const b = getBounds();
     tTx = Math.max(b.xMin, Math.min(b.xMax, tTx));
-    tTy = Math.max(b.yMin, Math.min(b.yMax, tTy));
-    rawTx = tTx; rawTy = tTy;
+    rawTx = tTx;
   }
 
   (function tick() {
-    const now = performance.now();
-
-    clamp();
-    const lf = 0.085;
-    s  += (tS  - s)  * lf;
-    tx += (tTx - tx) * lf;
-    ty += (tTy - ty) * lf;
-
-    const W = window.innerWidth, H = window.innerHeight;
-    const mpxTarget = drag ? 0 : ((mx - W / 2) / W) * -18;
-    const mpyTarget = drag ? 0 : ((my - H / 2) / H) * -11;
-    mpx += (mpxTarget - mpx) * 0.035;
-    mpy += (mpyTarget - mpy) * 0.035;
-
-    gallery.style.transform = `translate(${tx + mpx}px,${ty + mpy}px) scale(${s})`;
-
-    zl.textContent = Math.round(s * 100) + '%';
+    tx += (tTx - tx) * 0.085;
+    gallery.style.transform = `translateX(${tx}px)`;
     requestAnimationFrame(tick);
   })();
 
-  function clampS(v) { return Math.max(0.8, Math.min(2.5, v)); }
-
-  function zoomAt(cx, cy, factor) {
-    const ns = clampS(tS * factor);
-    tTx = cx - (cx - tTx) * (ns / tS);
-    tTy = cy - (cy - tTy) * (ns / tS);
-    tS  = ns;
-    clamp();
-  }
-
+  /* scroll do rato move só para os lados */
   window.addEventListener('wheel', e => {
     if (lb.classList.contains('open')) return;
-    if (e.target.closest('#projects-list, #about-panel')) return;
+    if (e.target.closest('#projects-list, #about-panel, #contact-panel')) return;
     e.preventDefault();
-    zoomAt(e.clientX, e.clientY, e.deltaY < 0 ? 1.1 : 0.91);
+    rawTx -= e.deltaY;
+    const b = getBounds();
+    tTx = rubberBand(rawTx, b.xMin, b.xMax);
   }, { passive: false });
 
-  window.addEventListener('mousedown', e => {
-    if (e.target.closest('nav')) return;
-    drag = true; dragMoved = false;
-    pmx = e.clientX; pmy = e.clientY; vx = vy = 0;
-    rawTx = tTx; rawTy = tTy;
-    document.body.classList.add('grabbing');
-    document.body.classList.remove('on-pic');
+  /* clique num projeto abre-o */
+  document.querySelectorAll('#gallery .pic').forEach(pic => {
+    pic.addEventListener('click', () => {
+      if (pic.dataset.href) openProject(pic);
+    });
   });
 
-  window.addEventListener('mousemove', e => {
-    if (!drag) return;
-    vx = e.clientX - pmx; vy = e.clientY - pmy;
-    if (Math.abs(vx) > 4 || Math.abs(vy) > 4) dragMoved = true;
-    rawTx += vx; rawTy += vy;
-    const b = getBounds(tS);
-    tTx = rubberBand(rawTx, b.xMin, b.xMax);
-    tTy = rubberBand(rawTy, b.yMin, b.yMax);
-    pmx = e.clientX; pmy = e.clientY;
-  });
-
-  window.addEventListener('mouseup', e => {
-    if (!drag) return;
-    drag = false;
-    if (!dragMoved) {
-      const pic = e.target.closest('.pic');
-      if (pic?.dataset.href) openProject(pic);
-    }
-    tTx += vx * 7; tTy += vy * 7;
-    clamp();
-    document.body.classList.remove('grabbing');
-  });
-
-  let lastDist = 0;
+  /* toque (mobile) — arrastar move só na horizontal, como um swipe */
+  let touchActive = false, pmx = 0;
   window.addEventListener('touchstart', e => {
-    if (e.touches.length === 1) {
-      drag = true; dragMoved = false;
-      pmx = e.touches[0].clientX; pmy = e.touches[0].clientY; vx = vy = 0;
-      rawTx = tTx; rawTy = tTy;
-    } else if (e.touches.length === 2) {
-      drag = false;
-      lastDist = Math.hypot(e.touches[1].clientX - e.touches[0].clientX, e.touches[1].clientY - e.touches[0].clientY);
-    }
+    if (e.touches.length !== 1) return;
+    touchActive = true;
+    pmx = e.touches[0].clientX;
+    rawTx = tTx;
   }, { passive: true });
 
   window.addEventListener('touchmove', e => {
+    if (!touchActive || e.touches.length !== 1) return;
     e.preventDefault();
-    if (e.touches.length === 1 && drag) {
-      vx = e.touches[0].clientX - pmx; vy = e.touches[0].clientY - pmy;
-      if (Math.abs(vx) > 4 || Math.abs(vy) > 4) dragMoved = true;
-      rawTx += vx; rawTy += vy;
-      const b = getBounds(tS);
-      tTx = rubberBand(rawTx, b.xMin, b.xMax);
-      tTy = rubberBand(rawTy, b.yMin, b.yMax);
-      pmx = e.touches[0].clientX; pmy = e.touches[0].clientY;
-    } else if (e.touches.length === 2) {
-      const d  = Math.hypot(e.touches[1].clientX - e.touches[0].clientX, e.touches[1].clientY - e.touches[0].clientY);
-      const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-      const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-      zoomAt(cx, cy, d / lastDist); lastDist = d;
-    }
+    const vx = e.touches[0].clientX - pmx;
+    rawTx += vx;
+    const b = getBounds();
+    tTx = rubberBand(rawTx, b.xMin, b.xMax);
+    pmx = e.touches[0].clientX;
   }, { passive: false });
 
   window.addEventListener('touchend', () => {
-    if (drag) { drag = false; tTx += vx * 7; tTy += vy * 7; clamp(); }
-  });
-
-  window.addEventListener('dblclick', e => {
-    if (e.target.closest('nav')) return;
-    const reset = Math.abs(tS - 1) > 0.08 || Math.abs(tTx) > 8 || Math.abs(tTy) > 8;
-    if (reset) { tS = 1; tTx = 0; tTy = 0; } else { zoomAt(e.clientX, e.clientY, 2.2); }
+    if (!touchActive) return;
+    touchActive = false;
+    clamp();
   });
 }
 
@@ -1100,7 +1020,8 @@ async function fetchProjectContent(id) {
     if (lb.classList.contains('open')) closeProject();
     aboutPanel.classList.add('open');
     document.querySelectorAll('.nav-links a, .lb-nav-links a, #nav-mobile a, .footer-nav a').forEach(a => {
-      if (a.textContent.trim().toLowerCase() === 'about') a.classList.add('nav-active');
+      const t = a.textContent.trim().toLowerCase();
+      if (a.classList.contains('nav-about-link') || t === 'about' || t === 'sobre') a.classList.add('nav-active');
     });
   }
   function closeAbout() {
@@ -1113,7 +1034,8 @@ async function fetchProjectContent(id) {
   aboutPanel.addEventListener('wheel',      e => e.stopPropagation(), { passive: true });
 
   document.querySelectorAll('.nav-links a, .lb-nav-links a, #nav-mobile a, .footer-nav a').forEach(a => {
-    if (a.textContent.trim().toLowerCase() === 'about') {
+    const t = a.textContent.trim().toLowerCase();
+    if (a.classList.contains('nav-about-link') || t === 'about' || t === 'sobre') {
       a.addEventListener('click', e => {
         e.preventDefault();
         aboutPanel.classList.contains('open') ? closeAbout() : openAbout();
@@ -1156,7 +1078,8 @@ async function fetchProjectContent(id) {
     document.querySelectorAll(
       '.nav-links a, .lb-nav-links a, #nav-mobile a, .footer-nav a, .cp-nav-links a'
     ).forEach(a => {
-      if (a.textContent.trim().toLowerCase() === 'contact') a.classList.add('nav-active');
+      const t = a.textContent.trim().toLowerCase();
+      if (a.classList.contains('nav-contact-link') || t === 'contact' || t === 'contato') a.classList.add('nav-active');
     });
   }
 
@@ -1170,11 +1093,12 @@ async function fetchProjectContent(id) {
   contactPanel.addEventListener('touchstart', e => e.stopPropagation(), { passive: true });
   contactPanel.addEventListener('wheel',      e => e.stopPropagation(), { passive: true });
 
-  /* wiring — todos os links "Contact" no site */
+  /* wiring — todos os links "Contact"/"Contato" no site */
   document.querySelectorAll(
     '.nav-links a, .lb-nav-links a, #nav-mobile a, .footer-nav a'
   ).forEach(a => {
-    if (a.textContent.trim().toLowerCase() === 'contact') {
+    const t = a.textContent.trim().toLowerCase();
+    if (a.classList.contains('nav-contact-link') || t === 'contact' || t === 'contato') {
       a.addEventListener('click', e => {
         e.preventDefault();
         contactPanel.classList.contains('open') ? closeContact() : openContact();
