@@ -183,7 +183,7 @@ const COL_CONFIG = [
   { maxW: 480,  cols: 5, gap: 14, offsets: [30, 90, 15, 65, 100], canvasScale: 2.4 },
   { maxW: 768,  cols: 5, gap: 18, offsets: [25, 75, 10, 55, 90],  canvasScale: 1.9 },
   { maxW: 1024, cols: 4, gap: 20, offsets: [30, 65, 12, 48],       canvasScale: 1   },
-  { maxW: Infinity, cols: 4, gap: 8, offsets: [30, 90, 15, 65], canvasScale: 1.4 },
+  { maxW: Infinity, cols: 4, gap: 3, offsets: [0, 0, 0, 0], canvasScale: 1.4 },
 ];
 
 function getMasonryConfig() {
@@ -324,10 +324,8 @@ function entrance() {
    CANVAS — navegação só horizontal, via scroll (sem arrastar, sem zoom)
 ══════════════════════════════════════════════════ */
 function initCanvas() {
-  const initCx = (gallery.offsetWidth * galleryScale) > window.innerWidth
-    ? -Math.round((gallery.offsetWidth * galleryScale - window.innerWidth) / 2) : 0;
-
-  let tx = initCx, tTx = initCx, rawTx = initCx;
+  /* começa sempre encostado ao início (esquerda), nunca centrado */
+  let tx = 0, tTx = 0, rawTx = 0;
 
   function getBounds() {
     const W  = window.innerWidth;

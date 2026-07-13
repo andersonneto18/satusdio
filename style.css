@@ -120,8 +120,6 @@
       cursor: none;
       will-change: transform, opacity;
       transform-style: preserve-3d;
-      border: 2px solid rgba(21,21,18,0.28);
-      box-shadow: 0 4px 18px rgba(21,21,18,0.14);
     }
 
     .pic-hover-vid {
