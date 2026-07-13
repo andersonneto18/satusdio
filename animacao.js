@@ -65,7 +65,8 @@ async function fetchProjects() {
     if (!posts.length) throw new Error('Sem projetos');
 
     posts.forEach(post => {
-      const imgUrl = post._embedded?.['wp:featuredmedia']?.[0]?.source_url;
+      const media   = post._embedded?.['wp:featuredmedia']?.[0];
+      const imgUrl  = media?.source_url;
       if (!imgUrl) return;
 
       const title = post.title.rendered;
@@ -74,11 +75,19 @@ async function fetchProjects() {
       const cat   = terms[0]?.name || '';
       const sub   = cat ? `${cat} · ${year}` : String(year);
 
+      /* proporção real da imagem (largura/altura), vinda do WordPress —
+         usada no layout para a caixa encaixar exatamente na imagem,
+         sem cortar nada com object-fit:cover */
+      const mw = media?.media_details?.width;
+      const mh = media?.media_details?.height;
+      const aspect = (mw && mh) ? mw / mh : null;
+
       const el = document.createElement('div');
       el.className    = 'pic';
       el.dataset.id       = post.id;
       el.dataset.href     = post.link;
       el.dataset.sub      = sub;
+      if (aspect) el.dataset.aspect = aspect;
       const hoverGif      = post.acf?.hover_gif || '';
       el.dataset.hoverGif = hoverGif;
       el.innerHTML    = `
@@ -174,7 +183,7 @@ const COL_CONFIG = [
   { maxW: 480,  cols: 5, gap: 14, offsets: [30, 90, 15, 65, 100], canvasScale: 2.4 },
   { maxW: 768,  cols: 5, gap: 18, offsets: [25, 75, 10, 55, 90],  canvasScale: 1.9 },
   { maxW: 1024, cols: 4, gap: 20, offsets: [30, 65, 12, 48],       canvasScale: 1   },
-  { maxW: Infinity, cols: 4, gap: 28, offsets: [30, 90, 15, 65], canvasScale: 1.4 },
+  { maxW: Infinity, cols: 4, gap: 8, offsets: [30, 90, 15, 65], canvasScale: 1.4 },
 ];
 
 function getMasonryConfig() {
@@ -197,7 +206,11 @@ function layoutMasonry() {
   pics.forEach((pic, idx) => {
     const minH = Math.min(...colH);
     const ci   = colH.indexOf(minH);
-    const h    = BASE_H[idx % BASE_H.length];
+    /* usa a proporção real da imagem quando disponível, para a caixa
+       encaixar exatamente nela (sem cortar nada); só recorre à altura
+       fixa de reserva se não soubermos as dimensões reais */
+    const aspect = parseFloat(pic.dataset.aspect);
+    const h = aspect ? colW / aspect : BASE_H[idx % BASE_H.length];
 
     pic.style.left   = gap + ci * (colW + gap) + 'px';
     pic.style.top    = colH[ci] + 'px';
