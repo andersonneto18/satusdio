@@ -110,7 +110,6 @@
       cursor: none;
       will-change: transform, opacity;
       transform-style: preserve-3d;
-      border: 3px solid #fff;
       border-radius: 10px;
       box-shadow: 0 4px 18px rgba(21,21,18,0.14);
     }
