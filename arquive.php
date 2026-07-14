@@ -43,18 +43,7 @@ add_shortcode('sastudio_gallery', function () {
     display: flex; align-items: center; justify-content: space-between;
     flex-wrap: wrap; gap: 1rem; margin-bottom: 2.5rem;
   }
-  #sg-filters { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-  .sg-filter-btn {
-    font-family: inherit; font-size: 0.68rem; letter-spacing: 0.08em;
-    text-transform: uppercase; color: rgba(21,21,18,0.55);
-    background: none; border: 1px solid rgba(21,21,18,0.18);
-    border-radius: 999px; padding: 0.5rem 1.1rem; cursor: pointer;
-    transition: background 0.2s, color 0.2s, border-color 0.2s;
-  }
-  .sg-filter-btn:hover { border-color: #151512; color: #151512; }
-  .sg-filter-btn.active { background: #151512; border-color: #151512; color: #fff; }
-
-  /* ── Dropdowns Location/Status/Typology, como no i-mad.com ── */
+  /* ── Dropdowns Categoria/Location/Status/Typology, como no i-mad.com ── */
   #sg-dropdowns { display: flex; gap: 0.5rem; flex-wrap: wrap; }
   .sg-dd { position: relative; }
   .sg-dd-btn {
@@ -334,7 +323,6 @@ add_shortcode('sastudio_gallery', function () {
   </div>
   <div id="sg-controls">
     <div style="display:flex; align-items:center; gap:0.7rem; flex-wrap:wrap;">
-      <div id="sg-filters"></div>
       <div id="sg-dropdowns"></div>
     </div>
     <div style="display:flex; align-items:center; gap:0.7rem;">
@@ -372,7 +360,6 @@ add_shortcode('sastudio_gallery', function () {
   var list    = document.getElementById('sg-list');
   var viewToggle = document.getElementById('sg-view-toggle');
   var count   = document.getElementById('sg-count');
-  var filters = document.getElementById('sg-filters');
   var search  = document.getElementById('sg-search');
   var empty   = document.getElementById('sg-empty');
   var modal   = document.getElementById('sg-modal');
@@ -423,67 +410,85 @@ add_shortcode('sastudio_gallery', function () {
     });
   }
 
-  /* ── Filtros em dropdown: Location / Status / Typology, como no
-     i-mad.com — cada um lê os valores únicos dos campos ACF de todos
-     os projetos e deixa escolher um valor por dropdown (AND entre eles). ── */
-  var activeFilters = { location: '', status: '', typology: '' };
+  /* ── Filtros em dropdown: Categoria / Location / Status / Typology, como
+     no i-mad.com — cada um lê os valores únicos (categoria vem da
+     taxonomia, os outros dos campos ACF) e deixa escolher um valor por
+     dropdown, com "Todos" a limpar esse dropdown especificamente. Os
+     quatro combinam entre si (AND). ── */
+  var activeFilters = { category: '', location: '', status: '', typology: '' };
+
+  function makeDropdown(key, label, values) {
+    var wrap = document.createElement('div');
+    wrap.className = 'sg-dd';
+
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'sg-dd-btn';
+    btn.innerHTML = esc(label) + ' <span class="sg-dd-icon">+</span>';
+
+    var panel = document.createElement('div');
+    panel.className = 'sg-dd-panel';
+
+    function selectValue(val, optEl) {
+      activeFilters[key] = val;
+      panel.querySelectorAll('.sg-dd-opt').forEach(function (o) { o.classList.remove('active'); });
+      optEl.classList.add('active');
+      filterCards();
+    }
+
+    var allOpt = document.createElement('button');
+    allOpt.type = 'button';
+    allOpt.className = 'sg-dd-opt active';
+    allOpt.textContent = 'Todos';
+    allOpt.addEventListener('click', function (e) { e.stopPropagation(); selectValue('', allOpt); });
+    panel.appendChild(allOpt);
+
+    values.forEach(function (val) {
+      var opt = document.createElement('button');
+      opt.type = 'button';
+      opt.className = 'sg-dd-opt';
+      opt.textContent = val;
+      opt.addEventListener('click', function (e) { e.stopPropagation(); selectValue(val, opt); });
+      panel.appendChild(opt);
+    });
+
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var wasOpen = wrap.classList.contains('open');
+      document.querySelectorAll('.sg-dd.open').forEach(function (d) { d.classList.remove('open'); });
+      if (!wasOpen) wrap.classList.add('open');
+      btn.querySelector('.sg-dd-icon').textContent = wasOpen ? '+' : '—';
+    });
+
+    wrap.appendChild(btn);
+    wrap.appendChild(panel);
+    return wrap;
+  }
 
   function buildDropdowns() {
     var host = document.getElementById('sg-dropdowns');
     if (!host || host.children.length) return;
+
+    var cats = [];
+    allPosts.forEach(function (post) {
+      var terms = (post._embedded && post._embedded['wp:term']) ? [].concat.apply([], post._embedded['wp:term']) : [];
+      var cat = terms[0] ? terms[0].name : '';
+      if (cat && cats.indexOf(cat) === -1) cats.push(cat);
+    });
+    if (cats.length) host.appendChild(makeDropdown('category', 'Categoria', cats));
 
     var fieldsMap = [
       { key: 'location', label: 'Localização', field: 'project_location' },
       { key: 'status',   label: 'Status',      field: 'project_status'   },
       { key: 'typology', label: 'Tipologia',    field: 'project_program'  }
     ];
-
     fieldsMap.forEach(function (f) {
       var values = [];
       allPosts.forEach(function (post) {
         var v = post.acf && post.acf[f.field] ? String(post.acf[f.field]).trim() : '';
         if (v && values.indexOf(v) === -1) values.push(v);
       });
-      if (!values.length) return;
-
-      var wrap = document.createElement('div');
-      wrap.className = 'sg-dd';
-
-      var btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'sg-dd-btn';
-      btn.innerHTML = esc(f.label) + ' <span class="sg-dd-icon">+</span>';
-
-      var panel = document.createElement('div');
-      panel.className = 'sg-dd-panel';
-
-      values.forEach(function (val) {
-        var opt = document.createElement('button');
-        opt.type = 'button';
-        opt.className = 'sg-dd-opt';
-        opt.textContent = val;
-        opt.addEventListener('click', function (e) {
-          e.stopPropagation();
-          var turningOn = activeFilters[f.key] !== val;
-          panel.querySelectorAll('.sg-dd-opt').forEach(function (o) { o.classList.remove('active'); });
-          activeFilters[f.key] = turningOn ? val : '';
-          if (turningOn) opt.classList.add('active');
-          filterCards();
-        });
-        panel.appendChild(opt);
-      });
-
-      btn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        var wasOpen = wrap.classList.contains('open');
-        document.querySelectorAll('.sg-dd.open').forEach(function (d) { d.classList.remove('open'); });
-        if (!wasOpen) wrap.classList.add('open');
-        btn.querySelector('.sg-dd-icon').textContent = wasOpen ? '+' : '—';
-      });
-
-      wrap.appendChild(btn);
-      wrap.appendChild(panel);
-      host.appendChild(wrap);
+      if (values.length) host.appendChild(makeDropdown(f.key, f.label, values));
     });
 
     document.addEventListener('click', function () {
@@ -536,13 +541,11 @@ add_shortcode('sastudio_gallery', function () {
   }
 
   function filterCards() {
-    var q   = search.value.trim().toLowerCase();
-    var cat = filters.querySelector('.sg-filter-btn.active');
-    cat = cat ? cat.dataset.cat : '';
+    var q = search.value.trim().toLowerCase();
     var visible = 0;
     allCards.forEach(function (c) {
       var matchQ    = !q || c.title.indexOf(q) !== -1 || c.sub.indexOf(q) !== -1;
-      var matchCat  = !cat || c.sub.indexOf(cat.toLowerCase()) !== -1;
+      var matchCat  = !activeFilters.category || c.category === activeFilters.category;
       var matchLoc  = !activeFilters.location || c.location === activeFilters.location;
       var matchStat = !activeFilters.status   || c.status   === activeFilters.status;
       var matchTypo = !activeFilters.typology || c.typology === activeFilters.typology;
@@ -860,43 +863,6 @@ add_shortcode('sastudio_gallery', function () {
       if (!posts || !posts.length) { empty.style.display = 'block'; return; }
       allPosts = posts;
       buildDropdowns();
-
-      var cats = [];
-      posts.forEach(function (post) {
-        var terms = (post._embedded && post._embedded['wp:term']) ? [].concat.apply([], post._embedded['wp:term']) : [];
-        var cat = terms[0] ? terms[0].name : '';
-        if (cat && cats.indexOf(cat) === -1) cats.push(cat);
-      });
-
-      var allBtn = document.createElement('button');
-      allBtn.className = 'sg-filter-btn active';
-      allBtn.textContent = 'Todos';
-      allBtn.dataset.cat = '';
-      filters.appendChild(allBtn);
-      cats.forEach(function (cat) {
-        var btn = document.createElement('button');
-        btn.className = 'sg-filter-btn';
-        btn.textContent = cat;
-        btn.dataset.cat = cat;
-        filters.appendChild(btn);
-      });
-      filters.addEventListener('click', function (e) {
-        var btn = e.target.closest('.sg-filter-btn');
-        if (!btn) return;
-        filters.querySelectorAll('.sg-filter-btn').forEach(function (b) { b.classList.remove('active'); });
-        btn.classList.add('active');
-
-        /* "Todos" também limpa os dropdowns Localização/Status/Tipologia —
-           senão clicar em Todos não mostrava tudo se algum estivesse ativo */
-        if (!btn.dataset.cat) {
-          activeFilters.location = activeFilters.status = activeFilters.typology = '';
-          document.querySelectorAll('#sg-dropdowns .sg-dd-opt.active').forEach(function (o) {
-            o.classList.remove('active');
-          });
-        }
-
-        filterCards();
-      });
       search.addEventListener('input', filterCards);
 
       posts.forEach(function (post) {
@@ -933,6 +899,7 @@ add_shortcode('sastudio_gallery', function () {
         grid.appendChild(card);
         allCards.push({
           el: card, title: title.toLowerCase(), sub: sub.toLowerCase(),
+          category: cat,
           location: (post.acf && post.acf.project_location) ? String(post.acf.project_location).trim() : '',
           status:   (post.acf && post.acf.project_status)   ? String(post.acf.project_status).trim()   : '',
           typology: (post.acf && post.acf.project_program)  ? String(post.acf.project_program).trim()  : ''
