@@ -21,7 +21,7 @@ add_shortcode('sastudio_gallery', function () {
     color: #151512;
     max-width: 1440px;
     margin: 0 auto;
-    padding: 3rem 5vw 5rem;
+    padding: 8rem 5vw 5rem;
   }
   #sg-header {
     display: flex; align-items: flex-end; justify-content: space-between;
