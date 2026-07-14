@@ -66,20 +66,24 @@ add_shortcode('sastudio_gallery', function () {
      e a altura de cada imagem vem da proporção real (largura/altura
      do WordPress), por isso os tamanhos ficam variados, como na referência */
   #sg-grid {
-    column-count: 3; column-gap: 1.8rem;
+    display: block !important;
+    column-count: 3 !important; column-gap: 1.8rem;
   }
-  @media (max-width: 1100px) { #sg-grid { column-count: 2; } }
-  @media (max-width: 760px)  { #sg-grid { column-count: 2; column-gap: 1rem; } }
-  @media (max-width: 480px)  { #sg-grid { column-count: 1; } }
+  @media (max-width: 1100px) { #sg-grid { column-count: 2 !important; } }
+  @media (max-width: 760px)  { #sg-grid { column-count: 2 !important; column-gap: 1rem; } }
+  @media (max-width: 480px)  { #sg-grid { column-count: 1 !important; } }
   .sg-card {
     cursor: pointer;
     break-inside: avoid;
     margin-bottom: 1.6rem;
+    width: 100% !important;
+    height: auto !important;
   }
   .sg-card-img {
     position: relative;
     overflow: hidden; background: #e8e7e3;
     border-radius: 16px;
+    width: 100% !important;
   }
   .sg-card-img img {
     width: 100%; height: 100%; object-fit: cover; display: block;
@@ -708,7 +712,7 @@ add_shortcode('sastudio_gallery', function () {
 
         var ratio = CARD_RATIOS[cardIdx % CARD_RATIOS.length];
         cardIdx++;
-        var aspectStyle = ' style="aspect-ratio:' + ratio + '"';
+        var aspectStyle = ' style="aspect-ratio:' + ratio + ' !important"';
 
         var card = document.createElement('div');
         card.className = 'sg-card';
