@@ -53,6 +53,43 @@ add_shortcode('sastudio_gallery', function () {
   }
   .sg-filter-btn:hover { border-color: #151512; color: #151512; }
   .sg-filter-btn.active { background: #151512; border-color: #151512; color: #fff; }
+
+  /* ── Dropdowns Location/Status/Typology, como no i-mad.com ── */
+  #sg-dropdowns { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .sg-dd { position: relative; }
+  .sg-dd-btn {
+    display: flex; align-items: center; gap: 0.45rem;
+    font-family: inherit; font-size: 0.68rem; letter-spacing: 0.08em;
+    text-transform: uppercase; color: rgba(21,21,18,0.55);
+    background: none; border: 1px solid rgba(21,21,18,0.18);
+    border-radius: 999px; padding: 0.5rem 1.1rem; cursor: pointer;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+  }
+  .sg-dd-btn:hover { border-color: #151512; color: #151512; }
+  .sg-dd.open .sg-dd-btn { background: #151512; border-color: #151512; color: #fff; }
+  .sg-dd-icon { font-size: 0.9rem; line-height: 1; }
+  .sg-dd-panel {
+    position: absolute; top: calc(100% + 8px); left: 0; z-index: 20;
+    min-width: 210px;
+    background: rgba(28,28,26,0.94);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    border-radius: 10px;
+    padding: 0.5rem 0;
+    display: none;
+    box-shadow: 0 10px 32px rgba(0,0,0,0.25);
+  }
+  .sg-dd.open .sg-dd-panel { display: block; }
+  .sg-dd-opt {
+    display: block; width: 100%; text-align: left;
+    background: none; border: none; cursor: pointer;
+    font-family: 'Inter', sans-serif; font-size: 0.9rem;
+    color: rgba(255,255,255,0.8);
+    padding: 0.55rem 1.2rem;
+    transition: color 0.15s;
+  }
+  .sg-dd-opt:hover { color: #fff; }
+  .sg-dd-opt.active { color: #fff; font-weight: 600; }
+
   #sg-search-wrap {
     display: flex; align-items: center; gap: 0.5rem;
     border: 1px solid rgba(21,21,18,0.18); border-radius: 999px;
@@ -295,7 +332,10 @@ add_shortcode('sastudio_gallery', function () {
     <span id="sg-count"></span>
   </div>
   <div id="sg-controls">
-    <div id="sg-filters"></div>
+    <div style="display:flex; align-items:center; gap:0.7rem; flex-wrap:wrap;">
+      <div id="sg-filters"></div>
+      <div id="sg-dropdowns"></div>
+    </div>
     <div style="display:flex; align-items:center; gap:0.7rem;">
       <div id="sg-search-wrap">
         <input id="sg-search" type="text" placeholder="Pesquisar projetos…" autocomplete="off" />
@@ -382,6 +422,78 @@ add_shortcode('sastudio_gallery', function () {
     });
   }
 
+  /* ── Filtros em dropdown: Location / Status / Typology, como no
+     i-mad.com — cada um lê os valores únicos dos campos ACF de todos
+     os projetos e deixa escolher um valor por dropdown (AND entre eles). ── */
+  var activeFilters = { location: '', status: '', typology: '' };
+
+  function buildDropdowns() {
+    var host = document.getElementById('sg-dropdowns');
+    if (!host || host.children.length) return;
+
+    var fieldsMap = [
+      { key: 'location', label: 'Localização', field: 'project_location' },
+      { key: 'status',   label: 'Status',      field: 'project_status'   },
+      { key: 'typology', label: 'Tipologia',    field: 'project_program'  }
+    ];
+
+    fieldsMap.forEach(function (f) {
+      var values = [];
+      allPosts.forEach(function (post) {
+        var v = post.acf && post.acf[f.field] ? String(post.acf[f.field]).trim() : '';
+        if (v && values.indexOf(v) === -1) values.push(v);
+      });
+      if (!values.length) return;
+
+      var wrap = document.createElement('div');
+      wrap.className = 'sg-dd';
+
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'sg-dd-btn';
+      btn.innerHTML = esc(f.label) + ' <span class="sg-dd-icon">+</span>';
+
+      var panel = document.createElement('div');
+      panel.className = 'sg-dd-panel';
+
+      values.forEach(function (val) {
+        var opt = document.createElement('button');
+        opt.type = 'button';
+        opt.className = 'sg-dd-opt';
+        opt.textContent = val;
+        opt.addEventListener('click', function (e) {
+          e.stopPropagation();
+          var turningOn = activeFilters[f.key] !== val;
+          panel.querySelectorAll('.sg-dd-opt').forEach(function (o) { o.classList.remove('active'); });
+          activeFilters[f.key] = turningOn ? val : '';
+          if (turningOn) opt.classList.add('active');
+          filterCards();
+        });
+        panel.appendChild(opt);
+      });
+
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var wasOpen = wrap.classList.contains('open');
+        document.querySelectorAll('.sg-dd.open').forEach(function (d) { d.classList.remove('open'); });
+        if (!wasOpen) wrap.classList.add('open');
+        btn.querySelector('.sg-dd-icon').textContent = wasOpen ? '+' : '—';
+      });
+
+      wrap.appendChild(btn);
+      wrap.appendChild(panel);
+      host.appendChild(wrap);
+    });
+
+    document.addEventListener('click', function () {
+      document.querySelectorAll('.sg-dd.open').forEach(function (d) {
+        d.classList.remove('open');
+        var icon = d.querySelector('.sg-dd-icon');
+        if (icon) icon.textContent = '+';
+      });
+    });
+  }
+
   /* ── Link direto (limpo) para um projeto — usa o permalink real do WordPress
      (post.link, ex: /projects/nome-do-projeto/) em vez de query string, para
      poder ser aberto/partilhado noutros locais e coincidir com a página
@@ -428,9 +540,12 @@ add_shortcode('sastudio_gallery', function () {
     cat = cat ? cat.dataset.cat : '';
     var visible = 0;
     allCards.forEach(function (c) {
-      var matchQ   = !q || c.title.indexOf(q) !== -1 || c.sub.indexOf(q) !== -1;
-      var matchCat = !cat || c.sub.indexOf(cat.toLowerCase()) !== -1;
-      var show = matchQ && matchCat;
+      var matchQ    = !q || c.title.indexOf(q) !== -1 || c.sub.indexOf(q) !== -1;
+      var matchCat  = !cat || c.sub.indexOf(cat.toLowerCase()) !== -1;
+      var matchLoc  = !activeFilters.location || c.location === activeFilters.location;
+      var matchStat = !activeFilters.status   || c.status   === activeFilters.status;
+      var matchTypo = !activeFilters.typology || c.typology === activeFilters.typology;
+      var show = matchQ && matchCat && matchLoc && matchStat && matchTypo;
       c.el.style.display = show ? '' : 'none';
       if (show) visible++;
     });
@@ -743,6 +858,7 @@ add_shortcode('sastudio_gallery', function () {
     .then(function (posts) {
       if (!posts || !posts.length) { empty.style.display = 'block'; return; }
       allPosts = posts;
+      buildDropdowns();
 
       var cats = [];
       posts.forEach(function (post) {
@@ -804,7 +920,12 @@ add_shortcode('sastudio_gallery', function () {
         card.addEventListener('mouseenter', function () { prefetchProject(post.id); });
 
         grid.appendChild(card);
-        allCards.push({ el: card, title: title.toLowerCase(), sub: sub.toLowerCase() });
+        allCards.push({
+          el: card, title: title.toLowerCase(), sub: sub.toLowerCase(),
+          location: (post.acf && post.acf.project_location) ? String(post.acf.project_location).trim() : '',
+          status:   (post.acf && post.acf.project_status)   ? String(post.acf.project_status).trim()   : '',
+          typology: (post.acf && post.acf.project_program)  ? String(post.acf.project_program).trim()  : ''
+        });
       });
 
       count.textContent = allCards.length + ' projetos';
