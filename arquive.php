@@ -62,21 +62,19 @@ add_shortcode('sastudio_gallery', function () {
     border: none; outline: none; background: none;
     font-family: inherit; font-size: 0.75rem; color: #151512; width: 180px;
   }
-  /* masonry via colunas CSS — tamanhos variados (visual mais premium, como
-     a referência i-mad.com). Cada card usa uma proporção fixa de uma lista
-     variada (não a real da foto): se usássemos a proporção real, fotos com
-     enquadramento parecido ficavam do mesmo tamanho na coluna. A imagem
-     recorta (object-fit: cover) em vez de esticar, por isso não distorce. */
+  /* masonry via colunas CSS — cada card usa a proporção REAL da imagem
+     (largura/altura vinda do WordPress), sem esticar nem recortar, tal
+     como no i-mad.com. 3 colunas desktop, 2 tablet, 1 mobile. */
   #sg-grid {
-    column-count: 3; column-gap: 1.8rem;
+    column-count: 3; column-gap: 20px;
   }
   @media (max-width: 1100px) { #sg-grid { column-count: 2; } }
-  @media (max-width: 760px)  { #sg-grid { column-count: 2; column-gap: 1rem; } }
+  @media (max-width: 760px)  { #sg-grid { column-count: 2; column-gap: 12px; } }
   @media (max-width: 480px)  { #sg-grid { column-count: 1; } }
   .sg-card {
     cursor: pointer;
     break-inside: avoid;
-    margin-bottom: 1.8rem;
+    margin-bottom: 20px;
   }
   .sg-card-img {
     position: relative;
@@ -85,9 +83,9 @@ add_shortcode('sastudio_gallery', function () {
   }
   .sg-card-img img {
     width: 100%; height: 100%; object-fit: cover; display: block;
-    transition: transform 0.5s ease;
+    transition: transform 0.3s ease;
   }
-  .sg-card:hover .sg-card-img img { transform: scale(1.05); }
+  .sg-card:hover .sg-card-img img { transform: scale(1.03); }
   /* descrição só aparece ao passar o rato, sobreposta à imagem */
   .sg-card-overlay {
     position: absolute; inset: 0;
@@ -689,15 +687,9 @@ add_shortcode('sastudio_gallery', function () {
       });
       search.addEventListener('input', filterCards);
 
-      /* proporções fixas e variadas (não a real da foto) — dão o visual
-         premium de tamanhos diferentes, sem depender do enquadramento
-         de cada imagem em concreto */
-      var CARD_RATIOS = [0.72, 1.3, 0.95, 1.55, 0.85, 1.1];
-      var cardIdx = 0;
-
       posts.forEach(function (post) {
-        var imgUrl = post._embedded && post._embedded['wp:featuredmedia'] && post._embedded['wp:featuredmedia'][0]
-          ? post._embedded['wp:featuredmedia'][0].source_url : '';
+        var media = post._embedded && post._embedded['wp:featuredmedia'] && post._embedded['wp:featuredmedia'][0];
+        var imgUrl = media ? media.source_url : '';
         if (!imgUrl) return;
 
         var title = post.title.rendered;
@@ -706,13 +698,17 @@ add_shortcode('sastudio_gallery', function () {
         var cat   = terms[0] ? terms[0].name : '';
         var sub   = cat ? (cat + ' · ' + year) : String(year);
 
-        var ratio = CARD_RATIOS[cardIdx % CARD_RATIOS.length];
-        cardIdx++;
+        /* proporção real da imagem (largura/altura do WordPress) — cada
+           card fica com a altura correspondente à foto real, sem esticar
+           nem recortar, tal como no i-mad.com */
+        var mw = media && media.media_details ? media.media_details.width : 0;
+        var mh = media && media.media_details ? media.media_details.height : 0;
+        var aspectStyle = (mw && mh) ? ' style="aspect-ratio:' + mw + '/' + mh + '"' : '';
 
         var card = document.createElement('div');
         card.className = 'sg-card';
         card.innerHTML =
-          '<div class="sg-card-img" style="aspect-ratio:' + ratio + '">' +
+          '<div class="sg-card-img"' + aspectStyle + '>' +
             '<img src="' + esc(imgUrl) + '" alt="' + esc(title) + '" loading="lazy"/>' +
             '<div class="sg-card-overlay">' +
               '<div class="sg-card-title">' + esc(title) + '</div>' +
