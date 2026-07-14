@@ -66,9 +66,9 @@ add_shortcode('sastudio_gallery', function () {
      e a altura de cada imagem vem da proporção real (largura/altura
      do WordPress), por isso os tamanhos ficam variados, como na referência */
   #sg-grid {
-    column-count: 4; column-gap: 1.6rem;
+    column-count: 3; column-gap: 1.8rem;
   }
-  @media (max-width: 1100px) { #sg-grid { column-count: 3; } }
+  @media (max-width: 1100px) { #sg-grid { column-count: 2; } }
   @media (max-width: 760px)  { #sg-grid { column-count: 2; column-gap: 1rem; } }
   @media (max-width: 480px)  { #sg-grid { column-count: 1; } }
   .sg-card {
