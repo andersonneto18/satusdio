@@ -184,18 +184,6 @@ function getMasonryConfig() {
   return BREAKPOINTS.find(c => vw <= c.maxW);
 }
 
-function picAspect(pic) {
-  const a = parseFloat(pic.dataset.aspect);
-  return (isFinite(a) && a > 0) ? a : 1.5;
-}
-
-/* Larguras da coluna necessária para que `count` imagens, empilhadas com
-   a sua proporção real, preencham exatamente maxH (sem cortar nada). */
-function colWidthFor(group, count, gap, maxH) {
-  const sumInv = group.slice(0, count).reduce((s, p) => s + 1 / picAspect(p), 0);
-  return (maxH - gap * (count + 1)) / sumInv;
-}
-
 /* Gera a sequência de quantas imagens cada coluna leva (3, 2, 3, 2...),
    mas corrige o fim para nunca sobrar uma coluna com 1 imagem sozinha —
    junta/reparte com a coluna anterior nesse caso. */
@@ -241,35 +229,36 @@ function layoutMasonry() {
   counts.forEach((count, colIdx) => {
     const group = pics.slice(idx, idx + count);
 
-    if (count === 2) {
-      /* colunas de 2 imagens: uma sempre nitidamente maior que a outra
-         (60/40), largura normal — a imagem recorta (object-fit: cover)
-         em vez de esticar, por isso o corte não distorce nada */
-      const colW  = baseColW;
-      const availH = maxH - gap * 3;
-      const big   = availH * 0.6;
-      const small = availH * 0.4;
-      const heights = (colIdx % 2 === 0) ? [big, small] : [small, big];
+    if (count === 2 || count === 3) {
+      /* tamanhos sempre com proporções fixas e diferentes entre si
+         (não derivadas da proporção real da foto) — senão fotos com
+         enquadramento parecido ficavam com o mesmo tamanho na coluna.
+         Largura normal da coluna; a imagem recorta (object-fit: cover)
+         em vez de esticar, por isso o corte não distorce nada. */
+      const colW    = baseColW;
+      const availH  = maxH - gap * (count + 1);
+      const ratios2 = [[0.6, 0.4], [0.4, 0.6]];
+      const ratios3 = [[0.40, 0.34, 0.26], [0.26, 0.40, 0.34], [0.34, 0.26, 0.40]];
+      const ratios  = count === 2 ? ratios2[colIdx % 2] : ratios3[colIdx % 3];
 
       let y = gap;
       group.forEach((pic, i) => {
+        const h = availH * ratios[i];
         pic.style.left   = x + 'px';
         pic.style.top    = y + 'px';
         pic.style.width  = colW + 'px';
-        pic.style.height = heights[i] + 'px';
-        y += heights[i] + gap;
+        pic.style.height = h + 'px';
+        y += h + gap;
       });
 
       x += colW + gap;
     } else {
-      let colW = colWidthFor(group, count, gap, maxH);
-
-      /* prioriza preencher a tela toda — só trava em casos extremos */
-      colW = Math.max(baseColW * 0.6, Math.min(baseColW * 2.0, colW));
+      /* caso raro (ex: só sobra 1 imagem no total) — preenche a altura toda */
+      const colW = baseColW;
+      const h    = maxH - gap * 2;
 
       let y = gap;
       group.forEach(pic => {
-        const h = colW / picAspect(pic);
         pic.style.left   = x + 'px';
         pic.style.top    = y + 'px';
         pic.style.width  = colW + 'px';
