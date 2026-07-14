@@ -100,6 +100,45 @@ add_shortcode('sastudio_gallery', function () {
   .sg-card-overlay .sg-card-sub { font-size: 0.7rem; color: rgba(255,255,255,0.75); margin-top: 0.2rem; }
   #sg-empty { font-size: 0.85rem; color: rgba(21,21,18,0.5); padding: 3rem 0; }
 
+  /* ── Botão de alternar grid/lista, como no i-mad.com ── */
+  #sg-view-toggle {
+    display: flex; align-items: center; justify-content: center;
+    width: 38px; height: 38px; flex-shrink: 0;
+    border: 1px solid rgba(21,21,18,0.18); border-radius: 8px;
+    background: none; cursor: pointer; color: #151512;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  #sg-view-toggle:hover { border-color: #151512; }
+  #sg-view-toggle.active { background: #151512; color: #fff; border-color: #151512; }
+  #sg-view-toggle svg { width: 16px; height: 16px; }
+
+  /* ── Vista em lista ── */
+  #sg-list { display: none; }
+  #sg-root.is-list-view #sg-grid { display: none; }
+  #sg-root.is-list-view #sg-list { display: block; }
+  .sg-list-row {
+    display: grid;
+    grid-template-columns: 90px 1fr 200px 260px 140px;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.1rem 0;
+    border-bottom: 1px solid rgba(21,21,18,0.1);
+    cursor: pointer;
+  }
+  .sg-list-row:hover { background: rgba(21,21,18,0.03); }
+  .sg-list-thumb { width: 90px; height: 64px; border-radius: 8px; overflow: hidden; background: #e8e7e3; }
+  .sg-list-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .sg-list-title { font-size: 0.95rem; color: #151512; }
+  .sg-list-cat, .sg-list-loc, .sg-list-year {
+    font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase;
+    color: rgba(21,21,18,0.5);
+  }
+  .sg-list-year { text-align: right; }
+  @media (max-width: 900px) {
+    .sg-list-row { grid-template-columns: 70px 1fr; }
+    .sg-list-cat, .sg-list-loc, .sg-list-year { display: none; }
+  }
+
   /* ── Imagem "a voar" — efeito de zoom ao clicar, igual ao index.html ── */
   #sg-fly {
     position: fixed; inset: 0; z-index: 100005;
@@ -257,11 +296,17 @@ add_shortcode('sastudio_gallery', function () {
   </div>
   <div id="sg-controls">
     <div id="sg-filters"></div>
-    <div id="sg-search-wrap">
-      <input id="sg-search" type="text" placeholder="Pesquisar projetos…" autocomplete="off" />
+    <div style="display:flex; align-items:center; gap:0.7rem;">
+      <div id="sg-search-wrap">
+        <input id="sg-search" type="text" placeholder="Pesquisar projetos…" autocomplete="off" />
+      </div>
+      <button id="sg-view-toggle" type="button" aria-label="Alternar vista em lista">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+      </button>
     </div>
   </div>
   <div id="sg-grid"></div>
+  <div id="sg-list"></div>
   <div id="sg-empty" style="display:none;">Sem projetos para mostrar.</div>
 </div>
 
@@ -283,6 +328,8 @@ add_shortcode('sastudio_gallery', function () {
   var CUSTOM_API  = WP_API_BASE.replace('/wp/v2', '/sastudio/v2');
 
   var grid    = document.getElementById('sg-grid');
+  var list    = document.getElementById('sg-list');
+  var viewToggle = document.getElementById('sg-view-toggle');
   var count   = document.getElementById('sg-count');
   var filters = document.getElementById('sg-filters');
   var search  = document.getElementById('sg-search');
@@ -296,6 +343,44 @@ add_shortcode('sastudio_gallery', function () {
   var allCards = [];
   var allPosts = [];
   var projectCache = {};
+  var listBuilt = false;
+
+  /* ── Vista em lista (como no i-mad.com): miniatura, título, categoria,
+     localização e ano — construída uma vez a partir de allPosts. ── */
+  function buildListView() {
+    if (listBuilt) return;
+    listBuilt = true;
+    list.innerHTML = allPosts.map(function (post) {
+      var imgUrl = featuredUrl(post);
+      var title  = post.title.rendered;
+      var year   = new Date(post.date).getFullYear();
+      var terms  = (post._embedded && post._embedded['wp:term']) ? [].concat.apply([], post._embedded['wp:term']) : [];
+      var cat    = terms[0] ? terms[0].name : '';
+      var loc    = (post.acf && post.acf.project_location) ? post.acf.project_location : '';
+      return '<div class="sg-list-row" data-id="' + post.id + '">' +
+        '<div class="sg-list-thumb"><img src="' + esc(imgUrl) + '" alt="' + esc(title) + '" loading="lazy"/></div>' +
+        '<div class="sg-list-title">' + esc(title) + '</div>' +
+        '<div class="sg-list-cat">' + esc(cat) + '</div>' +
+        '<div class="sg-list-loc">' + esc(loc) + '</div>' +
+        '<div class="sg-list-year">' + year + '</div>' +
+      '</div>';
+    }).join('');
+    list.querySelectorAll('.sg-list-row').forEach(function (row) {
+      row.addEventListener('click', function () {
+        var id = parseInt(row.dataset.id, 10);
+        var post = allPosts.filter(function (p) { return p.id === id; })[0];
+        if (post) openModal(post, featuredUrl(post));
+      });
+    });
+  }
+
+  if (viewToggle) {
+    viewToggle.addEventListener('click', function () {
+      var isList = document.getElementById('sg-root').classList.toggle('is-list-view');
+      viewToggle.classList.toggle('active', isList);
+      if (isList) buildListView();
+    });
+  }
 
   /* ── Link direto (limpo) para um projeto — usa o permalink real do WordPress
      (post.link, ex: /projects/nome-do-projeto/) em vez de query string, para
