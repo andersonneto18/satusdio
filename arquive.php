@@ -19,9 +19,9 @@ add_shortcode('sastudio_gallery', function () {
   #sg-root {
     font-family: 'Inter', sans-serif;
     color: #151512;
-    max-width: 1440px;
+    max-width: 1920px;
     margin: 0 auto;
-    padding: 3rem 5vw 5rem;
+    padding: 3rem 3vw 5rem;
   }
   #sg-header {
     display: flex; align-items: flex-end; justify-content: space-between;
