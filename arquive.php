@@ -101,13 +101,14 @@ add_shortcode('sastudio_gallery', function () {
   }
   /* masonry via colunas CSS — cada card usa a proporção REAL da imagem
      (largura/altura vinda do WordPress), sem esticar nem recortar, tal
-     como no i-mad.com. 3 colunas desktop, 2 tablet, 1 mobile. */
+     como no i-mad.com. 3 colunas desktop, 2 tablet e telemóvel — com só
+     1 coluna a variedade de alturas desaparece (fica tudo empilhado na
+     mesma coluna), por isso mantém-se sempre pelo menos 2. */
   #sg-grid {
     column-count: 3; column-gap: 20px;
   }
   @media (max-width: 1100px) { #sg-grid { column-count: 2; } }
   @media (max-width: 760px)  { #sg-grid { column-count: 2; column-gap: 12px; } }
-  @media (max-width: 480px)  { #sg-grid { column-count: 1; } }
   .sg-card {
     cursor: pointer;
     break-inside: avoid;
