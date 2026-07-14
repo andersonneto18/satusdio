@@ -19,9 +19,9 @@ add_shortcode('sastudio_gallery', function () {
   #sg-root {
     font-family: 'Inter', sans-serif;
     color: #151512;
-    max-width: 1920px;
+    max-width: 1440px;
     margin: 0 auto;
-    padding: 3rem 3vw 5rem;
+    padding: 3rem 5vw 5rem;
   }
   #sg-header {
     display: flex; align-items: flex-end; justify-content: space-between;
@@ -66,24 +66,20 @@ add_shortcode('sastudio_gallery', function () {
      e a altura de cada imagem vem da proporção real (largura/altura
      do WordPress), por isso os tamanhos ficam variados, como na referência */
   #sg-grid {
-    display: block !important;
-    column-count: 3 !important; column-gap: 1.8rem;
+    column-count: 3; column-gap: 1.8rem;
   }
-  @media (max-width: 1100px) { #sg-grid { column-count: 2 !important; } }
-  @media (max-width: 760px)  { #sg-grid { column-count: 2 !important; column-gap: 1rem; } }
-  @media (max-width: 480px)  { #sg-grid { column-count: 1 !important; } }
+  @media (max-width: 1100px) { #sg-grid { column-count: 2; } }
+  @media (max-width: 760px)  { #sg-grid { column-count: 2; column-gap: 1rem; } }
+  @media (max-width: 480px)  { #sg-grid { column-count: 1; } }
   .sg-card {
     cursor: pointer;
     break-inside: avoid;
     margin-bottom: 1.6rem;
-    width: 100% !important;
-    height: auto !important;
   }
   .sg-card-img {
     position: relative;
     overflow: hidden; background: #e8e7e3;
     border-radius: 16px;
-    width: 100% !important;
   }
   .sg-card-img img {
     width: 100%; height: 100%; object-fit: cover; display: block;
@@ -691,14 +687,6 @@ add_shortcode('sastudio_gallery', function () {
       });
       search.addEventListener('input', filterCards);
 
-      /* proporções fixas e variadas (não a real da foto) — fotos com o
-         mesmo enquadramento (ex: todas panorâmicas) ficavam do mesmo
-         tamanho na coluna se usássemos a proporção real. A imagem recorta
-         (object-fit: cover já definido em .sg-card-img img) em vez de
-         esticar, por isso o corte não distorce nada. */
-      var CARD_RATIOS = [0.72, 1.3, 0.95, 1.55, 0.85, 1.1];
-      var cardIdx = 0;
-
       posts.forEach(function (post) {
         var media = post._embedded && post._embedded['wp:featuredmedia'] && post._embedded['wp:featuredmedia'][0];
         var imgUrl = media ? media.source_url : '';
@@ -710,9 +698,10 @@ add_shortcode('sastudio_gallery', function () {
         var cat   = terms[0] ? terms[0].name : '';
         var sub   = cat ? (cat + ' · ' + year) : String(year);
 
-        var ratio = CARD_RATIOS[cardIdx % CARD_RATIOS.length];
-        cardIdx++;
-        var aspectStyle = ' style="aspect-ratio:' + ratio + ' !important"';
+        /* proporção real da imagem — dá a variedade de tamanhos no masonry */
+        var mw = media && media.media_details ? media.media_details.width : 0;
+        var mh = media && media.media_details ? media.media_details.height : 0;
+        var aspectStyle = (mw && mh) ? ' style="aspect-ratio:' + mw + '/' + mh + '"' : '';
 
         var card = document.createElement('div');
         card.className = 'sg-card';
