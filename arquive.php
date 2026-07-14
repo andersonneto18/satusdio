@@ -230,7 +230,7 @@ add_shortcode('sastudio_gallery', function () {
   }
   #sg-related-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
   .sg-rel-card { cursor: pointer; }
-  .sg-rel-card-img-wrap { overflow: hidden; aspect-ratio: 4/3; }
+  .sg-rel-card-img-wrap { overflow: hidden; aspect-ratio: 4/3; border-radius: 16px; }
   .sg-rel-card-img-wrap img {
     width: 100%; height: 100%; object-fit: cover; display: block;
     transition: transform 0.55s ease;
