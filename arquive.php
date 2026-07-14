@@ -885,6 +885,16 @@ add_shortcode('sastudio_gallery', function () {
         if (!btn) return;
         filters.querySelectorAll('.sg-filter-btn').forEach(function (b) { b.classList.remove('active'); });
         btn.classList.add('active');
+
+        /* "Todos" também limpa os dropdowns Localização/Status/Tipologia —
+           senão clicar em Todos não mostrava tudo se algum estivesse ativo */
+        if (!btn.dataset.cat) {
+          activeFilters.location = activeFilters.status = activeFilters.typology = '';
+          document.querySelectorAll('#sg-dropdowns .sg-dd-opt.active').forEach(function (o) {
+            o.classList.remove('active');
+          });
+        }
+
         filterCards();
       });
       search.addEventListener('input', filterCards);
