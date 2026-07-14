@@ -72,17 +72,20 @@
     .nav-links a {
       display: block;
       font-family: 'Inter', sans-serif;
-      font-size: 1rem; font-weight: 800;
-      color: #fff;
+      font-size: 1.1rem; font-weight: 500;
+      color: #151512;
       text-decoration: none;
-      mix-blend-mode: difference;
+      padding-bottom: 0.3rem;
       transition: opacity 0.2s;
     }
     .nav-links a:hover {
       opacity: 0.6;
     }
     .nav-links a.nav-active {
-      font-weight: 700;
+      font-weight: 500;
+      text-decoration: underline;
+      text-underline-offset: 0.4rem;
+      text-decoration-thickness: 2px;
     }
 
     /* ── VIEWPORT ── */
