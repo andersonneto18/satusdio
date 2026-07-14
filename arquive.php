@@ -62,16 +62,23 @@ add_shortcode('sastudio_gallery', function () {
     border: none; outline: none; background: none;
     font-family: inherit; font-size: 0.75rem; color: #151512; width: 180px;
   }
+  /* masonry via colunas CSS — cada card flui para a coluna mais vazia,
+     e a altura de cada imagem vem da proporção real (largura/altura
+     do WordPress), por isso os tamanhos ficam variados, como na referência */
   #sg-grid {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 2.2rem 1.6rem;
+    column-count: 4; column-gap: 1.6rem;
   }
-  @media (max-width: 1100px) { #sg-grid { grid-template-columns: repeat(3, 1fr); } }
-  @media (max-width: 760px)  { #sg-grid { grid-template-columns: repeat(2, 1fr); gap: 1.6rem 1rem; } }
-  @media (max-width: 480px)  { #sg-grid { grid-template-columns: 1fr; } }
-  .sg-card { cursor: pointer; }
+  @media (max-width: 1100px) { #sg-grid { column-count: 3; } }
+  @media (max-width: 760px)  { #sg-grid { column-count: 2; column-gap: 1rem; } }
+  @media (max-width: 480px)  { #sg-grid { column-count: 1; } }
+  .sg-card {
+    cursor: pointer;
+    break-inside: avoid;
+    margin-bottom: 1.6rem;
+  }
   .sg-card-img {
     position: relative;
-    aspect-ratio: 3/4; overflow: hidden; background: #e8e7e3;
+    overflow: hidden; background: #e8e7e3;
     border-radius: 16px;
   }
   .sg-card-img img {
@@ -681,8 +688,8 @@ add_shortcode('sastudio_gallery', function () {
       search.addEventListener('input', filterCards);
 
       posts.forEach(function (post) {
-        var imgUrl = post._embedded && post._embedded['wp:featuredmedia'] && post._embedded['wp:featuredmedia'][0]
-          ? post._embedded['wp:featuredmedia'][0].source_url : '';
+        var media = post._embedded && post._embedded['wp:featuredmedia'] && post._embedded['wp:featuredmedia'][0];
+        var imgUrl = media ? media.source_url : '';
         if (!imgUrl) return;
 
         var title = post.title.rendered;
@@ -691,10 +698,15 @@ add_shortcode('sastudio_gallery', function () {
         var cat   = terms[0] ? terms[0].name : '';
         var sub   = cat ? (cat + ' · ' + year) : String(year);
 
+        /* proporção real da imagem — dá a variedade de tamanhos no masonry */
+        var mw = media && media.media_details ? media.media_details.width : 0;
+        var mh = media && media.media_details ? media.media_details.height : 0;
+        var aspectStyle = (mw && mh) ? ' style="aspect-ratio:' + mw + '/' + mh + '"' : '';
+
         var card = document.createElement('div');
         card.className = 'sg-card';
         card.innerHTML =
-          '<div class="sg-card-img">' +
+          '<div class="sg-card-img"' + aspectStyle + '>' +
             '<img src="' + esc(imgUrl) + '" alt="' + esc(title) + '" loading="lazy"/>' +
             '<div class="sg-card-overlay">' +
               '<div class="sg-card-title">' + esc(title) + '</div>' +
