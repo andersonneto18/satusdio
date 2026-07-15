@@ -415,7 +415,7 @@ add_shortcode('sastudio_gallery', function () {
      taxonomia, os outros dos campos ACF) e deixa escolher um valor por
      dropdown, com "Todos" a limpar esse dropdown especificamente. Os
      quatro combinam entre si (AND). ── */
-  var activeFilters = { category: '', location: '', status: '', typology: '' };
+  var activeFilters = { category: '', location: '' };
 
   function makeDropdown(key, label, values) {
     var wrap = document.createElement('div');
@@ -478,9 +478,7 @@ add_shortcode('sastudio_gallery', function () {
     if (cats.length) host.appendChild(makeDropdown('category', 'Categoria', cats));
 
     var fieldsMap = [
-      { key: 'location', label: 'Localização', field: 'project_location' },
-      { key: 'status',   label: 'Status',      field: 'project_status'   },
-      { key: 'typology', label: 'Tipologia',    field: 'project_program'  }
+      { key: 'location', label: 'Localização', field: 'project_location' }
     ];
     fieldsMap.forEach(function (f) {
       var values = [];
@@ -544,12 +542,10 @@ add_shortcode('sastudio_gallery', function () {
     var q = search.value.trim().toLowerCase();
     var visible = 0;
     allCards.forEach(function (c) {
-      var matchQ    = !q || c.title.indexOf(q) !== -1 || c.sub.indexOf(q) !== -1;
-      var matchCat  = !activeFilters.category || c.category === activeFilters.category;
-      var matchLoc  = !activeFilters.location || c.location === activeFilters.location;
-      var matchStat = !activeFilters.status   || c.status   === activeFilters.status;
-      var matchTypo = !activeFilters.typology || c.typology === activeFilters.typology;
-      var show = matchQ && matchCat && matchLoc && matchStat && matchTypo;
+      var matchQ   = !q || c.title.indexOf(q) !== -1 || c.sub.indexOf(q) !== -1;
+      var matchCat = !activeFilters.category || c.category === activeFilters.category;
+      var matchLoc = !activeFilters.location || c.location === activeFilters.location;
+      var show = matchQ && matchCat && matchLoc;
       c.el.style.display = show ? '' : 'none';
       if (show) visible++;
     });
@@ -900,9 +896,7 @@ add_shortcode('sastudio_gallery', function () {
         allCards.push({
           el: card, title: title.toLowerCase(), sub: sub.toLowerCase(),
           category: cat,
-          location: (post.acf && post.acf.project_location) ? String(post.acf.project_location).trim() : '',
-          status:   (post.acf && post.acf.project_status)   ? String(post.acf.project_status).trim()   : '',
-          typology: (post.acf && post.acf.project_program)  ? String(post.acf.project_program).trim()  : ''
+          location: (post.acf && post.acf.project_location) ? String(post.acf.project_location).trim() : ''
         });
       });
 
