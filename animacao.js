@@ -1016,9 +1016,11 @@ async function fetchProjectContent(id) {
 
 /* ══════════════════════════════════════════════════
    GALLERY DRAG-TO-SCROLL (com inércia)
+   Usado tanto na galeria de imagens do projeto (#lb-gallery)
+   como no carrossel "Confira outros projetos" (#lb-related-grid).
 ══════════════════════════════════════════════════ */
-(function () {
-  const el = document.getElementById('lb-gallery');
+function initDragScroll(elId) {
+  const el = document.getElementById(elId);
   if (!el) return;
 
   let isDown = false, startX = 0, startScroll = 0;
@@ -1071,7 +1073,9 @@ async function fetchProjectContent(id) {
   el.addEventListener('touchmove', e => {
     el.scrollLeft = tS - (e.touches[0].pageX - tX);
   }, { passive: true });
-})();
+}
+initDragScroll('lb-gallery');
+initDragScroll('lb-related-grid');
 
 /* ══════════════════════════════════════════════════
    PROJECTS LIST PANEL
