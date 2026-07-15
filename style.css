@@ -696,6 +696,7 @@
     .lb-rel-card { cursor: pointer; }
     .lb-rel-card-img-wrap {
       overflow: hidden; aspect-ratio: 4 / 3;
+      border-radius: 16px;
     }
     .lb-rel-card img {
       width: 100%; height: 100%; object-fit: cover; display: block;
