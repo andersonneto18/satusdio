@@ -324,14 +324,14 @@ add_shortcode('sastudio_gallery', function () {
   <div id="sg-controls">
     <div style="display:flex; align-items:center; gap:0.7rem; flex-wrap:wrap;">
       <div id="sg-dropdowns"></div>
+      <button id="sg-view-toggle" type="button" aria-label="Alternar vista em lista">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+      </button>
     </div>
     <div style="display:flex; align-items:center; gap:0.7rem;">
       <div id="sg-search-wrap">
         <input id="sg-search" type="text" placeholder="Pesquisar projetos…" autocomplete="off" />
       </div>
-      <button id="sg-view-toggle" type="button" aria-label="Alternar vista em lista">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
-      </button>
     </div>
   </div>
   <div id="sg-grid"></div>
