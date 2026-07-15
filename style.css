@@ -277,20 +277,38 @@
       pointer-events: none;
     }
 
-    /* full-screen project view */
+    /* full-screen project view — navegação horizontal entre painéis
+       (Hero → Descrição/Dados → Galeria → Relacionados), ao estilo do
+       scroll da home. #lb-track é deslocado via transform:translateX
+       pelo wheel handler em animacao.js; cada .lb-panel mantém o seu
+       próprio scroll vertical (para textos longos) até chegar ao
+       topo/fundo, altura em que o wheel passa a mudar de painel. */
     #lb-view {
       position: absolute; inset: 0;
-      overflow-y: auto; overflow-x: hidden;
+      overflow: hidden;
       opacity: 0;
-      -webkit-overflow-scrolling: touch;
     }
     #lb-view.show { opacity: 1; transition: opacity 0.4s ease; }
+
+    #lb-track {
+      display: flex;
+      height: 100%;
+      will-change: transform;
+    }
+    .lb-panel {
+      flex: 0 0 100vw;
+      width: 100vw;
+      height: 100%;
+    }
+    .lb-panel-scrollable {
+      overflow-y: auto; overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+    }
 
     /* hero section — 100vh */
     #lb-hero {
       position: relative;
-      width: 100%; height: 100vh;
-      overflow: hidden; flex-shrink: 0;
+      overflow: hidden;
     }
     #lb-slides { position: absolute; inset: 0; }
     .lb-slide { position: absolute; inset: 0; opacity: 0; }
@@ -368,8 +386,8 @@
       pointer-events: none;
     }
     @keyframes scrollCue {
-      0%,100% { opacity: 0.3; transform: translateX(-50%) translateY(0); }
-      50%      { opacity: 0.9; transform: translateX(-50%) translateY(5px); }
+      0%,100% { opacity: 0.3; transform: translateX(-50%); }
+      50%      { opacity: 0.9; transform: translateX(calc(-50% + 6px)); }
     }
 
     /* content section — below fold */
@@ -676,10 +694,14 @@
       overflow: visible !important;
     }
     /* ── RELATED PROJECTS ── */
+    #lb-panel-related {
+      display: flex;
+      align-items: center;
+    }
     #lb-related {
       background: #f7f6f4;
       padding: 3.5rem 8vw 5rem;
-      border-top: 1px solid rgba(21,21,18,0.08);
+      width: 100%;
     }
     .lb-related-label {
       font-family: 'Inter', sans-serif;
@@ -919,13 +941,18 @@
     }
 
     /* ── GALERIA HORIZONTAL (carrossel com drag) ── */
+    #lb-panel-gallery {
+      display: flex;
+      align-items: center;
+      padding: 0 clamp(1.2rem, 6vw, 5vw);
+    }
     #lb-gallery {
       display: flex;
       overflow-x: auto;
       scroll-snap-type: none;
       -webkit-overflow-scrolling: touch;
       gap: 6px;
-      margin-bottom: 5rem;
+      width: 100%;
       cursor: grab;
       scrollbar-width: thin;
       scrollbar-color: rgba(21,21,18,0.25) rgba(21,21,18,0.06);

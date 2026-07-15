@@ -181,16 +181,27 @@ add_shortcode('sastudio_gallery', function () {
   }
   #sg-fly img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-  /* ── Modal — ecrã inteiro, como o lightbox do index.html ── */
+  /* ── Modal — ecrã inteiro, como o lightbox do index.html ──
+     Navegação horizontal entre painéis (Hero → Descrição/Dados →
+     Galeria → Relacionados): #sg-track é deslocado via
+     transform:translateX pelo wheel handler; cada .sg-panel mantém
+     o seu próprio scroll vertical (texto longo) até chegar ao
+     topo/fundo, altura em que o wheel passa a mudar de painel. */
   #sg-modal {
     position: fixed; inset: 0; z-index: 100000;
     background: #fff;
     display: none;
-    overflow-y: auto; overflow-x: hidden;
+    overflow: hidden;
   }
   #sg-modal.sg-open { display: block; }
   body.sg-modal-open { overflow: hidden; }
-  #sg-modal-inner { position: relative; min-height: 100%; }
+  #sg-modal-inner { position: relative; height: 100%; }
+  #sg-track { display: flex; height: 100%; will-change: transform; }
+  .sg-panel { flex: 0 0 100vw; width: 100vw; height: 100%; }
+  .sg-panel-scrollable {
+    overflow-y: auto; overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
 
   #sg-modal-close {
     position: fixed; top: 1.5rem; right: 1.5rem; z-index: 100010;
@@ -205,7 +216,6 @@ add_shortcode('sastudio_gallery', function () {
 
   #sg-modal-hero {
     position: relative;
-    width: 100%; height: 100vh;
     overflow: hidden; background: #000;
   }
   #sg-slides { position: absolute; inset: 0; }
@@ -268,9 +278,10 @@ add_shortcode('sastudio_gallery', function () {
     #sg-modal-main { grid-template-columns: 1fr; gap: 2.5rem; }
   }
   /* ── Galeria horizontal (arrastar para ver mais), igual ao #lb-gallery ── */
+  #sg-panel-gallery { display: flex; align-items: center; }
   #sg-modal-gallery {
     display: flex; overflow-x: auto; -webkit-overflow-scrolling: touch;
-    gap: 6px; margin: 3rem auto 1rem; max-width: 1280px;
+    gap: 6px; margin: 0 auto; max-width: 1280px; width: 100%;
     padding: 0 clamp(1.2rem, 6vw, 5vw) 0.6rem; cursor: grab;
     scrollbar-width: thin; scrollbar-color: rgba(21,21,18,0.25) rgba(21,21,18,0.06);
     user-select: none; -webkit-user-select: none;
@@ -291,10 +302,11 @@ add_shortcode('sastudio_gallery', function () {
   }
 
   /* ── Outros projetos (relacionados), igual ao #lb-related ── */
+  #sg-panel-related { display: flex; align-items: center; }
   #sg-related {
     background: #f7f6f4;
     padding: 3.5rem 8vw 5rem;
-    border-top: 1px solid rgba(21,21,18,0.08);
+    width: 100%;
   }
   #sg-related-label {
     font-size: clamp(1.4rem, 2.4vw, 2rem);
@@ -627,8 +639,8 @@ add_shortcode('sastudio_gallery', function () {
       if (featSrc) slideUrls.push(featSrc);
       galleryImgs.forEach(function (u) { if (u) slideUrls.push(u); });
 
-      var html = '';
-      html += '<div id="sg-modal-hero">';
+      var html = '<div id="sg-track">';
+      html += '<section id="sg-modal-hero" class="sg-panel">';
       html += '<div id="sg-slides">' + slideUrls.map(function (url, i) {
         var inner = isVideoUrl(url)
           ? '<video src="' + esc(url) + '" muted playsinline preload="' + (i === 0 ? 'auto' : 'none') + '"></video>'
@@ -645,7 +657,8 @@ add_shortcode('sastudio_gallery', function () {
           '<button id="sg-slide-next" aria-label="Seguinte">&#8250;</button>' +
         '</div>';
       }
-      html += '</div></div>';
+      html += '</div></section>';
+      html += '<section id="sg-panel-content" class="sg-panel sg-panel-scrollable">';
       html += '<div id="sg-modal-content">';
       html += '<div id="sg-modal-main">';
       html += '<div id="sg-content">';
@@ -661,17 +674,22 @@ add_shortcode('sastudio_gallery', function () {
         html += '</div>';
       }
       html += '</div>'; /* fim #sg-modal-main */
+      html += '</div>'; /* fim #sg-modal-content */
+      html += '</section>';
       if (galleryImgs.length) {
+        html += '<section id="sg-panel-gallery" class="sg-panel sg-panel-scrollable">';
         html += '<div id="sg-modal-gallery">' + galleryImgs.map(function (url) {
           return '<div class="sg-gallery-item"><div class="sg-gallery-item-img"><img src="' + esc(url) + '" loading="lazy" alt=""/></div></div>';
         }).join('') + '</div>';
+        html += '</section>';
       }
-      html += '</div>';
       html += buildRelatedHtml(post);
+      html += '</div>'; /* fim #sg-track */
       modalBody.innerHTML = html;
       initGalleryDrag();
       wireRelatedClicks();
       initSlideshow(slideUrls);
+      if (window.resetSgTrack) window.resetSgTrack();
     }).catch(function () {
       modalBody.innerHTML = '<div id="sg-modal-content"><h2>' + esc(title) + '</h2><p>Não foi possível carregar o conteúdo.</p></div>';
     });
@@ -700,10 +718,10 @@ add_shortcode('sastudio_gallery', function () {
         '</div>';
     }).join('');
 
-    return '<div id="sg-related">' +
+    return '<section id="sg-panel-related" class="sg-panel sg-panel-scrollable"><div id="sg-related">' +
       '<span id="sg-related-label">Confira outros projetos</span>' +
       '<div id="sg-related-grid">' + cards + '</div>' +
-      '</div>';
+      '</div></section>';
   }
 
   function wireRelatedClicks() {
@@ -837,6 +855,54 @@ add_shortcode('sastudio_gallery', function () {
       el.scrollLeft = tS - (e.touches[0].pageX - tX);
     }, { passive: true });
   }
+
+  /* ── Navegação horizontal entre painéis (Hero → Descrição/Dados →
+     Galeria → Relacionados), igual ao index.html — #sg-track é
+     recriado a cada abertura de projeto (modalBody.innerHTML), por
+     isso é preciso voltar a procurá-lo em cada frame/evento em vez
+     de o guardar numa variável fixa. ── */
+  var sgTx = 0, sgTTx = 0;
+
+  function sgBounds() {
+    var track = document.getElementById('sg-track');
+    var n = track ? Math.max(track.querySelectorAll('.sg-panel').length, 1) : 1;
+    return { min: -(n - 1) * window.innerWidth, max: 0 };
+  }
+
+  (function sgTick() {
+    var track = document.getElementById('sg-track');
+    if (track) {
+      var b = sgBounds();
+      sgTTx = Math.max(b.min, Math.min(b.max, sgTTx));
+      sgTx += (sgTTx - sgTx) * 0.14;
+      track.style.transform = 'translateX(' + sgTx + 'px)';
+    }
+    requestAnimationFrame(sgTick);
+  })();
+
+  window.addEventListener('wheel', function (e) {
+    if (!modal.classList.contains('sg-open')) return;
+    var track = document.getElementById('sg-track');
+    if (!track) return;
+
+    var scrollable = e.target.closest('.sg-panel-scrollable');
+    if (scrollable) {
+      var atTop     = scrollable.scrollTop <= 0;
+      var atBottom  = scrollable.scrollTop + scrollable.clientHeight >= scrollable.scrollHeight - 1;
+      var goingDown = e.deltaY > 0;
+      if ((goingDown && !atBottom) || (!goingDown && !atTop)) return;
+    }
+
+    e.preventDefault();
+    var delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    sgTTx -= delta * 1.3;
+  }, { passive: false });
+
+  window.resetSgTrack = function () {
+    sgTx = 0; sgTTx = 0;
+    var track = document.getElementById('sg-track');
+    if (track) track.style.transform = 'translateX(0px)';
+  };
 
   function closeModal(opts) {
     opts = opts || {};

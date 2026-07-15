@@ -736,6 +736,7 @@ function openProject(pic) {
   lbContent.innerHTML     = '';
   lbLoader.style.display  = 'flex';
   lbView.scrollTop        = 0;
+  if (window.resetLbTrack) window.resetLbTrack();
   populateRelated(pic);
   flushPrefetchQueue();
 
@@ -817,6 +818,9 @@ function populateRelated(currentPic) {
     });
     grid.appendChild(card);
   });
+
+  const relatedPanel = document.getElementById('lb-panel-related');
+  if (relatedPanel) relatedPanel.style.display = grid.children.length ? '' : 'none';
 }
 
 function buildContentGallery(images, captions = []) {
@@ -1011,6 +1015,8 @@ async function fetchProjectContent(id) {
   } finally {
     lbLoader.style.display = 'none';
     lbContent.classList.add('visible');
+    const galleryPanel = document.getElementById('lb-panel-gallery');
+    if (galleryPanel) galleryPanel.style.display = (lbGallery && lbGallery.children.length) ? '' : 'none';
   }
 }
 
@@ -1076,6 +1082,66 @@ function initDragScroll(elId) {
 }
 initDragScroll('lb-gallery');
 initDragScroll('lb-related-grid');
+
+/* ══════════════════════════════════════════════════
+   LIGHTBOX — NAVEGAÇÃO HORIZONTAL ENTRE PAINÉIS
+   (Hero → Descrição/Dados → Galeria → Relacionados), ao
+   estilo do scroll da home. A roda do rato desloca o
+   #lb-track horizontalmente; dentro de um painel com
+   overflow vertical (texto longo), o scroll nativo funciona
+   normalmente até chegar ao topo/fundo — só aí passa a
+   trocar de painel.
+══════════════════════════════════════════════════ */
+(function () {
+  const track = document.getElementById('lb-track');
+  if (!track) return;
+
+  let tx = 0, tTx = 0;
+
+  function visiblePanels() {
+    return Array.from(track.querySelectorAll('.lb-panel')).filter(p => p.style.display !== 'none');
+  }
+
+  function bounds() {
+    const n = Math.max(visiblePanels().length, 1);
+    return { min: -(n - 1) * window.innerWidth, max: 0 };
+  }
+
+  function clampTx() {
+    const b = bounds();
+    tTx = Math.max(b.min, Math.min(b.max, tTx));
+  }
+
+  (function tick() {
+    clampTx();
+    tx += (tTx - tx) * 0.14;
+    track.style.transform = `translateX(${tx}px)`;
+    requestAnimationFrame(tick);
+  })();
+
+  window.addEventListener('wheel', e => {
+    if (!lb.classList.contains('open')) return;
+
+    /* dentro de um painel com scroll vertical próprio (texto longo),
+       deixa o scroll nativo agir até chegar ao topo/fundo */
+    const scrollable = e.target.closest('.lb-panel-scrollable');
+    if (scrollable) {
+      const atTop     = scrollable.scrollTop <= 0;
+      const atBottom  = scrollable.scrollTop + scrollable.clientHeight >= scrollable.scrollHeight - 1;
+      const goingDown = e.deltaY > 0;
+      if ((goingDown && !atBottom) || (!goingDown && !atTop)) return;
+    }
+
+    e.preventDefault();
+    const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    tTx -= delta * 1.3;
+  }, { passive: false });
+
+  window.resetLbTrack = function () {
+    tx = 0; tTx = 0;
+    track.style.transform = 'translateX(0px)';
+  };
+})();
 
 /* ══════════════════════════════════════════════════
    PROJECTS LIST PANEL
