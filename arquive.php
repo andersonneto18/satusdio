@@ -113,6 +113,12 @@ add_shortcode('sastudio_gallery', function () {
     transition: transform 0.3s ease;
   }
   .sg-card:hover .sg-card-img img { transform: scale(1.03); }
+  .sg-card-hover-vid {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%; object-fit: cover;
+    opacity: 0; transition: opacity 0.35s ease;
+    pointer-events: none;
+  }
   /* descrição só aparece ao passar o rato, sobreposta à imagem */
   .sg-card-overlay {
     position: absolute; inset: 0;
@@ -880,11 +886,20 @@ add_shortcode('sastudio_gallery', function () {
         var mh = media && media.media_details ? media.media_details.height : 0;
         var aspectStyle = (mw && mh) ? ' style="aspect-ratio:' + mw + '/' + mh + '"' : '';
 
+        /* vídeo em hover (campo ACF hover_gif), igual ao index.html — ao
+           passar o rato num card, se houver vídeo associado, mostra-o por
+           cima da imagem em vez do fallback estático */
+        var hoverGif = (post.acf && post.acf.hover_gif) ? String(post.acf.hover_gif).trim() : '';
+        var hoverVidHtml = (hoverGif && isVideoUrl(hoverGif))
+          ? '<video class="sg-card-hover-vid" muted loop playsinline preload="none" src="' + esc(hoverGif) + '"></video>'
+          : '';
+
         var card = document.createElement('div');
         card.className = 'sg-card';
         card.innerHTML =
           '<div class="sg-card-img"' + aspectStyle + '>' +
             '<img src="' + esc(imgUrl) + '" alt="' + esc(title) + '" loading="lazy"/>' +
+            hoverVidHtml +
             '<div class="sg-card-overlay">' +
               '<div class="sg-card-title">' + esc(title) + '</div>' +
               '<div class="sg-card-sub">' + esc(sub) + '</div>' +
@@ -892,6 +907,19 @@ add_shortcode('sastudio_gallery', function () {
           '</div>';
         card.addEventListener('click', function () { openModal(post, imgUrl); });
         card.addEventListener('mouseenter', function () { prefetchProject(post.id); });
+
+        var hoverVidEl = card.querySelector('.sg-card-hover-vid');
+        if (hoverVidEl) {
+          card.addEventListener('mouseenter', function () {
+            hoverVidEl.currentTime = 0;
+            hoverVidEl.play().catch(function () {});
+            hoverVidEl.style.opacity = '1';
+          });
+          card.addEventListener('mouseleave', function () {
+            hoverVidEl.style.opacity = '0';
+            setTimeout(function () { hoverVidEl.pause(); }, 300);
+          });
+        }
 
         grid.appendChild(card);
         allCards.push({
