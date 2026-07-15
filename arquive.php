@@ -154,7 +154,8 @@ add_shortcode('sastudio_gallery', function () {
   }
   .sg-list-row:hover { background: rgba(21,21,18,0.03); }
   .sg-list-thumb { width: 90px; height: 64px; border-radius: 8px; overflow: hidden; background: #e8e7e3; }
-  .sg-list-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .sg-list-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.35s ease; }
+  .sg-list-row:hover .sg-list-thumb img { transform: scale(1.08); }
   .sg-list-title { font-size: 0.95rem; color: #151512; }
   .sg-list-cat, .sg-list-loc, .sg-list-year {
     font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase;
