@@ -202,7 +202,9 @@ add_shortcode('sastudio_gallery', function () {
   .sg-panel-scrollable {
     overflow-y: auto; overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
   }
+  .sg-panel-scrollable::-webkit-scrollbar { display: none; }
 
   #sg-modal-close {
     position: fixed; top: 1.5rem; right: 1.5rem; z-index: 100010;

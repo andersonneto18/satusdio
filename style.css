@@ -303,7 +303,9 @@
     .lb-panel-scrollable {
       overflow-y: auto; overflow-x: hidden;
       -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
     }
+    .lb-panel-scrollable::-webkit-scrollbar { display: none; }
 
     /* hero section — 100vh */
     #lb-hero {
