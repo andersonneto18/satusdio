@@ -279,16 +279,21 @@ add_shortcode('sastudio_gallery', function () {
     #sg-modal-main { grid-template-columns: 1fr; gap: 2.5rem; }
   }
   /* ── Galeria — cada foto é o seu próprio painel horizontal,
-     sem faixa de scroll interna, tal como o resto do #sg-track. ── */
+     sem faixa de scroll interna, tal como o resto do #sg-track.
+     A foto não ocupa o ecrã todo — fica mais pequena, com borda
+     arredondada e espaço à volta (separação do resto do painel). ── */
   .sg-photo-panel {
     display: flex; align-items: center; justify-content: center;
-    background: #000;
-    position: relative;
+    background: #fff;
+    padding: 7vh 9vw;
   }
   .sg-photo-panel img {
     width: 100%; height: 100%; object-fit: cover; display: block;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(21,21,18,0.18);
     pointer-events: none; -webkit-user-drag: none;
   }
+  @media (max-width: 700px) { .sg-photo-panel { padding: 4vh 5vw; } }
   #sg-modal-loading {
     display: flex; align-items: center; justify-content: center;
     height: 60vh; font-size: 0.8rem; color: rgba(21,21,18,0.45);
