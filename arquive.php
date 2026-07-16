@@ -304,7 +304,6 @@ add_shortcode('sastudio_gallery', function () {
   /* ── Outros projetos (relacionados), igual ao #lb-related ── */
   #sg-panel-related { display: flex; align-items: center; }
   #sg-related {
-    background: #f7f6f4;
     padding: 3.5rem 8vw 5rem;
     width: 100%;
   }
