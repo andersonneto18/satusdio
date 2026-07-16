@@ -196,6 +196,7 @@ add_shortcode('sastudio_gallery', function () {
   #sg-modal.sg-open { display: block; }
   body.sg-modal-open { overflow: hidden; }
   #sg-modal-inner { position: relative; height: 100%; }
+  #sg-modal-body { height: 100%; }
   #sg-track { display: flex; height: 100%; will-change: transform; }
   .sg-panel { flex: 0 0 100vw; width: 100vw; height: 100%; }
   .sg-panel-scrollable {
