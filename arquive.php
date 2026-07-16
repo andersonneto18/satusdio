@@ -278,25 +278,17 @@ add_shortcode('sastudio_gallery', function () {
   @media (max-width: 900px) {
     #sg-modal-main { grid-template-columns: 1fr; gap: 2.5rem; }
   }
-  /* ── Galeria horizontal (arrastar para ver mais), igual ao #lb-gallery ── */
-  #sg-panel-gallery { display: flex; align-items: center; }
-  #sg-modal-gallery {
-    display: flex; overflow-x: auto; -webkit-overflow-scrolling: touch;
-    gap: 6px; margin: 0 auto; max-width: 1280px; width: 100%;
-    padding: 0 clamp(1.2rem, 6vw, 5vw) 0.6rem; cursor: grab;
-    scrollbar-width: thin; scrollbar-color: rgba(21,21,18,0.25) rgba(21,21,18,0.06);
-    user-select: none; -webkit-user-select: none;
+  /* ── Galeria — cada foto é o seu próprio painel horizontal,
+     sem faixa de scroll interna, tal como o resto do #sg-track. ── */
+  .sg-photo-panel {
+    display: flex; align-items: center; justify-content: center;
+    background: #000;
+    position: relative;
   }
-  #sg-modal-gallery::-webkit-scrollbar { height: 3px; }
-  #sg-modal-gallery::-webkit-scrollbar-track { background: rgba(21,21,18,0.06); }
-  #sg-modal-gallery::-webkit-scrollbar-thumb { background: rgba(21,21,18,0.25); border-radius: 999px; }
-  .sg-gallery-item { flex: 0 0 auto; width: 52vw; }
-  .sg-gallery-item-img { overflow: hidden; aspect-ratio: 16/9; border-radius: 4px; }
-  .sg-gallery-item-img img {
+  .sg-photo-panel img {
     width: 100%; height: 100%; object-fit: cover; display: block;
     pointer-events: none; -webkit-user-drag: none;
   }
-  @media (max-width: 700px) { .sg-gallery-item { width: 82vw; } }
   #sg-modal-loading {
     display: flex; align-items: center; justify-content: center;
     height: 60vh; font-size: 0.8rem; color: rgba(21,21,18,0.45);
@@ -678,16 +670,13 @@ add_shortcode('sastudio_gallery', function () {
       html += '</div>'; /* fim #sg-modal-content */
       html += '</section>';
       if (galleryImgs.length) {
-        html += '<section id="sg-panel-gallery" class="sg-panel sg-panel-scrollable">';
-        html += '<div id="sg-modal-gallery">' + galleryImgs.map(function (url) {
-          return '<div class="sg-gallery-item"><div class="sg-gallery-item-img"><img src="' + esc(url) + '" loading="lazy" alt=""/></div></div>';
-        }).join('') + '</div>';
-        html += '</section>';
+        html += galleryImgs.map(function (url) {
+          return '<section class="sg-panel sg-panel-scrollable sg-photo-panel"><img src="' + esc(url) + '" loading="lazy" alt=""/></section>';
+        }).join('');
       }
       html += buildRelatedHtml(post);
       html += '</div>'; /* fim #sg-track */
       modalBody.innerHTML = html;
-      initGalleryDrag();
       wireRelatedClicks();
       initSlideshow(slideUrls);
       if (window.resetSgTrack) window.resetSgTrack();
@@ -801,60 +790,6 @@ add_shortcode('sastudio_gallery', function () {
     } else {
       startAutoPlay(total);
     }
-  }
-
-  /* ── Drag-to-scroll com inércia na galeria horizontal, igual ao #lb-gallery ──
-     Estado partilhado + listeners de window ligados uma única vez, para não
-     acumular listeners cada vez que se abre um projeto diferente. */
-  var dragEl = null, dragDown = false, dragStartX = 0, dragStartScroll = 0;
-  var dragVelX = 0, dragLastX = 0, dragLastT = 0, dragRaf = null;
-
-  function cancelDragMomentum() { if (dragRaf) { cancelAnimationFrame(dragRaf); dragRaf = null; } }
-  function dragMomentum() {
-    if (!dragEl || Math.abs(dragVelX) < 0.4) return;
-    dragEl.scrollLeft += dragVelX;
-    dragVelX *= 0.91;
-    dragRaf = requestAnimationFrame(dragMomentum);
-  }
-  window.addEventListener('mousemove', function (e) {
-    if (!dragDown || !dragEl) return;
-    var now = performance.now();
-    var dt  = now - dragLastT || 1;
-    dragVelX  = (dragLastX - e.pageX) / dt * 14;
-    dragLastX = e.pageX; dragLastT = now;
-    dragEl.scrollLeft = dragStartScroll + (dragStartX - e.pageX);
-  });
-  window.addEventListener('mouseup', function () {
-    if (!dragDown || !dragEl) return;
-    dragDown = false;
-    dragEl.style.cursor = 'grab';
-    dragMomentum();
-  });
-
-  function initGalleryDrag() {
-    var el = document.getElementById('sg-modal-gallery');
-    if (!el) return;
-
-    el.addEventListener('mousedown', function (e) {
-      cancelDragMomentum();
-      dragEl = el;
-      dragDown = true;
-      dragStartX = e.pageX;
-      dragStartScroll = el.scrollLeft;
-      dragVelX = 0; dragLastX = e.pageX; dragLastT = performance.now();
-      el.style.cursor = 'grabbing';
-      e.preventDefault();
-    });
-
-    var tX = 0, tS = 0;
-    el.addEventListener('touchstart', function (e) {
-      cancelDragMomentum();
-      tX = e.touches[0].pageX;
-      tS = el.scrollLeft;
-    }, { passive: true });
-    el.addEventListener('touchmove', function (e) {
-      el.scrollLeft = tS - (e.touches[0].pageX - tX);
-    }, { passive: true });
   }
 
   /* ── Navegação horizontal entre painéis (Hero → Descrição/Dados →

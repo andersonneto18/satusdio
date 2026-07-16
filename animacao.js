@@ -861,10 +861,9 @@ async function fetchProjectContent(id) {
   lbContent.innerHTML = '';
   lbLoader.style.display = 'flex';
 
-  const lbAcf     = document.getElementById('lb-acf');
-  const lbGallery = document.getElementById('lb-gallery');
-  if (lbAcf)     lbAcf.innerHTML     = '';
-  if (lbGallery) lbGallery.innerHTML = '';
+  const lbAcf = document.getElementById('lb-acf');
+  if (lbAcf) lbAcf.innerHTML = '';
+  document.querySelectorAll('#lb-track .lb-photo-panel').forEach(p => p.remove());
 
   try {
     if (!projectCache.has(id)) {
@@ -996,15 +995,19 @@ async function fetchProjectContent(id) {
         buildSlides(slideImages);
       }
 
-      if (lbGallery) {
-        lbGallery.innerHTML = galleryImgs.map(({ url, caption }) =>
-          `<div class="lb-proj-gallery-item">
-            <div class="lb-gallery-img-wrap">
-              <img src="${url}" alt="${caption}" loading="lazy"/>
-            </div>
-            ${caption ? `<div class="lb-gallery-caption">${caption}</div>` : ''}
-          </div>`
-        ).join('');
+      /* cada foto da galeria vira o seu próprio painel horizontal,
+         inserido a seguir ao painel de Descrição/Dados — sem faixa
+         de scroll interna, tal como o resto do #lb-track */
+      const contentPanel = document.getElementById('lb-panel-content');
+      if (contentPanel) {
+        const photoPanels = galleryImgs.map(({ url, caption }) => {
+          const panel = document.createElement('section');
+          panel.className = 'lb-panel lb-panel-scrollable lb-photo-panel';
+          panel.innerHTML = `<img src="${url}" alt="${caption}" loading="lazy"/>` +
+            (caption ? `<div class="lb-photo-caption">${caption}</div>` : '');
+          return panel;
+        });
+        contentPanel.after(...photoPanels);
       }
     }
 
@@ -1015,15 +1018,12 @@ async function fetchProjectContent(id) {
   } finally {
     lbLoader.style.display = 'none';
     lbContent.classList.add('visible');
-    const galleryPanel = document.getElementById('lb-panel-gallery');
-    if (galleryPanel) galleryPanel.style.display = (lbGallery && lbGallery.children.length) ? '' : 'none';
   }
 }
 
 /* ══════════════════════════════════════════════════
    GALLERY DRAG-TO-SCROLL (com inércia)
-   Usado tanto na galeria de imagens do projeto (#lb-gallery)
-   como no carrossel "Confira outros projetos" (#lb-related-grid).
+   Usado no carrossel "Confira outros projetos" (#lb-related-grid).
 ══════════════════════════════════════════════════ */
 function initDragScroll(elId) {
   const el = document.getElementById(elId);
@@ -1080,7 +1080,6 @@ function initDragScroll(elId) {
     el.scrollLeft = tS - (e.touches[0].pageX - tX);
   }, { passive: true });
 }
-initDragScroll('lb-gallery');
 initDragScroll('lb-related-grid');
 
 /* ══════════════════════════════════════════════════
