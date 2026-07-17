@@ -665,7 +665,7 @@
     /* ── CLOSE BUTTON — círculo com X, fixo fora do scroll ── */
     #lb-close {
       position: absolute;
-      top: 1.5rem; right: 1.5rem; z-index: 2010;
+      top: 2.4rem; right: 1.5rem; z-index: 2010;
       width: 52px; height: 52px;
       border-radius: 50%;
       background: rgba(236,234,230,0.96);

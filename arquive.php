@@ -207,7 +207,7 @@ add_shortcode('sastudio_gallery', function () {
   .sg-panel-scrollable::-webkit-scrollbar { display: none; }
 
   #sg-modal-close {
-    position: fixed; top: 1.5rem; right: 1.5rem; z-index: 100010;
+    position: fixed; top: 2.4rem; right: 1.5rem; z-index: 100010;
     display: flex; align-items: center; justify-content: center;
     width: 46px; height: 46px;
     border-radius: 50%; border: none;
