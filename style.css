@@ -77,6 +77,14 @@
       opacity: 0; pointer-events: none; transition: opacity 0.6s ease;
     }
     #nav.ready { pointer-events: all; }
+    /* com um projeto aberto (lightbox), esconde o logo/nav do site —
+       fica só o X de fechar do lightbox, como na página Projects */
+    body:has(#lightbox.open) #nav,
+    body:has(#lightbox.open) #site-logo {
+      opacity: 0 !important;
+      pointer-events: none !important;
+      transition: opacity 0.3s ease;
+    }
     .nav-links {
       margin-left: auto;
       display: flex; gap: 2.4rem; list-style: none;
