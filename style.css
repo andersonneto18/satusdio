@@ -13,12 +13,16 @@
 
     html, body {
       width: 100%; height: 100%;
-      overflow: hidden;
       background: var(--bg);
       color: var(--text);
       font-family: 'Inter', sans-serif;
       cursor: none;
     }
+    /* overflow:hidden só se aplica na home (onde existe a galeria fullscreen
+       #vp) — este CSS é partilhado por todo o site, e sem esta condição
+       bloqueava o scroll nativo em páginas normais como About/Contact. */
+    body:has(#vp) { overflow: hidden; }
+    html:has(body:has(#vp)) { overflow: hidden; }
 
     /* ── LOGO (efeito "revela o que está atrás", mesma técnica do cursor) ──
        Independente do #nav (não aninhado) — aninhar dentro do #nav
