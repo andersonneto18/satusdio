@@ -260,7 +260,10 @@
       position: fixed; inset: 0; z-index: 2000;
       pointer-events: none;
     }
-    #lightbox.open { pointer-events: all; }
+    #lightbox.open {
+      pointer-events: all;
+      background: var(--bg);
+    }
 
     /* flying image (animation only) — fixed + full screen, GSAP move with transform */
     #lb-img {
@@ -303,6 +306,7 @@
       flex: 0 0 100vw;
       width: 100vw;
       height: 100%;
+      background: var(--bg);
     }
     .lb-panel-scrollable {
       overflow-y: auto; overflow-x: hidden;
