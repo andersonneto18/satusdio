@@ -287,17 +287,17 @@ add_shortcode('sastudio_gallery', function () {
   .sg-photo-panel {
     display: flex; align-items: center; justify-content: center;
     background: #fff;
-    padding: 3vh 4vw;
+    padding: 1.5vh 1.5vw;
   }
   .sg-photo-panel img {
     width: auto; height: auto;
-    max-width: 62vw; max-height: 62vh;
+    max-width: 92vw; max-height: 82vh;
     object-fit: cover; display: block;
     border-radius: 16px;
     box-shadow: 0 10px 40px rgba(21,21,18,0.18);
     pointer-events: none; -webkit-user-drag: none;
   }
-  @media (max-width: 700px) { .sg-photo-panel { padding: 2vh 3vw; } .sg-photo-panel img { max-width: 88vw; max-height: 50vh; } }
+  @media (max-width: 700px) { .sg-photo-panel { padding: 1vh 1.5vw; } .sg-photo-panel img { max-width: 94vw; max-height: 60vh; } }
   #sg-modal-loading {
     display: flex; align-items: center; justify-content: center;
     height: 60vh; font-size: 0.8rem; color: rgba(21,21,18,0.45);
