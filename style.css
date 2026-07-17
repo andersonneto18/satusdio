@@ -969,8 +969,11 @@
       padding: 1.5vh 1.5vw;
     }
     .lb-photo-panel img {
-      width: auto; height: auto;
-      max-width: 92vw; max-height: 78vh;
+      /* tamanho FIXO (não auto) — cada foto ocupa sempre a mesma caixa,
+         com object-fit:cover a preencher/recortar, independentemente da
+         proporção original. Sem isto, fotos em retrato ficavam muito mais
+         pequenas que as em paisagem, criando um vazio enorme entre elas. */
+      width: 92vw; height: 78vh;
       object-fit: cover; display: block;
       border-radius: 16px;
       box-shadow: 0 10px 40px rgba(21,21,18,0.18);
@@ -987,7 +990,7 @@
     }
     @media (max-width: 768px) {
       .lb-photo-panel { padding: 1vh 1.5vw; }
-      .lb-photo-panel img { max-width: 94vw; max-height: 60vh; }
+      .lb-photo-panel img { width: 94vw; height: 60vh; }
     }
 
     /* ── FOOTER ── */
