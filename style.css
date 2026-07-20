@@ -872,27 +872,20 @@
     }
 
     /* ── MAIN 2-COLUMN LAYOUT ──
-       columns (não grid): descrição e dados fluem como um texto só —
-       se a descrição for muito longa para a coluna esquerda, o resto
-       continua na coluna direita, por cima da tabela "Dados do
-       projeto" (que vem a seguir no HTML), em vez de ficar escondido
-       a precisar de scroll dentro da própria coluna. */
+       grid simples: Descrição e Dados são dois blocos independentes,
+       lado a lado. Se a descrição for muito longa, a linha cresce em
+       altura e o painel (com o seu próprio scroll) revela o resto ao
+       rolar — sem depender de CSS multi-coluna, que se mostrou
+       instável em navegadores reais (criava colunas fantasma). */
     #lb-main {
-      columns: 2;
-      column-gap: 5vw;
-      column-fill: auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: start;
+      gap: 5vw;
       padding: 4.5rem 8vw 5rem;
       max-width: 1280px;
       margin: 0 auto;
-      height: calc(100vh - 9.5rem);
-      /* overflow != visible impede o browser de criar uma 3ª coluna
-         "fantasma" quando o texto é demasiado longo para as 2 colunas —
-         em vez disso, ganha o seu próprio scroll vertical interno. */
-      overflow-y: auto;
-      overflow-x: hidden;
-      scrollbar-width: none;
     }
-    #lb-main::-webkit-scrollbar { display: none; }
     #lb-content,
     #lb-acf { padding-top: 0 !important; margin-top: 0 !important; }
     #lb-content > .lb-section-heading,
@@ -940,7 +933,6 @@
       padding: 0.85rem 0;
       border-bottom: 1px solid rgba(21,21,18,0.09);
       align-items: start;
-      break-inside: avoid;
     }
     .lb-acf-row:first-child {
       border-top: 1px solid rgba(21,21,18,0.09);
@@ -1103,8 +1095,8 @@
     ══════════════════════════════════════════════════ */
     @media (max-width: 1024px) {
       #lb-main {
-        columns: 1;
-        height: auto;
+        grid-template-columns: 1fr;
+        gap: 3rem;
         padding: 3rem 6vw 4rem;
       }
       .footer-top {
@@ -1204,11 +1196,10 @@
 
       /* CONTENT */
       #lb-main {
-        columns: 1;
-        height: auto;
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
         padding: 2.5rem 5vw 3rem;
       }
-      #lb-acf { margin-top: 2.5rem !important; }
       #lb-content p { font-size: 0.95rem !important; }
 
       /* ACF TABLE */

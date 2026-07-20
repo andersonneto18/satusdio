@@ -258,24 +258,16 @@ add_shortcode('sastudio_gallery', function () {
   #sg-modal-content {
     padding: 4.5rem clamp(1.2rem, 6vw, 5vw) 2rem;
   }
-  /* columns (não grid): descrição e dados fluem como um texto só — se a
-     descrição for muito longa para a coluna esquerda, o resto continua
-     na coluna direita, por cima da tabela "Dados do projeto" (que vem a
-     seguir no HTML), em vez de ficar escondido a precisar de scroll. */
+  /* grid simples: Descrição e Dados são dois blocos independentes,
+     lado a lado. Se a descrição for muito longa, a linha cresce em
+     altura e o painel (com o seu próprio scroll) revela o resto ao
+     rolar — sem depender de CSS multi-coluna, que se mostrou instável
+     em navegadores reais (criava colunas fantasma). */
   #sg-modal-main {
-    columns: 2; column-gap: 5vw; column-fill: auto;
+    display: grid; grid-template-columns: 1fr 1fr;
+    align-items: start; gap: 5vw;
     max-width: 1280px; margin: 0 auto;
-    height: calc(100vh - 6.5rem);
-    /* overflow != visible impede o browser de criar uma 3ª coluna
-       "fantasma" quando o texto e demasiado longo para as 2 colunas —
-       em vez disso, ganha o seu proprio scroll vertical interno. */
-    overflow-y: auto;
-    overflow-x: hidden;
-    scrollbar-width: none;
   }
-  #sg-modal-main::-webkit-scrollbar { display: none; }
-  #sg-content p { break-inside: avoid; }
-  .sg-acf-row { break-inside: avoid; }
   .sg-section-heading {
     font-size: clamp(1.4rem, 2.4vw, 2rem); font-weight: 300;
     color: #151512; margin: 0 0 2rem; line-height: 1.1;
@@ -291,8 +283,7 @@ add_shortcode('sastudio_gallery', function () {
   .sg-acf-label { font-weight: 400; color: #151512; }
   .sg-acf-value { color: rgba(21,21,18,0.75); line-height: 1.55; }
   @media (max-width: 900px) {
-    #sg-modal-main { columns: 1; height: auto; }
-    #sg-acf { margin-top: 2.5rem; }
+    #sg-modal-main { grid-template-columns: 1fr; gap: 2.5rem; }
   }
   /* ── Galeria — cada foto é o seu próprio painel horizontal,
      sem faixa de scroll interna, tal como o resto do #sg-track.
@@ -678,7 +669,7 @@ add_shortcode('sastudio_gallery', function () {
       html += '</div></section>';
       html += '<section id="sg-panel-content" class="sg-panel sg-panel-scrollable">';
       html += '<div id="sg-modal-content">';
-      html += '<div id="sg-modal-main" class="sg-panel-scrollable">';
+      html += '<div id="sg-modal-main">';
       html += '<div id="sg-content">';
       html += '<h3 class="sg-section-heading">Descrição:</h3>';
       html += '<div class="sg-desc">' + (desc || '<p>Sem descrição para este projeto.</p>') + '</div>';
