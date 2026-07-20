@@ -884,15 +884,19 @@
       font-variant-numeric: tabular-nums;
     }
 
-    /* ── MAIN 2-COLUMN LAYOUT ── */
+    /* ── MAIN 2-COLUMN LAYOUT ──
+       columns (não grid): descrição e dados fluem como um texto só —
+       se a descrição for muito longa para a coluna esquerda, o resto
+       continua na coluna direita, por cima da tabela "Dados do
+       projeto" (que vem a seguir no HTML), em vez de ficar escondido
+       a precisar de scroll dentro da própria coluna. */
     #lb-main {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      align-items: start;
-      gap: 5vw;
+      columns: 2;
+      column-gap: 5vw;
       padding: 4.5rem 8vw 5rem;
       max-width: 1280px;
       margin: 0 auto;
+      height: calc(100vh - 9.5rem);
     }
     #lb-content,
     #lb-acf { padding-top: 0 !important; margin-top: 0 !important; }
@@ -941,6 +945,7 @@
       padding: 0.85rem 0;
       border-bottom: 1px solid rgba(21,21,18,0.09);
       align-items: start;
+      break-inside: avoid;
     }
     .lb-acf-row:first-child {
       border-top: 1px solid rgba(21,21,18,0.09);
@@ -1103,8 +1108,8 @@
     ══════════════════════════════════════════════════ */
     @media (max-width: 1024px) {
       #lb-main {
-        grid-template-columns: 1fr;
-        gap: 3rem;
+        columns: 1;
+        height: auto;
         padding: 3rem 6vw 4rem;
       }
       .footer-top {
@@ -1206,10 +1211,11 @@
 
       /* CONTENT */
       #lb-main {
-        grid-template-columns: 1fr;
-        gap: 2.5rem;
+        columns: 1;
+        height: auto;
         padding: 2.5rem 5vw 3rem;
       }
+      #lb-acf { margin-top: 2.5rem !important; }
       #lb-content p { font-size: 0.95rem !important; }
 
       /* ACF TABLE */

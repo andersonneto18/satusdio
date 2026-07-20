@@ -258,11 +258,17 @@ add_shortcode('sastudio_gallery', function () {
   #sg-modal-content {
     padding: 4.5rem clamp(1.2rem, 6vw, 5vw) 2rem;
   }
+  /* columns (não grid): descrição e dados fluem como um texto só — se a
+     descrição for muito longa para a coluna esquerda, o resto continua
+     na coluna direita, por cima da tabela "Dados do projeto" (que vem a
+     seguir no HTML), em vez de ficar escondido a precisar de scroll. */
   #sg-modal-main {
-    display: grid; grid-template-columns: 1fr 1fr;
-    align-items: start; gap: 5vw;
+    columns: 2; column-gap: 5vw;
     max-width: 1280px; margin: 0 auto;
+    height: calc(100vh - 6.5rem);
   }
+  #sg-content p { break-inside: avoid; }
+  .sg-acf-row { break-inside: avoid; }
   .sg-section-heading {
     font-size: clamp(1.4rem, 2.4vw, 2rem); font-weight: 300;
     color: #151512; margin: 0 0 2rem; line-height: 1.1;
@@ -278,7 +284,8 @@ add_shortcode('sastudio_gallery', function () {
   .sg-acf-label { font-weight: 400; color: #151512; }
   .sg-acf-value { color: rgba(21,21,18,0.75); line-height: 1.55; }
   @media (max-width: 900px) {
-    #sg-modal-main { grid-template-columns: 1fr; gap: 2.5rem; }
+    #sg-modal-main { columns: 1; height: auto; }
+    #sg-acf { margin-top: 2.5rem; }
   }
   /* ── Galeria — cada foto é o seu próprio painel horizontal,
      sem faixa de scroll interna, tal como o resto do #sg-track.
