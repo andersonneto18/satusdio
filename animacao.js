@@ -337,10 +337,7 @@ function entrance() {
   });
 
   gsap.timeline()
-    .to('#h-tag',  { opacity: 1, y: 0, duration: 0.55, ease: 'power2.out' }, 0)
     .to('#h-name', { opacity: 1, y: 0, duration: 0.75, ease: 'power3.out' }, 0.1)
-    .to('#h-rule', { width: 120, duration: 0.65, ease: 'power2.inOut' }, 0.55)
-    .to('#h-desc', { opacity: 1, y: 0, duration: 0.55, ease: 'power2.out' }, 0.85)
     .call(() => {
       const done = () => {
         if (nav) {

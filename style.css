@@ -213,11 +213,6 @@
       gap: 0;
       pointer-events: none;
     }
-    #h-tag {
-      font-size: 0.56rem; letter-spacing: 0.46em;
-      text-transform: uppercase; color: var(--accent);
-      margin-bottom: 2rem; opacity: 0; transform: translateY(10px);
-    }
     #h-name {
       font-family: 'Cormorant Garamond', serif;
       font-size: clamp(3rem, 9vw, 8rem);
@@ -225,12 +220,6 @@
       line-height: 1;
       color: var(--text);
       opacity: 0; transform: translateY(16px);
-    }
-    #h-rule { width: 0; height: 1px; background: var(--accent); margin-top: 2.2rem; }
-    #h-desc {
-      font-size: 0.58rem; letter-spacing: 0.26em;
-      text-transform: uppercase; color: var(--muted);
-      margin-top: 1.3rem; opacity: 0; transform: translateY(8px);
     }
 
     /* ── GRAIN ── */
@@ -1179,8 +1168,6 @@
 
       /* HERO */
       #h-name { font-size: clamp(2.4rem, 12vw, 4rem); letter-spacing: 0.1em; }
-      #h-tag  { font-size: 0.5rem; }
-      #h-desc { font-size: 0.5rem; }
 
       /* HUD */
       #hud { gap: 0.6rem; }
