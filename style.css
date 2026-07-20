@@ -214,11 +214,9 @@
       pointer-events: none;
     }
     #h-name {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(3rem, 9vw, 8rem);
-      font-weight: 400; letter-spacing: 0.18em;
-      line-height: 1;
-      color: var(--text);
+      width: clamp(180px, 26vw, 360px);
+      height: auto;
+      display: block;
       opacity: 0; transform: translateY(16px);
     }
 
@@ -1168,7 +1166,7 @@
       #nav-burger { display: flex; }
 
       /* HERO */
-      #h-name { font-size: clamp(2.4rem, 12vw, 4rem); letter-spacing: 0.1em; }
+      #h-name { width: clamp(140px, 55vw, 260px); }
 
       /* HUD */
       #hud { gap: 0.6rem; }
