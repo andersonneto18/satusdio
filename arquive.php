@@ -263,7 +263,7 @@ add_shortcode('sastudio_gallery', function () {
      na coluna direita, por cima da tabela "Dados do projeto" (que vem a
      seguir no HTML), em vez de ficar escondido a precisar de scroll. */
   #sg-modal-main {
-    columns: 2; column-gap: 5vw;
+    columns: 2; column-gap: 5vw; column-fill: auto;
     max-width: 1280px; margin: 0 auto;
     height: calc(100vh - 6.5rem);
   }
