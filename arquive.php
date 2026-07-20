@@ -266,7 +266,14 @@ add_shortcode('sastudio_gallery', function () {
     columns: 2; column-gap: 5vw; column-fill: auto;
     max-width: 1280px; margin: 0 auto;
     height: calc(100vh - 6.5rem);
+    /* overflow != visible impede o browser de criar uma 3ª coluna
+       "fantasma" quando o texto e demasiado longo para as 2 colunas —
+       em vez disso, ganha o seu proprio scroll vertical interno. */
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
   }
+  #sg-modal-main::-webkit-scrollbar { display: none; }
   #sg-content p { break-inside: avoid; }
   .sg-acf-row { break-inside: avoid; }
   .sg-section-heading {
@@ -671,7 +678,7 @@ add_shortcode('sastudio_gallery', function () {
       html += '</div></section>';
       html += '<section id="sg-panel-content" class="sg-panel sg-panel-scrollable">';
       html += '<div id="sg-modal-content">';
-      html += '<div id="sg-modal-main">';
+      html += '<div id="sg-modal-main" class="sg-panel-scrollable">';
       html += '<div id="sg-content">';
       html += '<h3 class="sg-section-heading">Descrição:</h3>';
       html += '<div class="sg-desc">' + (desc || '<p>Sem descrição para este projeto.</p>') + '</div>';

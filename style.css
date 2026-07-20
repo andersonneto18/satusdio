@@ -885,7 +885,14 @@
       max-width: 1280px;
       margin: 0 auto;
       height: calc(100vh - 9.5rem);
+      /* overflow != visible impede o browser de criar uma 3ª coluna
+         "fantasma" quando o texto é demasiado longo para as 2 colunas —
+         em vez disso, ganha o seu próprio scroll vertical interno. */
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: none;
     }
+    #lb-main::-webkit-scrollbar { display: none; }
     #lb-content,
     #lb-acf { padding-top: 0 !important; margin-top: 0 !important; }
     #lb-content > .lb-section-heading,
