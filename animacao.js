@@ -890,36 +890,6 @@ async function fetchProjectContent(id) {
       lbContent.appendChild(vw);
     }
 
-    /* se a descrição for muito longa para uma coluna, move o excesso
-       para a 2ª coluna (#lb-content-2), empurrando "Dados do projeto"
-       mais para o lado — medido via JS (altura real), não CSS-columns
-       (que criava colunas fantasma em navegadores reais). */
-    if (lbContent2) {
-      requestAnimationFrame(() => {
-        /* espaço vertical REAL disponível até ao fundo do painel (não um
-           número fixo adivinhado) — um valor fixo (ex: window.innerHeight
-           - 260) não se ajusta ao padding/título reais e disparava a
-           divisão cedo demais, empurrando quase todo o texto para a 2ª
-           coluna. */
-        const panel = document.getElementById('lb-panel-content');
-        const panelBottom   = panel ? panel.getBoundingClientRect().bottom : window.innerHeight;
-        const contentTop    = lbContent.getBoundingClientRect().top;
-        const maxH = panelBottom - contentTop - 40;
-        if (lbContent.scrollHeight <= maxH) return;
-
-        const children = Array.from(lbContent.children);
-        let h = 0, splitIndex = -1;
-        for (let i = 0; i < children.length; i++) {
-          h += children[i].offsetHeight;
-          if (h > maxH && i > 0) { splitIndex = i; break; }
-        }
-        if (splitIndex === -1) return;
-
-        children.slice(splitIndex).forEach(el => lbContent2.appendChild(el));
-        lbContent2.style.display = '';
-      });
-    }
-
     /* ── Dados do projeto (coluna direita) ── */
     if (lbAcf) {
       const yearMatch = lbProjMeta.textContent.match(/\d{4}/);
@@ -1047,6 +1017,35 @@ async function fetchProjectContent(id) {
   } finally {
     lbLoader.style.display = 'none';
     lbContent.classList.add('visible');
+
+    /* se a descrição for muito longa para uma coluna, move o excesso
+       para a 2ª coluna (#lb-content-2), empurrando "Dados do projeto"
+       mais para o lado — medido via JS (altura real), não CSS-columns
+       (que criava colunas fantasma em navegadores reais). Corre aqui no
+       finally (depois do #lb-loader já estar escondido), não logo a
+       seguir a montar a descrição — nessa altura o loader ainda estava
+       visível (o finally só corre depois do fetch da galeria terminar),
+       o que empurrava #lb-content para baixo e distorcia a medição. */
+    if (lbContent2) {
+      requestAnimationFrame(() => {
+        const panel = document.getElementById('lb-panel-content');
+        const panelBottom = panel ? panel.getBoundingClientRect().bottom : window.innerHeight;
+        const contentTop  = lbContent.getBoundingClientRect().top;
+        const maxH = panelBottom - contentTop - 40;
+        if (lbContent.scrollHeight <= maxH) return;
+
+        const children = Array.from(lbContent.children);
+        let h = 0, splitIndex = -1;
+        for (let i = 0; i < children.length; i++) {
+          h += children[i].offsetHeight;
+          if (h > maxH && i > 0) { splitIndex = i; break; }
+        }
+        if (splitIndex === -1) return;
+
+        children.slice(splitIndex).forEach(el => lbContent2.appendChild(el));
+        lbContent2.style.display = '';
+      });
+    }
   }
 }
 
