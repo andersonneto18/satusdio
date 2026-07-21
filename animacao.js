@@ -859,7 +859,9 @@ async function fetchProjectContent(id) {
   lbLoader.style.display = 'flex';
 
   const lbAcf = document.getElementById('lb-acf');
+  const lbContent2 = document.getElementById('lb-content-2');
   if (lbAcf) lbAcf.innerHTML = '';
+  if (lbContent2) { lbContent2.innerHTML = ''; lbContent2.style.display = 'none'; }
   document.querySelectorAll('#lb-track .lb-photo-panel').forEach(p => p.remove());
 
   try {
@@ -886,6 +888,36 @@ async function fetchProjectContent(id) {
       vw.className = 'lb-video-wrap';
       vw.innerHTML = `<video src="${acf.project_video}" controls playsinline></video>`;
       lbContent.appendChild(vw);
+    }
+
+    /* se a descrição for muito longa para uma coluna, move o excesso
+       para a 2ª coluna (#lb-content-2), empurrando "Dados do projeto"
+       mais para o lado — medido via JS (altura real), não CSS-columns
+       (que criava colunas fantasma em navegadores reais). */
+    if (lbContent2) {
+      requestAnimationFrame(() => {
+        /* espaço vertical REAL disponível até ao fundo do painel (não um
+           número fixo adivinhado) — um valor fixo (ex: window.innerHeight
+           - 260) não se ajusta ao padding/título reais e disparava a
+           divisão cedo demais, empurrando quase todo o texto para a 2ª
+           coluna. */
+        const panel = document.getElementById('lb-panel-content');
+        const panelBottom   = panel ? panel.getBoundingClientRect().bottom : window.innerHeight;
+        const contentTop    = lbContent.getBoundingClientRect().top;
+        const maxH = panelBottom - contentTop - 40;
+        if (lbContent.scrollHeight <= maxH) return;
+
+        const children = Array.from(lbContent.children);
+        let h = 0, splitIndex = -1;
+        for (let i = 0; i < children.length; i++) {
+          h += children[i].offsetHeight;
+          if (h > maxH && i > 0) { splitIndex = i; break; }
+        }
+        if (splitIndex === -1) return;
+
+        children.slice(splitIndex).forEach(el => lbContent2.appendChild(el));
+        lbContent2.style.display = '';
+      });
     }
 
     /* ── Dados do projeto (coluna direita) ── */

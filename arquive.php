@@ -709,7 +709,13 @@ add_shortcode('sastudio_gallery', function () {
       var sgContent2 = document.getElementById('sg-content-2');
       if (sgContent && sgContent2) {
         requestAnimationFrame(function () {
-          var maxH = window.innerHeight - 260;
+          /* espaço vertical REAL disponível até ao fundo do painel (não
+             um número fixo adivinhado) — um valor fixo nao se ajusta ao
+             padding/titulo reais e disparava a divisao cedo demais. */
+          var panel = document.getElementById('sg-panel-content');
+          var panelBottom = panel ? panel.getBoundingClientRect().bottom : window.innerHeight;
+          var contentTop  = sgContent.getBoundingClientRect().top;
+          var maxH = panelBottom - contentTop - 40;
           if (sgContent.scrollHeight <= maxH) return;
 
           var srcDesc = sgContent.querySelector('.sg-desc');
