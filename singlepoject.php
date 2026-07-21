@@ -99,6 +99,12 @@ add_shortcode('single_projetos', function () {
     ob_start();
     ?>
 <style>
+  /* Ativa Cross-Document View Transitions (Chrome/Edge) — ao clicar num
+     card em "Confira outros projetos", a miniatura (view-transition-name
+     "sp-hero-{ID}" no .sp-rel-card-img-wrap) morfa automaticamente para
+     o hero da página seguinte (mesmo nome no primeiro .sp-slide), dando
+     o efeito de zoom sem precisar de JS nem de SPA/modal. Navegadores
+     sem suporte (Firefox/Safari) simplesmente navegam sem animação. */
   @view-transition { navigation: auto; }
 
   /* A página inteira é o "track" horizontal (como o lightbox aberto do
@@ -106,10 +112,15 @@ add_shortcode('single_projetos', function () {
      vertical próprio, o #sp-viewport é que ocupa o ecrã todo. */
   html, body { overflow: hidden !important; height: 100% !important; }
 
-  /* #nav/#site-logo vêm do header global do WordPress (mesmo widget
-     partilhado por todo o site) — nesta página (link direto/partilhado
-     de um projeto) ficam escondidos, tal como já acontece no lightbox
-     da home quando um projeto está aberto. O #sp-close faz de "voltar". */
+  /* Header do tema (The7/Elementor "Header Sastudio", classe
+     top_panel_custom_header-sastudio — nada a ver com o #nav/#site-logo
+     que só existem na home) e o menu mobile fullscreen — nesta página
+     (link direto/partilhado de um projeto) ficam escondidos, tal como já
+     acontece no lightbox da home quando um projeto está aberto. O
+     #sp-close faz de "voltar". */
+  header.top_panel_custom_header-sastudio,
+  .menu_mobile_overlay,
+  .menu_mobile,
   #nav, #site-logo { display: none !important; }
 
   /* Se este template estiver a ser renderizado dentro de um wrapper com
@@ -284,7 +295,7 @@ add_shortcode('single_projetos', function () {
           <?php foreach ($slide_urls as $i => $url):
             $is_video = preg_match('/\.(mp4|webm|mov|ogg)(\?|$)/i', $url);
           ?>
-            <div class="sp-slide<?php echo $i === 0 ? ' active' : ''; ?>"<?php echo $is_video ? ' data-video-src="' . esc_url($url) . '"' : ''; ?>>
+            <div class="sp-slide<?php echo $i === 0 ? ' active' : ''; ?>"<?php echo $is_video ? ' data-video-src="' . esc_url($url) . '"' : ''; ?><?php echo $i === 0 ? ' style="view-transition-name: sp-hero-' . (int) $post_id . '"' : ''; ?>>
               <?php if (!$is_video): ?>
                 <img src="<?php echo esc_url($url); ?>" alt="" loading="<?php echo $i === 0 ? 'eager' : 'lazy'; ?>"/>
               <?php endif; ?>
@@ -352,7 +363,7 @@ add_shortcode('single_projetos', function () {
               $r_title = html_entity_decode( get_the_title($rp->ID), ENT_QUOTES, 'UTF-8' );
             ?>
               <a class="sp-rel-card" href="<?php echo esc_url(get_permalink($rp->ID)); ?>">
-                <div class="sp-rel-card-img-wrap"><img src="<?php echo esc_url($r_img); ?>" alt="<?php echo esc_attr($r_title); ?>" loading="lazy"/></div>
+                <div class="sp-rel-card-img-wrap" style="view-transition-name: sp-hero-<?php echo (int) $rp->ID; ?>"><img src="<?php echo esc_url($r_img); ?>" alt="<?php echo esc_attr($r_title); ?>" loading="lazy"/></div>
                 <div class="sp-rel-card-title"><?php echo esc_html($r_title); ?></div>
                 <div class="sp-rel-card-sub"><?php echo esc_html($r_sub); ?></div>
               </a>
