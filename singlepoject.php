@@ -109,7 +109,7 @@ add_shortcode('single_projetos', function () {
   /* #nav/#site-logo vêm do header global do WordPress (mesmo widget
      partilhado por todo o site) — nesta página (link direto/partilhado
      de um projeto) ficam escondidos, tal como já acontece no lightbox
-     da home quando um projeto está aberto. O #sp-back faz de "voltar". */
+     da home quando um projeto está aberto. O #sp-close faz de "voltar". */
   #nav, #site-logo { display: none !important; }
 
   /* Se este template estiver a ser renderizado dentro de um wrapper com
@@ -138,12 +138,20 @@ add_shortcode('single_projetos', function () {
   #sp-root, #sp-root * { box-sizing: border-box; }
   #sp-root { font-family: 'Inter', sans-serif; color: #151512; }
 
-  #sp-back {
-    position: fixed; top: 1.5rem; left: 1.5rem; z-index: 100010;
-    display: flex; align-items: center; gap: 0.5rem;
-    padding: 0.6rem 1.1rem; border-radius: 999px; border: none;
-    background: rgba(255,255,255,0.92); box-shadow: 0 2px 14px rgba(21,21,18,0.18);
-    font-size: 0.75rem; letter-spacing: 0.04em; color: #151512; text-decoration: none;
+  /* botão "X" de fechar (leva de volta a /projects/), igual ao
+     #sg-modal-close/#lb-close — canto superior direito, sem texto. */
+  #sp-close {
+    position: fixed; top: 2.4rem; right: 1.5rem; z-index: 100010;
+    display: flex; align-items: center; justify-content: center;
+    width: 46px; height: 46px;
+    border-radius: 50%; border: none;
+    background: rgba(255,255,255,0.92);
+    box-shadow: 0 2px 14px rgba(21,21,18,0.18);
+    font-size: 1.5rem; line-height: 1; cursor: pointer;
+    color: #151512; text-decoration: none;
+  }
+  @media (max-width: 700px) {
+    #sp-close { top: 0.9rem; right: 0.9rem; width: 42px; height: 42px; }
   }
 
   /* ── Navegação horizontal entre painéis (Hero → Descrição/Dados →
@@ -267,7 +275,7 @@ add_shortcode('single_projetos', function () {
 </style>
 
 <div id="sp-root">
-  <a id="sp-back" href="<?php echo esc_url( home_url('/projects/') ); ?>">&#8592; Voltar aos projetos</a>
+  <a id="sp-close" href="<?php echo esc_url( home_url('/projects/') ); ?>" aria-label="Fechar">&times;</a>
 
   <div id="sp-viewport">
     <div id="sp-track">
