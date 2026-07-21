@@ -258,16 +258,18 @@ add_shortcode('sastudio_gallery', function () {
   #sg-modal-content {
     padding: 4.5rem clamp(1.2rem, 6vw, 5vw) 2rem;
   }
-  /* grid simples: Descrição e Dados são dois blocos independentes,
-     lado a lado. Se a descrição for muito longa, a linha cresce em
-     altura e o painel (com o seu próprio scroll) revela o resto ao
-     rolar — sem depender de CSS multi-coluna, que se mostrou instável
-     em navegadores reais (criava colunas fantasma). */
+  /* flex (não grid nem CSS-columns): Descrição e Dados são blocos
+     independentes lado a lado. Se a descrição for muito longa (medido
+     via JS), o excesso é movido para uma 2ª coluna (#sg-content-2),
+     empurrando "Dados do projeto" mais para o lado — sem os bugs de
+     CSS multi-coluna (que criava colunas fantasma em navegadores
+     reais). */
   #sg-modal-main {
-    display: grid; grid-template-columns: 1fr 1fr;
-    align-items: start; gap: 5vw;
+    display: flex; align-items: start; gap: 5vw;
     max-width: 1280px; margin: 0 auto;
   }
+  .sg-desc-col { flex: 1 1 0; min-width: 0; }
+  #sg-acf { flex: 0 1 340px; min-width: 220px; }
   .sg-section-heading {
     font-size: clamp(1.4rem, 2.4vw, 2rem); font-weight: 300;
     color: #151512; margin: 0 0 2rem; line-height: 1.1;
@@ -283,7 +285,7 @@ add_shortcode('sastudio_gallery', function () {
   .sg-acf-label { font-weight: 400; color: #151512; }
   .sg-acf-value { color: rgba(21,21,18,0.75); line-height: 1.55; }
   @media (max-width: 900px) {
-    #sg-modal-main { grid-template-columns: 1fr; gap: 2.5rem; }
+    #sg-modal-main { flex-direction: column; gap: 2.5rem; }
   }
   /* ── Galeria — cada foto é o seu próprio painel horizontal,
      sem faixa de scroll interna, tal como o resto do #sg-track.
@@ -670,10 +672,11 @@ add_shortcode('sastudio_gallery', function () {
       html += '<section id="sg-panel-content" class="sg-panel sg-panel-scrollable">';
       html += '<div id="sg-modal-content">';
       html += '<div id="sg-modal-main">';
-      html += '<div id="sg-content">';
+      html += '<div id="sg-content" class="sg-desc-col">';
       html += '<h3 class="sg-section-heading">Descrição:</h3>';
       html += '<div class="sg-desc">' + (desc || '<p>Sem descrição para este projeto.</p>') + '</div>';
       html += '</div>';
+      html += '<div id="sg-content-2" class="sg-desc-col" style="display:none"><div class="sg-desc"></div></div>';
       if (metaFields.length) {
         html += '<div id="sg-acf">';
         html += '<h3 class="sg-section-heading">Dados do projeto:</h3>';
@@ -696,6 +699,37 @@ add_shortcode('sastudio_gallery', function () {
       wireRelatedClicks();
       initSlideshow(slideUrls);
       if (window.resetSgTrack) window.resetSgTrack();
+
+      /* se a descrição for muito longa para uma coluna, move o excesso
+         para a 2ª coluna (#sg-content-2), empurrando "Dados do
+         projeto" mais para o lado — medido via JS (altura real), não
+         CSS-columns (que criava colunas fantasma em navegadores
+         reais). */
+      var sgContent = document.getElementById('sg-content');
+      var sgContent2 = document.getElementById('sg-content-2');
+      if (sgContent && sgContent2) {
+        requestAnimationFrame(function () {
+          var maxH = window.innerHeight - 260;
+          if (sgContent.scrollHeight <= maxH) return;
+
+          var srcDesc = sgContent.querySelector('.sg-desc');
+          var dstDesc = sgContent2.querySelector('.sg-desc');
+          if (!srcDesc || !dstDesc) return;
+
+          var heading = sgContent.querySelector('.sg-section-heading');
+          var used = heading ? heading.offsetHeight : 0;
+          var children = Array.prototype.slice.call(srcDesc.children);
+          var splitIndex = -1;
+          for (var i = 0; i < children.length; i++) {
+            used += children[i].offsetHeight;
+            if (used > maxH && i > 0) { splitIndex = i; break; }
+          }
+          if (splitIndex === -1) return;
+
+          children.slice(splitIndex).forEach(function (el) { dstDesc.appendChild(el); });
+          sgContent2.style.display = '';
+        });
+      }
     }).catch(function () {
       modalBody.innerHTML = '<div id="sg-modal-content"><h2>' + esc(title) + '</h2><p>Não foi possível carregar o conteúdo.</p></div>';
     });
