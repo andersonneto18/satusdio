@@ -198,7 +198,8 @@ add_shortcode('single_projetos', function () {
   .sp-desc-col { flex: 1 1 0; min-width: 0; }
   #sp-acf { flex: 0 1 320px; min-width: 220px; }
   .sp-section-heading {
-    font-family: 'Inter', sans-serif; font-size: 1.15rem; font-weight: 300;
+    font-family: 'Inter', sans-serif !important; font-size: 1rem !important;
+    font-weight: 300 !important; white-space: nowrap !important;
     color: #151512; margin: 0 0 2rem; line-height: 1.1;
   }
   #sp-content .sp-desc { font-size: 1rem; line-height: 1.85; color: rgba(21,21,18,0.82); text-align: justify; }
