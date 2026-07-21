@@ -867,22 +867,21 @@
     }
 
     /* ── MAIN LAYOUT ──
-       flex (não grid nem CSS-columns): Descrição e Dados são blocos
-       independentes lado a lado. Se a descrição for muito longa
-       (medido via JS em animacao.js), o excesso é movido para uma
-       2ª coluna de descrição (#lb-content-2), empurrando "Dados do
-       projeto" mais para o lado — sem os bugs de CSS multi-coluna
-       (que criava colunas fantasma em navegadores reais). */
+       flex (não grid): Descrição e Dados são blocos independentes lado
+       a lado. A coluna da descrição fica larga (flex:1 1 0, cresce para
+       ocupar o espaço todo) e o painel inteiro é mais largo (1600px em
+       vez de 1280px) — texto com mais largura por linha faz o bloco
+       ficar mais curto/baixo, reduzindo a necessidade de scroll. */
     #lb-main {
       display: flex;
       align-items: start;
       gap: 5vw;
       padding: 4.5rem 8vw 5rem;
-      max-width: 1280px;
+      max-width: 1600px;
       margin: 0 auto;
     }
     .lb-desc-col { flex: 1 1 0; min-width: 0; }
-    #lb-acf { flex: 0 1 340px; min-width: 220px; }
+    #lb-acf { flex: 0 1 320px; min-width: 220px; }
     .lb-desc-col * { max-width: 100%; box-sizing: border-box; }
     .lb-desc-col p {
       font-family: 'Inter', sans-serif !important;
@@ -894,7 +893,6 @@
       text-align: justify !important;
     }
     #lb-content,
-    #lb-content-2,
     #lb-acf { padding-top: 0 !important; margin-top: 0 !important; }
     #lb-content > .lb-section-heading,
     #lb-acf    > .lb-section-heading {
@@ -1208,7 +1206,7 @@
         gap: 2.5rem;
         padding: 2.5rem 5vw 3rem;
       }
-      #lb-content p, #lb-content-2 p { font-size: 0.95rem !important; }
+      #lb-content p { font-size: 0.95rem !important; }
 
       /* ACF TABLE */
       .lb-acf-row { grid-template-columns: 110px 1fr; gap: 0.6rem; }
