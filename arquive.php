@@ -35,7 +35,7 @@ add_shortcode('sastudio_gallery', function () {
     color: rgba(21,21,18,0.4); margin-bottom: 0.75rem;
   }
   #sg-tagline {
-    font-family: 'Cormorant Garamond', serif; font-weight: 300;
+    font-family: 'Inter', sans-serif; font-weight: 300;
     font-size: clamp(1.6rem, 3vw, 2.4rem); line-height: 1.15; margin: 0;
   }
   #sg-count { font-size: 0.75rem; color: rgba(21,21,18,0.4); white-space: nowrap; }
@@ -238,7 +238,7 @@ add_shortcode('sastudio_gallery', function () {
     color: rgba(255,255,255,0.75); margin-bottom: 0.8rem;
   }
   #sg-modal-hero h2 {
-    font-family: 'Cormorant Garamond', serif; font-weight: 300;
+    font-family: 'Inter', sans-serif; font-weight: 300;
     font-size: clamp(2.2rem, 5.5vw, 4.5rem); line-height: 1.05;
     color: #fff; margin: 0 0 1.5rem; letter-spacing: 0.01em;
   }
@@ -270,7 +270,7 @@ add_shortcode('sastudio_gallery', function () {
   .sg-desc-col { flex: 1 1 0; min-width: 0; }
   #sg-acf { flex: 0 1 320px; min-width: 220px; }
   .sg-section-heading {
-    font-size: clamp(1.4rem, 2.4vw, 2rem); font-weight: 300;
+    font-family: 'Inter', sans-serif; font-size: 1.15rem; font-weight: 300;
     color: #151512; margin: 0 0 2rem; line-height: 1.1;
   }
   #sg-modal-content .sg-desc { font-size: 1rem; line-height: 1.85; color: rgba(21,21,18,0.82); text-align: justify; }

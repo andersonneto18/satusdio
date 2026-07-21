@@ -184,7 +184,7 @@
     .pic:hover .pic-info { opacity: 1; transform: translateY(0); }
 
     .pic-title {
-      font-family: 'Cormorant Garamond', serif;
+      font-family: 'Inter', sans-serif;
       font-size: 1.5rem; font-weight: 500;
       color: #fff; letter-spacing: 0.03em; line-height: 1.2;
     }
@@ -354,7 +354,7 @@
       color: rgba(255,255,255,0.58); margin-bottom: 0.85rem;
     }
     #lb-proj-title {
-      font-family: 'Cormorant Garamond', serif;
+      font-family: 'Inter', sans-serif;
       font-size: clamp(2.4rem, 5.5vw, 5rem);
       font-weight: 300; letter-spacing: 0.03em; line-height: 1;
       color: #fff; margin: 0 0 2rem;
@@ -421,7 +421,7 @@
       color: rgba(21,21,18,0.7); margin-bottom: 1rem;
     }
     #lb-content h1, #lb-content h2, #lb-content h3, #lb-content h4 {
-      font-family: 'Cormorant Garamond', serif; font-weight: 300;
+      font-family: 'Inter', sans-serif; font-weight: 300;
       color: var(--text); margin: 2.2rem 0 0.5rem; line-height: 1.15;
     }
     #lb-content h2 { font-size: 1.7rem; }
@@ -499,7 +499,7 @@
     }
     #lb-proj-title {
       flex: 1;
-      font-family: 'Cormorant Garamond', serif;
+      font-family: 'Inter', sans-serif;
       font-size: 1.4rem; font-weight: 300; letter-spacing: 0.04em; line-height: 1.2;
       color: #fff;
       display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical;
@@ -558,7 +558,7 @@
       color: rgba(21,21,18,0.7); margin-bottom: 1rem;
     }
     #lb-content h1, #lb-content h2, #lb-content h3, #lb-content h4 {
-      font-family: 'Cormorant Garamond', serif; font-weight: 300;
+      font-family: 'Inter', sans-serif; font-weight: 300;
       line-height: 1.2; color: var(--text);
       margin: 1.8rem 0 0.5rem; letter-spacing: 0.02em;
     }
@@ -619,7 +619,7 @@
     #lb-top-right { display: flex; align-items: center; gap: 1.2rem; }
 
     .lb-logo {
-      font-family: 'Cormorant Garamond', serif;
+      font-family: 'Inter', sans-serif;
       font-size: 1.45rem; font-weight: 600; letter-spacing: 0.42em;
       color: #fff;
       text-shadow: 0 0 28px rgba(255,255,255,0.18);
@@ -683,7 +683,7 @@
 
     /* título maior e mais destacado */
     #lb-proj-title {
-      font-family: 'Cormorant Garamond', serif !important;
+      font-family: 'Inter', sans-serif !important;
       font-size: clamp(3.2rem, 7vw, 6.5rem) !important;
       font-weight: 300 !important; letter-spacing: 0.03em !important;
       line-height: 1 !important; color: #fff !important;
@@ -804,12 +804,12 @@
       column-span: all;
     }
     #lb-content h2 {
-      font-family: 'Cormorant Garamond', serif !important;
+      font-family: 'Inter', sans-serif !important;
       font-size: 1.9rem !important; font-weight: 300 !important;
       margin: 2.6rem 0 0.7rem !important; letter-spacing: 0.01em !important;
     }
     #lb-content h3 {
-      font-family: 'Cormorant Garamond', serif !important;
+      font-family: 'Inter', sans-serif !important;
       font-size: 1.35rem !important; font-weight: 300 !important;
       margin: 2rem 0 0.5rem !important;
     }
@@ -899,14 +899,14 @@
       margin-top: 0 !important;
       padding-top: 0 !important;
       font-family: 'Inter', sans-serif !important;
-      font-size: clamp(1.4rem, 2.4vw, 2rem) !important;
+      font-size: 1.15rem !important;
       font-weight: 300 !important;
     }
 
     /* ── SECTION HEADINGS (Descrição / Dados do projeto) ── */
     .lb-section-heading {
       font-family: 'Inter', sans-serif !important;
-      font-size: clamp(1.4rem, 2.4vw, 2rem) !important;
+      font-size: 1.15rem !important;
       font-weight: 300 !important;
       letter-spacing: 0.01em !important;
       color: var(--text) !important;
@@ -1010,12 +1010,12 @@
       display: flex; flex-direction: column; gap: 1.4rem;
     }
     .footer-logo {
-      font-family: 'Cormorant Garamond', serif;
+      font-family: 'Inter', sans-serif;
       font-size: 1.6rem; font-weight: 600; letter-spacing: 0.45em;
       color: var(--text);
     }
     .footer-about-text {
-      font-family: 'Cormorant Garamond', serif;
+      font-family: 'Inter', sans-serif;
       font-size: 1.15rem; font-weight: 300; font-style: italic;
       line-height: 1.75; color: rgba(21,21,18,0.45);
     }
@@ -1155,7 +1155,7 @@
     #nav-mobile ul { list-style: none; text-align: center; }
     #nav-mobile ul li { margin: 1.8rem 0; }
     #nav-mobile ul a {
-      font-family: 'Cormorant Garamond', serif;
+      font-family: 'Inter', sans-serif;
       font-size: clamp(2rem, 8vw, 3rem);
       font-weight: 300; letter-spacing: 0.12em;
       color: var(--text); text-decoration: none;
@@ -1231,7 +1231,7 @@
       .footer-bottom { flex-direction: column; align-items: flex-start; gap: 1.2rem; padding: 1.4rem 0 2rem; }
 
       /* SECTION HEADINGS */
-      .lb-section-heading { font-size: 1.3rem !important; }
+      .lb-section-heading { font-size: 1.1rem !important; }
     }
 
     /* ══════════════════════════════════════════════════
@@ -1306,7 +1306,7 @@
       color: var(--muted); margin-bottom: 1rem;
     }
     .about-value-title {
-      font-family: 'Cormorant Garamond', serif;
+      font-family: 'Inter', sans-serif;
       font-size: 1.4rem; font-weight: 400;
       margin-bottom: 0.75rem;
     }
@@ -1378,7 +1378,7 @@
       margin-bottom: 0.75rem;
     }
     #pl-tagline {
-      font-family: 'Cormorant Garamond', serif;
+      font-family: 'Inter', sans-serif;
       font-size: clamp(1.5rem, 2.6vw, 2.8rem);
       font-weight: 300;
       line-height: 1.2;
