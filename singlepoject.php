@@ -106,6 +106,12 @@ add_shortcode('single_projetos', function () {
      vertical próprio, o #sp-viewport é que ocupa o ecrã todo. */
   html, body { overflow: hidden !important; height: 100% !important; }
 
+  /* #nav/#site-logo vêm do header global do WordPress (mesmo widget
+     partilhado por todo o site) — nesta página (link direto/partilhado
+     de um projeto) ficam escondidos, tal como já acontece no lightbox
+     da home quando um projeto está aberto. O #sp-back faz de "voltar". */
+  #nav, #site-logo { display: none !important; }
+
   /* Se este template estiver a ser renderizado dentro de um wrapper com
      scroll/transform próprio (ex: popup do Elementor), isso criaria um
      "containing block" que quebraria o position:fixed do #sp-viewport.
