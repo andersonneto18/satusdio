@@ -185,16 +185,20 @@ function getMasonryConfig() {
 }
 
 /* Largura de coluna e recuo vertical (topo/fundo) variam ciclicamente —
-   só variar a largura não chega, porque todas as colunas continuavam a
-   começar/acabar exatamente na mesma altura, e a linha reta entre
-   colunas continuava contínua de alto a baixo. Com o recuo, colunas
-   vizinhas raramente partilham as mesmas bordas. Cada foto usa sempre a
-   SUA proporção real (dataset.aspect, vinda das dimensões reais do
-   WordPress) para decidir a altura: largura da coluna ÷ aspect, nunca
-   cortando nada. */
+   só variar a largura não chega, e um recuo pequeno (poucas dezenas de
+   px) também não: face a um ecrã de 900-1900px de altura, as colunas
+   continuavam sobrepostas em quase toda a extensão, e o vão entre elas
+   lia-se na mesma como uma linha contínua de alto a baixo. Por isso o
+   recuo agora é uma FRAÇÃO da altura do ecrã (não px fixos): colunas
+   alternam entre "metade de cima" e "metade de baixo" (com alguma
+   variação), sobrepondo-se só numa faixa estreita ao centro — na maior
+   parte da altura só existe uma das duas colunas, o resto é fundo,
+   quebrando mesmo a linha. Cada foto usa sempre a SUA proporção real
+   (dataset.aspect, vinda das dimensões reais do WordPress) para decidir
+   a altura: largura da coluna ÷ aspect, nunca cortando nada. */
 const WIDTH_MULTIPLIERS = [1.15, 0.80, 1.35, 0.90, 1.20, 0.75, 0.95, 1.05, 1.30, 0.85];
-const TOP_INSETS         = [0,    60,   20,   90,   40,   0,    70,   30,   0,    50  ];
-const BOTTOM_INSETS      = [80,   0,    60,   0,    90,   40,   0,    70,   30,   0   ];
+const TOP_FRACS          = [0.00, 0.42, 0.00, 0.45, 0.05, 0.38, 0.00, 0.40, 0.02, 0.42];
+const BOTTOM_FRACS       = [0.42, 0.00, 0.45, 0.00, 0.38, 0.00, 0.40, 0.00, 0.42, 0.00];
 const DEFAULT_ASPECT = 4 / 3;
 
 /* Para cada coluna: decide que fotos entram (na ordem em que aparecem,
@@ -219,8 +223,8 @@ function layoutMasonry() {
 
   while (idx < pics.length) {
     const baseW   = baseColW * WIDTH_MULTIPLIERS[colIdx % n];
-    const top     = gap + TOP_INSETS[colIdx % n];
-    const bottom  = vh - gap - BOTTOM_INSETS[colIdx % n];
+    const top     = gap + vh * TOP_FRACS[colIdx % n];
+    const bottom  = vh - gap - vh * BOTTOM_FRACS[colIdx % n];
     const targetH = bottom - top;
 
     const group = [];
