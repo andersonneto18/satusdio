@@ -248,6 +248,10 @@
       overflow-y: auto; overflow-x: hidden;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
+      /* sem isto, o rubber-band/bounce nativo do scroll (trackpad/mouse
+         com inércia) fazia estes painéis "saltar" um pouco para baixo e
+         voltar sozinhos, mesmo sem conteúdo a mais para rolar */
+      overscroll-behavior: contain;
     }
     .lb-panel-scrollable::-webkit-scrollbar { display: none; }
 

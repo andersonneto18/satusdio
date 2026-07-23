@@ -927,9 +927,12 @@ initDragScroll('lb-related-grid');
     if (!lb.classList.contains('open')) return;
 
     /* dentro de um painel com scroll vertical próprio (texto longo),
-       deixa o scroll nativo agir até chegar ao topo/fundo */
+       deixa o scroll nativo agir até chegar ao topo/fundo. Um overflow
+       residual pequeno (poucos px, ex: arredondamentos de layout) é
+       ignorado — sem isto, painéis quase do tamanho do ecrã faziam um
+       pequeno scroll "fantasma" antes de mudar de painel. */
     const scrollable = e.target.closest('.lb-panel-scrollable');
-    if (scrollable) {
+    if (scrollable && scrollable.scrollHeight - scrollable.clientHeight > 24) {
       const atTop     = scrollable.scrollTop <= 0;
       const atBottom  = scrollable.scrollTop + scrollable.clientHeight >= scrollable.scrollHeight - 1;
       const goingDown = e.deltaY > 0;

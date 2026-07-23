@@ -180,6 +180,10 @@ add_shortcode('single_projetos', function () {
     overflow-y: auto; overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
+    /* sem isto, o rubber-band/bounce nativo do scroll (trackpad/mouse
+       com inércia) fazia estes painéis "saltar" um pouco para baixo e
+       voltar sozinhos, mesmo sem conteúdo a mais para rolar */
+    overscroll-behavior: contain;
   }
   .sp-panel-scrollable::-webkit-scrollbar { display: none; }
 
@@ -467,7 +471,7 @@ add_shortcode('single_projetos', function () {
     if (!track) return;
 
     var scrollable = e.target.closest('.sp-panel-scrollable');
-    if (scrollable) {
+    if (scrollable && scrollable.scrollHeight - scrollable.clientHeight > 24) {
       var atTop     = scrollable.scrollTop <= 0;
       var atBottom  = scrollable.scrollTop + scrollable.clientHeight >= scrollable.scrollHeight - 1;
       var goingDown = e.deltaY > 0;
