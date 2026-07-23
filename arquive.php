@@ -347,7 +347,10 @@ add_shortcode('sastudio_gallery', function () {
   /* tamanho fixo pedido: 1320×750 — flex-shrink permite encolher
      (mantendo a proporção via aspect-ratio) em ecrãs mais estreitos,
      nunca ultrapassando 1320px de largura. */
-  .sg-photo-item { flex: 0 1 1320px; max-width: 100%; aspect-ratio: 1320 / 750; display: flex; flex-direction: column; }
+  /* mesma altura da imagem central (capa, #sg-cover-media: 55vh) —
+     fica alinhada com ela; a largura preenche o espaço disponível
+     lado a lado (2 por painel), recortando via object-fit:cover. */
+  .sg-photo-item { flex: 1 1 0; min-width: 0; height: 55vh; display: flex; flex-direction: column; }
   .sg-photo-item img {
     /* object-fit:cover preenche a caixa (pode recortar conforme a
        proporção original) — necessário para as duas fotos ficarem
@@ -356,7 +359,7 @@ add_shortcode('sastudio_gallery', function () {
     object-fit: cover; display: block;
     pointer-events: none; -webkit-user-drag: none;
   }
-  @media (max-width: 700px) { .sg-photo-panel { flex-direction: column; gap: 12px; padding: 1.5vh 3vw; } }
+  @media (max-width: 700px) { .sg-photo-panel { flex-direction: column; gap: 12px; padding: 1.5vh 3vw; } .sg-photo-item { height: 40vh; } }
   #sg-modal-loading {
     display: flex; align-items: center; justify-content: center;
     height: 60vh; font-size: 0.8rem; color: rgba(21,21,18,0.45);

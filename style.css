@@ -910,9 +910,12 @@
     /* tamanho fixo pedido: 1320×750 — flex-shrink permite encolher
        (mantendo a proporção via aspect-ratio) em ecrãs mais estreitos,
        nunca ultrapassando 1320px de largura. */
+    /* mesma altura da imagem central (capa, #lb-cover-media: 55vh) —
+       fica alinhada com ela; a largura preenche o espaço disponível
+       lado a lado (2 por painel), recortando via object-fit:cover. */
     .lb-photo-item {
-      flex: 0 1 1320px; max-width: 100%;
-      aspect-ratio: 1320 / 750;
+      flex: 1 1 0; min-width: 0;
+      height: 55vh;
       display: flex; flex-direction: column;
     }
     .lb-photo-item img {
@@ -934,6 +937,7 @@
     }
     @media (max-width: 768px) {
       .lb-photo-panel { flex-direction: column; gap: 12px; padding: 1.5vh 3vw; }
+      .lb-photo-item { height: 40vh; }
     }
 
     /* ── FOOTER ── */
