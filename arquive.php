@@ -292,8 +292,6 @@ add_shortcode('sastudio_gallery', function () {
        pequenas que as em paisagem, criando um vazio enorme entre elas. */
     width: 92vw; height: 82vh;
     object-fit: cover; display: block;
-    border-radius: 16px;
-    box-shadow: 0 10px 40px rgba(21,21,18,0.18);
     pointer-events: none; -webkit-user-drag: none;
   }
   @media (max-width: 700px) { .sg-photo-panel { padding: 1vh 1.5vw; } .sg-photo-panel img { width: 94vw; height: 60vh; } }

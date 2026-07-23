@@ -256,8 +256,6 @@ add_shortcode('single_projetos', function () {
        proporção original. */
     width: 92vw; height: 82vh;
     object-fit: cover; display: block;
-    border-radius: 16px;
-    box-shadow: 0 10px 40px rgba(21,21,18,0.18);
     pointer-events: none; -webkit-user-drag: none;
   }
   @media (max-width: 700px) { .sp-photo-panel { padding: 1vh 1.5vw; } .sp-photo-panel img { width: 94vw; height: 60vh; } }
