@@ -662,6 +662,22 @@ function buildContentGallery(images, captions = []) {
   return outer;
 }
 
+/* alinha o título "Descrição:" (painel seguinte) com a altura real do
+   título "Dados do projeto:" (painel principal) — como o painel da
+   descrição já não tem título/capa acima, teria ficado centrado numa
+   posição diferente; medindo a posição real do heading de Dados
+   evita ter de adivinhar a altura do bloco de título (que varia
+   consoante o comprimento do nome do projeto). Só se aplica em
+   ecrãs largos, onde Dados/Capa ficam lado a lado (ver #lb-main-cols
+   nos media queries de 1024px/768px). */
+function alignDescHeading() {
+  if (window.innerWidth <= 1024) { lbContent.style.paddingTop = ''; return; }
+  const heading = document.querySelector('#lb-acf > .lb-section-heading');
+  if (!heading) { lbContent.style.paddingTop = ''; return; }
+  lbContent.style.paddingTop = heading.getBoundingClientRect().top + 'px';
+}
+window.addEventListener('resize', alignDescHeading);
+
 async function fetchProjectContent(id) {
   lbContent.classList.remove('visible');
   lbContent.innerHTML = '';
@@ -790,6 +806,7 @@ async function fetchProjectContent(id) {
   } finally {
     lbLoader.style.display = 'none';
     lbContent.classList.add('visible');
+    alignDescHeading();
   }
 }
 

@@ -273,7 +273,10 @@ add_shortcode('sastudio_gallery', function () {
      largura quase total da página (sem coluna ao lado); o utilizador
      roda o rato (navegação horizontal já existente) para chegar a
      este painel e depois à Galeria. ── */
-  #sg-panel-desc { display: flex; align-items: center; }
+  /* align-items:flex-start (não center) — o padding-top de #sg-content
+     é ajustado em JS (alignSgDescHeading) para o título "Descrição:"
+     ficar à mesma altura do "Dados do projeto:" no painel anterior. */
+  #sg-panel-desc { display: flex; align-items: flex-start; }
   #sg-content.sg-desc-col {
     width: 100%; max-width: 900px; margin: 0 auto;
     padding: 3.5rem 8vw 5rem;
@@ -622,6 +625,21 @@ add_shortcode('sastudio_gallery', function () {
     }
   }
 
+  /* alinha o título "Descrição:" (painel seguinte) com a altura real do
+     título "Dados do projeto:" (painel principal) — evita ter de
+     adivinhar a altura do bloco de título (varia com o comprimento do
+     nome do projeto). Só se aplica em ecrãs largos (ver #sg-main-cols
+     no media query de 900px). */
+  function alignSgDescHeading() {
+    var descCol = document.getElementById('sg-content');
+    if (!descCol) return;
+    if (window.innerWidth <= 900) { descCol.style.paddingTop = ''; return; }
+    var heading = document.querySelector('#sg-acf > .sg-section-heading');
+    if (!heading) { descCol.style.paddingTop = ''; return; }
+    descCol.style.paddingTop = heading.getBoundingClientRect().top + 'px';
+  }
+  window.addEventListener('resize', alignSgDescHeading);
+
   function loadModalContent(post) {
     var id = post.id;
     var featSrc = post._embedded && post._embedded['wp:featuredmedia'] && post._embedded['wp:featuredmedia'][0]
@@ -697,6 +715,7 @@ add_shortcode('sastudio_gallery', function () {
       modalBody.innerHTML = html;
       wireRelatedClicks();
       if (window.resetSgTrack) window.resetSgTrack();
+      alignSgDescHeading();
     }).catch(function () {
       modalBody.innerHTML = '<div id="sg-modal-content"><h2>' + esc(title) + '</h2><p>Não foi possível carregar o conteúdo.</p></div>';
     });
