@@ -398,8 +398,8 @@ add_shortcode('single_projetos', function () {
     </a>
     <nav class="sp-topbar-nav">
       <a href="<?php echo esc_url( home_url('/projects/') ); ?>">Projects</a>
-      <a href="<?php echo esc_url( home_url('/') ); ?>">About</a>
-      <a href="<?php echo esc_url( home_url('/') ); ?>">Contact</a>
+      <a href="<?php echo esc_url( home_url('/about/') ); ?>">About</a>
+      <a href="<?php echo esc_url( home_url('/contact/') ); ?>">Contact</a>
     </nav>
   </div>
 
