@@ -183,10 +183,11 @@ add_shortcode('single_projetos', function () {
   }
   .sp-panel-scrollable::-webkit-scrollbar { display: none; }
 
-  /* ── Painel principal (Dados | Capa | Descrição) ──
-     título/categoria no topo (#sp-main-top), depois três colunas lado
-     a lado: Dados do projeto, a capa (imagem/vídeo estático, sem
-     slideshow) e Descrição — como a referência do cliente. */
+  /* ── Painel principal (Dados | Capa) ──
+     título/categoria no topo (#sp-main-top), depois duas colunas lado
+     a lado: Dados do projeto e a capa (imagem/vídeo estático, sem
+     slideshow). A Descrição já não vive aqui — é o painel seguinte, a
+     largura quase total da página (#sp-panel-desc), sem coluna ao lado. */
   #sp-panel-main { position: relative; padding: 4.5rem 5vw 6rem; }
   #sp-main-top { max-width: 1800px; margin: 0 auto 3rem; }
   #sp-main-top .sp-meta {
@@ -204,14 +205,23 @@ add_shortcode('single_projetos', function () {
   }
   .sp-col { flex: 1 1 0; min-width: 0; }
   #sp-acf { flex: 0 1 280px; min-width: 200px; }
-  #sp-cover-col { flex: 1 1 32%; }
+  #sp-cover-col { flex: 1 1 0; min-width: 0; }
   /* sem aspect-ratio/object-fit:cover fixo — a capa usa sempre a
      proporção real da imagem/vídeo (largura 100%, altura automática),
      para nunca cortar nada, seja qual for a orientação. */
   #sp-cover-media { width: 100%; }
   #sp-cover-media img,
   #sp-cover-media video { width: 100%; height: auto; display: block; }
-  .sp-desc-col { flex: 1.8 1 0; min-width: 0; }
+
+  /* ── PAINEL DA DESCRIÇÃO — próprio painel horizontal, texto a
+     largura quase total da página (sem coluna ao lado); o utilizador
+     roda o rato (navegação horizontal já existente) para chegar a
+     este painel e depois à Galeria. ── */
+  #sp-panel-desc { display: flex; align-items: center; }
+  #sp-content.sp-desc-col {
+    width: 100%; max-width: 1400px; margin: 0 auto;
+    padding: 3.5rem 8vw 5rem;
+  }
   .sp-section-heading {
     font-family: 'Inter', sans-serif !important; font-size: 1rem !important;
     font-weight: 300 !important; white-space: nowrap !important;
@@ -227,7 +237,10 @@ add_shortcode('single_projetos', function () {
   .sp-acf-row:first-child { border-top: 1px solid rgba(21,21,18,0.09); }
   .sp-acf-label { font-weight: 400; color: #151512; }
   .sp-acf-value { color: rgba(21,21,18,0.75); line-height: 1.55; }
-  @media (max-width: 900px) { #sp-main-cols { flex-direction: column; gap: 2.5rem; } }
+  @media (max-width: 900px) {
+    #sp-main-cols { flex-direction: column; gap: 2.5rem; }
+    #sp-content.sp-desc-col { padding: 2.5rem 5vw 3rem; }
+  }
 
   /* ── Galeria — cada foto é o seu próprio painel horizontal, tal como
      o resto do #sp-track (igual ao .sg-photo-panel/.lb-photo-panel). ── */
@@ -306,10 +319,13 @@ add_shortcode('single_projetos', function () {
               <?php endif; ?>
             </div>
           </div>
-          <div id="sp-content" class="sp-col sp-desc-col">
-            <h3 class="sp-section-heading">Descrição:</h3>
-            <div class="sp-desc"><?php echo $desc ? $desc : '<p>Sem descrição para este projeto.</p>'; ?></div>
-          </div>
+        </div>
+      </section>
+
+      <section id="sp-panel-desc" class="sp-panel sp-panel-scrollable">
+        <div id="sp-content" class="sp-desc-col">
+          <h3 class="sp-section-heading">Descrição:</h3>
+          <div class="sp-desc"><?php echo $desc ? $desc : '<p>Sem descrição para este projeto.</p>'; ?></div>
         </div>
       </section>
 
