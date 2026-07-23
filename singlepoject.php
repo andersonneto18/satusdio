@@ -223,7 +223,7 @@ add_shortcode('single_projetos', function () {
      este painel e depois à Galeria. ── */
   #sp-panel-desc { display: flex; align-items: center; }
   #sp-content.sp-desc-col {
-    width: 100%; max-width: 1400px; margin: 0 auto;
+    width: 100%; max-width: 900px; margin: 0 auto;
     padding: 3.5rem 8vw 5rem;
   }
   .sp-section-heading {

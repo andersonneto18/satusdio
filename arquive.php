@@ -257,7 +257,7 @@ add_shortcode('sastudio_gallery', function () {
      este painel e depois à Galeria. ── */
   #sg-panel-desc { display: flex; align-items: center; }
   #sg-content.sg-desc-col {
-    width: 100%; max-width: 1400px; margin: 0 auto;
+    width: 100%; max-width: 900px; margin: 0 auto;
     padding: 3.5rem 8vw 5rem;
   }
   .sg-section-heading {
