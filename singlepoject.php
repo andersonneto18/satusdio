@@ -212,7 +212,8 @@ add_shortcode('single_projetos', function () {
   /* sem aspect-ratio/object-fit:cover fixo — a capa usa sempre a
      proporção real da imagem/vídeo (largura 100%, altura automática),
      para nunca cortar nada, seja qual for a orientação. */
-  #sp-cover-media { width: 100%; }
+  /* mais pequena que a coluna toda, centrada — não colada às bordas */
+  #sp-cover-media { width: 80%; margin: 0 auto; }
   #sp-cover-media img,
   #sp-cover-media video { width: 100%; height: auto; display: block; }
 

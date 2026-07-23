@@ -246,7 +246,8 @@ add_shortcode('sastudio_gallery', function () {
   /* sem aspect-ratio/object-fit:cover fixo — a capa usa sempre a
      proporção real da imagem/vídeo (largura 100%, altura automática),
      para nunca cortar nada, seja qual for a orientação. */
-  #sg-cover-media { width: 100%; }
+  /* mais pequena que a coluna toda, centrada — não colada às bordas */
+  #sg-cover-media { width: 80%; margin: 0 auto; }
   #sg-cover-media img,
   #sg-cover-media video { width: 100%; height: auto; display: block; }
 
