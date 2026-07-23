@@ -182,7 +182,7 @@ add_shortcode('sastudio_gallery', function () {
   #sg-fly img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
   /* ── Modal — ecrã inteiro, como o lightbox do index.html ──
-     Navegação horizontal entre painéis (Hero → Descrição/Dados →
+     Navegação horizontal entre painéis (Capa/Dados/Descrição →
      Galeria → Relacionados): #sg-track é deslocado via
      transform:translateX pelo wheel handler; cada .sg-panel mantém
      o seu próprio scroll vertical (texto longo) até chegar ao
@@ -217,64 +217,41 @@ add_shortcode('sastudio_gallery', function () {
     color: #151512;
   }
 
-  #sg-modal-hero {
-    position: relative;
-    overflow: hidden; background: #000;
+  /* ── Painel principal (Dados | Capa | Descrição) ──
+     título/categoria no topo (#sg-main-top), depois três colunas lado
+     a lado: Dados do projeto, a capa (imagem/vídeo estático, sem
+     slideshow) e Descrição — como a referência do cliente. */
+  #sg-panel-main { position: relative; padding: 4.5rem 5vw 6rem; }
+  #sg-main-top { max-width: 1800px; margin: 0 auto 3rem; }
+  #sg-main-top .sg-meta {
+    font-size: 0.68rem; letter-spacing: 0.3em; text-transform: uppercase;
+    color: #7a5c3a; margin-bottom: 0.8rem;
   }
-  #sg-slides { position: absolute; inset: 0; }
-  .sg-slide { position: absolute; inset: 0; opacity: 0; }
-  .sg-slide.active { opacity: 1; z-index: 1; }
-  .sg-slide img, .sg-slide video { width: 100%; height: 100%; object-fit: cover; display: block; }
-  #sg-modal-hero-overlay {
-    position: absolute; inset: 0; z-index: 2;
-    display: flex; flex-direction: column; justify-content: flex-end;
-    padding: 2.4rem clamp(1.2rem, 6vw, 5vw);
-    background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 55%);
-    pointer-events: none;
-  }
-  #sg-modal-hero-overlay > * { pointer-events: all; }
-  #sg-modal-hero .sg-meta {
-    font-size: 0.7rem; letter-spacing: 0.3em; text-transform: uppercase;
-    color: rgba(255,255,255,0.75); margin-bottom: 0.8rem;
-  }
-  #sg-modal-hero h2 {
+  #sg-main-top h1 {
     font-family: 'Inter', sans-serif; font-weight: 300;
-    font-size: clamp(2.2rem, 5.5vw, 4.5rem); line-height: 1.05;
-    color: #fff; margin: 0 0 1.5rem; letter-spacing: 0.01em;
+    font-size: clamp(1.8rem, 3.2vw, 2.8rem); line-height: 1.05;
+    color: #151512; margin: 0; letter-spacing: 0.01em;
   }
-  #sg-slide-nav {
-    display: flex; align-items: center; gap: 0.9rem;
-    align-self: flex-end; margin-left: auto;
+  #sg-main-cols {
+    display: flex; align-items: start; gap: 4vw;
+    max-width: 1800px; margin: 0 auto;
   }
-  #sg-slide-nav button {
-    width: 36px; height: 36px; border-radius: 50%;
-    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.32);
-    color: #fff; font-size: 1.1rem; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-  }
-  #sg-slide-nav button:hover { background: rgba(255,255,255,0.22); border-color: rgba(255,255,255,0.75); }
-  #sg-slide-count { font-size: 0.48rem; letter-spacing: 0.14em; color: rgba(255,255,255,0.6); min-width: 2.5rem; text-align: center; }
-
-  #sg-modal-content {
-    padding: 4.5rem clamp(1.2rem, 6vw, 5vw) 2rem;
-  }
-  /* flex (não grid): Descrição e Dados são blocos independentes lado a
-     lado. A coluna da descrição fica larga (flex:1 1 0) e o painel
-     inteiro é mais largo (1600px em vez de 1280px) — texto com mais
-     largura por linha faz o bloco ficar mais curto/baixo, reduzindo a
-     necessidade de scroll. */
-  #sg-modal-main {
-    display: flex; align-items: start; gap: 5vw;
-    max-width: 1600px; margin: 0 auto;
-  }
+  .sg-col { flex: 1 1 0; min-width: 0; }
+  #sg-acf { flex: 0 1 280px; min-width: 200px; }
+  #sg-cover-col { flex: 1 1 42%; }
+  /* sem aspect-ratio/object-fit:cover fixo — a capa usa sempre a
+     proporção real da imagem/vídeo (largura 100%, altura automática),
+     para nunca cortar nada, seja qual for a orientação. */
+  #sg-cover-media { width: 100%; }
+  #sg-cover-media img,
+  #sg-cover-media video { width: 100%; height: auto; display: block; }
   .sg-desc-col { flex: 1 1 0; min-width: 0; }
-  #sg-acf { flex: 0 1 320px; min-width: 220px; }
   .sg-section-heading {
     font-family: 'Inter', sans-serif !important; font-size: 1rem !important;
     font-weight: 300 !important; white-space: nowrap !important;
     color: #151512; margin: 0 0 2rem; line-height: 1.1;
   }
-  #sg-modal-content .sg-desc { font-size: 1rem; line-height: 1.85; color: rgba(21,21,18,0.82); text-align: justify; }
+  .sg-desc { font-size: 1rem; line-height: 1.85; color: rgba(21,21,18,0.82); text-align: justify; }
   .sg-acf-table { width: 100%; }
   .sg-acf-row {
     display: grid; grid-template-columns: 140px 1fr; gap: 1rem;
@@ -285,7 +262,7 @@ add_shortcode('sastudio_gallery', function () {
   .sg-acf-label { font-weight: 400; color: #151512; }
   .sg-acf-value { color: rgba(21,21,18,0.75); line-height: 1.55; }
   @media (max-width: 900px) {
-    #sg-modal-main { flex-direction: column; gap: 2.5rem; }
+    #sg-main-cols { flex-direction: column; gap: 2.5rem; }
   }
   /* ── Galeria — cada foto é o seu próprio painel horizontal,
      sem faixa de scroll interna, tal como o resto do #sg-track.
@@ -345,10 +322,7 @@ add_shortcode('sastudio_gallery', function () {
 
 <div id="sg-root">
   <div id="sg-header">
-    <div>
-      <span id="sg-label">Projetos</span>
-      <p id="sg-tagline">Transformamos espaços em experiências únicas</p>
-    </div>
+    
     <span id="sg-count"></span>
   </div>
   <div id="sg-controls">
@@ -645,47 +619,36 @@ add_shortcode('sastudio_gallery', function () {
       var galleryImgs = Array.isArray(acf.project_gallery) ? acf.project_gallery : [];
       var hoverGif = (acf.hover_gif || '').trim();
 
-      var slideUrls = [];
-      if (hoverGif) slideUrls.push(hoverGif);
-      if (featSrc) slideUrls.push(featSrc);
-      galleryImgs.forEach(function (u) { if (u) slideUrls.push(u); });
+      /* capa: vídeo (hover_gif) se existir, senão a imagem principal —
+         estática, sem slideshow (a galeria completa continua disponível
+         como painéis próprios logo a seguir). */
+      var coverUrl     = hoverGif || featSrc;
+      var coverIsVideo = !!hoverGif && isVideoUrl(hoverGif);
+      var coverHtml    = coverIsVideo
+        ? '<video src="' + esc(coverUrl) + '" muted loop autoplay playsinline></video>'
+        : '<img src="' + esc(coverUrl) + '" alt=""/>';
 
       var html = '<div id="sg-track">';
-      html += '<section id="sg-modal-hero" class="sg-panel">';
-      html += '<div id="sg-slides">' + slideUrls.map(function (url, i) {
-        var inner = isVideoUrl(url)
-          ? '<video src="' + esc(url) + '" muted playsinline preload="' + (i === 0 ? 'auto' : 'none') + '"></video>'
-          : '<img src="' + esc(url) + '" alt="" loading="' + (i === 0 ? 'eager' : 'lazy') + '"/>';
-        return '<div class="sg-slide' + (i === 0 ? ' active' : '') + '">' + inner + '</div>';
-      }).join('') + '</div>';
-      html += '<div id="sg-modal-hero-overlay">';
+      html += '<section id="sg-panel-main" class="sg-panel sg-panel-scrollable">';
+      html += '<div id="sg-main-top">';
       html += '<div class="sg-meta">' + esc(meta) + '</div>';
-      html += '<h2>' + esc(title) + '</h2>';
-      if (slideUrls.length > 1) {
-        html += '<div id="sg-slide-nav">' +
-          '<button id="sg-slide-prev" aria-label="Anterior">&#8249;</button>' +
-          '<span id="sg-slide-count"></span>' +
-          '<button id="sg-slide-next" aria-label="Seguinte">&#8250;</button>' +
-        '</div>';
-      }
-      html += '</div></section>';
-      html += '<section id="sg-panel-content" class="sg-panel sg-panel-scrollable">';
-      html += '<div id="sg-modal-content">';
-      html += '<div id="sg-modal-main">';
-      html += '<div id="sg-content" class="sg-desc-col">';
-      html += '<h3 class="sg-section-heading">Descrição:</h3>';
-      html += '<div class="sg-desc">' + (desc || '<p>Sem descrição para este projeto.</p>') + '</div>';
+      html += '<h1>' + esc(title) + '</h1>';
       html += '</div>';
+      html += '<div id="sg-main-cols">';
       if (metaFields.length) {
-        html += '<div id="sg-acf">';
+        html += '<div id="sg-acf" class="sg-col">';
         html += '<h3 class="sg-section-heading">Dados do projeto:</h3>';
         html += '<div class="sg-acf-table">' + metaFields.map(function (f) {
           return '<div class="sg-acf-row"><span class="sg-acf-label">' + esc(f.label) + ':</span><span class="sg-acf-value">' + esc(f.value) + '</span></div>';
         }).join('') + '</div>';
         html += '</div>';
       }
-      html += '</div>'; /* fim #sg-modal-main */
-      html += '</div>'; /* fim #sg-modal-content */
+      html += '<div id="sg-cover-col" class="sg-col"><div id="sg-cover-media">' + (coverUrl ? coverHtml : '') + '</div></div>';
+      html += '<div id="sg-content" class="sg-col sg-desc-col">';
+      html += '<h3 class="sg-section-heading">Descrição:</h3>';
+      html += '<div class="sg-desc">' + (desc || '<p>Sem descrição para este projeto.</p>') + '</div>';
+      html += '</div>';
+      html += '</div>'; /* fim #sg-main-cols */
       html += '</section>';
       if (galleryImgs.length) {
         html += galleryImgs.map(function (url) {
@@ -696,7 +659,6 @@ add_shortcode('sastudio_gallery', function () {
       html += '</div>'; /* fim #sg-track */
       modalBody.innerHTML = html;
       wireRelatedClicks();
-      initSlideshow(slideUrls);
       if (window.resetSgTrack) window.resetSgTrack();
     }).catch(function () {
       modalBody.innerHTML = '<div id="sg-modal-content"><h2>' + esc(title) + '</h2><p>Não foi possível carregar o conteúdo.</p></div>';
@@ -745,72 +707,11 @@ add_shortcode('sastudio_gallery', function () {
     });
   }
 
-  /* ── Slideshow do hero: vídeo (hover_gif) primeiro se existir, depois
-     imagem principal e galeria — avanço automático, igual ao buildSlides(). ── */
-  var SLIDE_DELAY = 5000;
-  var slideInterval = null;
-  var currentSlide = 0;
-
   function isVideoUrl(url) {
     return /\.(mp4|webm|mov|ogg)(\?|$)/i.test(url);
   }
 
-  function stopAutoPlay() {
-    if (slideInterval) { clearInterval(slideInterval); slideInterval = null; }
-  }
-  function startAutoPlay(total) {
-    stopAutoPlay();
-    if (total < 2) return;
-    slideInterval = setInterval(function () {
-      goToSlide((currentSlide + 1) % total, 1);
-    }, SLIDE_DELAY);
-  }
-
-  function goToSlide(n, dir) {
-    var slides = document.querySelectorAll('#sg-slides .sg-slide');
-    if (!slides.length) return;
-    var total = slides.length;
-    var newIdx = ((n % total) + total) % total;
-    if (newIdx === currentSlide) return;
-
-    var oldVid = slides[currentSlide].querySelector('video');
-    if (oldVid) { oldVid.pause(); oldVid.currentTime = 0; }
-    slides[currentSlide].classList.remove('active');
-    currentSlide = newIdx;
-    slides[currentSlide].classList.add('active');
-    var newVid = slides[currentSlide].querySelector('video');
-    if (newVid) { newVid.currentTime = 0; newVid.play().catch(function () {}); }
-
-    var count = document.getElementById('sg-slide-count');
-    if (count) count.textContent = (currentSlide + 1) + ' / ' + total;
-  }
-
-  function initSlideshow(urls) {
-    stopAutoPlay();
-    currentSlide = 0;
-    var total = urls.length;
-    var count = document.getElementById('sg-slide-count');
-    if (count) count.textContent = total > 1 ? ('1 / ' + total) : '';
-
-    var prevBtn = document.getElementById('sg-slide-prev');
-    var nextBtn = document.getElementById('sg-slide-next');
-    if (prevBtn) prevBtn.addEventListener('click', function (e) { e.stopPropagation(); goToSlide(currentSlide - 1, -1); startAutoPlay(total); });
-    if (nextBtn) nextBtn.addEventListener('click', function (e) { e.stopPropagation(); goToSlide(currentSlide + 1, 1); startAutoPlay(total); });
-
-    var firstSlide = document.querySelector('#sg-slides .sg-slide.active');
-    var firstVid = firstSlide ? firstSlide.querySelector('video') : null;
-    if (firstVid) {
-      firstVid.addEventListener('ended', function () {
-        goToSlide(1, 1);
-        startAutoPlay(total);
-      });
-      firstVid.play().catch(function () {});
-    } else {
-      startAutoPlay(total);
-    }
-  }
-
-  /* ── Navegação horizontal entre painéis (Hero → Descrição/Dados →
+  /* ── Navegação horizontal entre painéis (Capa/Dados/Descrição →
      Galeria → Relacionados), igual ao index.html — #sg-track é
      recriado a cada abertura de projeto (modalBody.innerHTML), por
      isso é preciso voltar a procurá-lo em cada frame/evento em vez
@@ -860,7 +761,6 @@ add_shortcode('sastudio_gallery', function () {
 
   function closeModal(opts) {
     opts = opts || {};
-    stopAutoPlay();
     modal.classList.remove('sg-open');
     document.body.classList.remove('sg-modal-open');
     if (!opts.skipHistory) popProjectUrl();
