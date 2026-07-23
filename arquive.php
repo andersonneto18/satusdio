@@ -251,10 +251,10 @@ add_shortcode('sastudio_gallery', function () {
      que "Dados do projeto:" por construção em CSS (mesma marcação =
      mesma altura), sem depender de medir posições em JS. */
   .sg-title-block { max-width: 1800px; margin: 0 auto 3rem; }
-  .sg-title-block .sg-meta {
-    font-size: 0.68rem; letter-spacing: 0.3em; text-transform: uppercase;
-    color: #7a5c3a; margin-bottom: 0.8rem;
-  }
+  /* removida a pedido do cliente (categoria · ano acima do título) —
+     display:none aqui apaga tanto a versão real como as cópias
+     invisíveis usadas para alinhar Descrição/Galeria com o título. */
+  .sg-title-block .sg-meta { display: none; }
   .sg-title-block h1 {
     font-family: 'Inter', sans-serif; font-weight: 300;
     font-size: clamp(1.8rem, 3.2vw, 2.8rem); line-height: 1.05;

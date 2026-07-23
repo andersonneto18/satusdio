@@ -653,12 +653,11 @@
     /* meta mais visível e destacado. .lb-proj-meta-spacer partilha este
        estilo — cópia invisível no painel da Descrição (ver
        .lb-desc-spacer). */
+    /* removida a pedido do cliente (categoria · ano acima do título) —
+       display:none aqui apaga tanto a versão real como as cópias
+       invisíveis usadas para alinhar Descrição/Galeria com o título. */
     #lb-proj-meta, .lb-proj-meta-spacer {
-      font-family: 'Inter', sans-serif !important;
-      font-size: 0.68rem !important; letter-spacing: 0.38em !important;
-      text-transform: uppercase !important;
-      color: var(--accent) !important;
-      margin-bottom: 1rem !important; font-weight: 400 !important;
+      display: none !important;
     }
 
     /* ── CONTENT DESCRIPTION ── */
