@@ -204,14 +204,14 @@ add_shortcode('single_projetos', function () {
   }
   .sp-col { flex: 1 1 0; min-width: 0; }
   #sp-acf { flex: 0 1 280px; min-width: 200px; }
-  #sp-cover-col { flex: 1 1 42%; }
+  #sp-cover-col { flex: 1 1 32%; }
   /* sem aspect-ratio/object-fit:cover fixo — a capa usa sempre a
      proporção real da imagem/vídeo (largura 100%, altura automática),
      para nunca cortar nada, seja qual for a orientação. */
   #sp-cover-media { width: 100%; }
   #sp-cover-media img,
   #sp-cover-media video { width: 100%; height: auto; display: block; }
-  .sp-desc-col { flex: 1 1 0; min-width: 0; }
+  .sp-desc-col { flex: 1.8 1 0; min-width: 0; }
   .sp-section-heading {
     font-family: 'Inter', sans-serif !important; font-size: 1rem !important;
     font-weight: 300 !important; white-space: nowrap !important;

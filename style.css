@@ -738,14 +738,14 @@
     }
     .lb-col { flex: 1 1 0; min-width: 0; }
     #lb-acf { flex: 0 1 280px; min-width: 200px; }
-    #lb-cover-col { flex: 1 1 42%; }
+    #lb-cover-col { flex: 1 1 32%; }
     /* sem aspect-ratio/object-fit:cover fixo — a capa usa sempre a
        proporção real da imagem/vídeo (largura 100%, altura automática),
        para nunca cortar nada, seja qual for a orientação. */
     #lb-cover-media { width: 100%; }
     #lb-cover-media img,
     #lb-cover-media video { width: 100%; height: auto; display: block; }
-    .lb-desc-col { flex: 1 1 0; min-width: 0; }
+    .lb-desc-col { flex: 1.8 1 0; min-width: 0; }
     .lb-desc-col * { max-width: 100%; box-sizing: border-box; }
     .lb-desc-col p {
       font-family: 'Inter', sans-serif !important;

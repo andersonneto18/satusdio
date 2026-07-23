@@ -238,14 +238,14 @@ add_shortcode('sastudio_gallery', function () {
   }
   .sg-col { flex: 1 1 0; min-width: 0; }
   #sg-acf { flex: 0 1 280px; min-width: 200px; }
-  #sg-cover-col { flex: 1 1 42%; }
+  #sg-cover-col { flex: 1 1 32%; }
   /* sem aspect-ratio/object-fit:cover fixo — a capa usa sempre a
      proporção real da imagem/vídeo (largura 100%, altura automática),
      para nunca cortar nada, seja qual for a orientação. */
   #sg-cover-media { width: 100%; }
   #sg-cover-media img,
   #sg-cover-media video { width: 100%; height: auto; display: block; }
-  .sg-desc-col { flex: 1 1 0; min-width: 0; }
+  .sg-desc-col { flex: 1.8 1 0; min-width: 0; }
   .sg-section-heading {
     font-family: 'Inter', sans-serif !important; font-size: 1rem !important;
     font-weight: 300 !important; white-space: nowrap !important;
