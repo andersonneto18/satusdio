@@ -184,52 +184,76 @@ function getMasonryConfig() {
   return BREAKPOINTS.find(c => vw <= c.maxW);
 }
 
-/* Larguras de coluna variam ciclicamente — evita colunas todas iguais
-   (grelha de linhas retas), mas cada foto usa sempre a SUA proporção
-   real (dataset.aspect, vinda das dimensões reais do WordPress) para
-   decidir a altura: largura da coluna ÷ aspect, nunca cortando nada.
-   O fundo da coluna pode ficar um pouco aquém da altura do ecrã (em vez
-   de forçar a foto a esticar/cortar para encaixar exato) — essa folga
-   também ajuda a quebrar a linha reta contínua entre colunas vizinhas. */
-const WIDTH_MULTIPLIERS = [1.15, 0.80, 1.35, 0.90, 1.20, 0.75, 0.95, 1.05, 1.30, 0.85];
-const DEFAULT_ASPECT = 4 / 3;
+/* Padrões de coluna (largura relativa à coluna "normal" + divisão
+   interna de altura) — ciclam por esta lista em vez de um grid uniforme,
+   para que colunas vizinhas nunca tenham a mesma largura nem o mesmo
+   número de fotos. É isso que quebra o efeito de "linhas retas" a
+   dividir as imagens (pedido do cliente) — sem isto, largura e gap
+   uniformes criavam corredores verticais contínuos entre colunas. */
+const COLUMN_PATTERNS = [
+  { count: 3, widthMul: 1.15, ratios: [0.42, 0.33, 0.25] },
+  { count: 2, widthMul: 0.80, ratios: [0.55, 0.45] },
+  { count: 1, widthMul: 1.35, ratios: [1] },
+  { count: 3, widthMul: 0.90, ratios: [0.28, 0.40, 0.32] },
+  { count: 2, widthMul: 1.20, ratios: [0.38, 0.62] },
+  { count: 3, widthMul: 0.75, ratios: [0.36, 0.24, 0.40] },
+  { count: 1, widthMul: 0.95, ratios: [1] },
+  { count: 2, widthMul: 1.05, ratios: [0.48, 0.52] },
+  { count: 3, widthMul: 1.30, ratios: [0.30, 0.46, 0.24] },
+  { count: 2, widthMul: 0.85, ratios: [0.60, 0.40] },
+];
 
-/* Para cada coluna: enche com fotos (na ordem em que aparecem) até
-   chegar perto da altura do ecrã, cada uma com a sua altura natural
-   (colW / aspect real). Novas colunas abrem-se à direita, reveladas ao
-   fazer scroll horizontal. */
+/* Gera o plano de colunas consumindo exatamente n fotos, ciclando
+   COLUMN_PATTERNS — a última coluna é cortada ao que sobrar, com os
+   pesos de altura do padrão renormalizados para continuarem a somar 1. */
+function computeColumnPlan(n) {
+  const plan = [];
+  let remaining = n, i = 0;
+  while (remaining > 0) {
+    const pattern = COLUMN_PATTERNS[i % COLUMN_PATTERNS.length];
+    const count   = Math.min(pattern.count, remaining);
+    let ratios = pattern.ratios;
+    if (count !== pattern.count) {
+      const slice = pattern.ratios.slice(0, count);
+      const sum   = slice.reduce((a, b) => a + b, 0);
+      ratios = slice.map(r => r / sum);
+    }
+    plan.push({ count, widthMul: pattern.widthMul, ratios });
+    remaining -= count;
+    i++;
+  }
+  return plan;
+}
+
+/* Para cada coluna: usa o plano já decidido (computeColumnPlan) — largura
+   e divisão de altura próprias por coluna — para fechar exatamente a
+   altura do ecrã sem deixar vão nem esticar demais. Novas colunas
+   abrem-se à direita, reveladas ao fazer scroll horizontal. */
 function layoutMasonry() {
   const { gap, approxCols } = getMasonryConfig();
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
+  const vw    = window.innerWidth;
+  const vh    = window.innerHeight;
+  const maxH  = vh - gap * 2;
   const baseColW = (vw - gap * (approxCols + 1)) / approxCols;
-  const targetH  = vh - gap * 2;
 
   const pics = Array.from(gallery.querySelectorAll('.pic'));
+  const plan = computeColumnPlan(pics.length);
 
-  let idx = 0, x = gap, colIdx = 0;
+  let idx = 0, x = gap;
 
-  while (idx < pics.length) {
-    const colW = baseColW * WIDTH_MULTIPLIERS[colIdx % WIDTH_MULTIPLIERS.length];
-
-    const group = [];
-    let usedH = 0;
-    while (idx < pics.length) {
-      const pic    = pics[idx];
-      const aspect = parseFloat(pic.dataset.aspect) || DEFAULT_ASPECT;
-      const h      = colW / aspect;
-      /* já tem pelo menos 1 foto e esta próxima passaria bastante da
-         altura do ecrã — fica para a coluna seguinte (a não ser que seja
-         a última foto de todas, aí tem de entrar nesta coluna na mesma) */
-      if (group.length && usedH + gap + h > targetH && idx < pics.length - 1) break;
-      group.push({ pic, h });
-      usedH += h + gap;
-      idx++;
-      if (usedH >= targetH) break;
-    }
+  plan.forEach(({ count, widthMul, ratios }) => {
+    const group  = pics.slice(idx, idx + count);
+    /* tamanhos sempre com proporções fixas e diferentes entre si (não
+       derivadas da proporção real da foto) — senão fotos com
+       enquadramento parecido ficavam com o mesmo tamanho na coluna.
+       A imagem recorta (object-fit: cover) em vez de esticar, por isso
+       o corte não distorce nada. */
+    const colW   = baseColW * widthMul;
+    const availH = maxH - gap * (count + 1);
 
     let y = gap;
-    group.forEach(({ pic, h }) => {
+    group.forEach((pic, i) => {
+      const h = availH * ratios[i];
       pic.style.left   = x + 'px';
       pic.style.top    = y + 'px';
       pic.style.width  = colW + 'px';
@@ -238,8 +262,8 @@ function layoutMasonry() {
     });
 
     x += colW + gap;
-    colIdx++;
-  }
+    idx += count;
+  });
 
   gallery.style.width  = x + 'px';
   gallery.style.height = vh + 'px';
