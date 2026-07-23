@@ -239,9 +239,19 @@ add_shortcode('single_projetos', function () {
      proporção real da imagem/vídeo (largura 100%, altura automática),
      para nunca cortar nada, seja qual for a orientação. */
   /* mais pequena que a coluna toda, centrada — não colada às bordas */
-  #sp-cover-media { width: 80%; margin: 0 auto; }
+  /* max-height evita que imagens muito altas (proporção vertical)
+     empurrem o painel para além do ecrã, obrigando a rolar — a
+     imagem encolhe (mantendo a proporção real, sem cortar) até caber
+     nessa altura, mesmo que fique mais estreita que os 65% da largura. */
+  #sp-cover-media {
+    width: 65%; max-height: 60vh; margin: 0 auto;
+    display: flex; justify-content: center;
+  }
   #sp-cover-media img,
-  #sp-cover-media video { width: 100%; height: auto; display: block; }
+  #sp-cover-media video {
+    max-width: 100%; max-height: 60vh;
+    width: auto; height: auto; display: block;
+  }
 
   /* ── PAINEL DA DESCRIÇÃO — próprio painel horizontal, texto a
      largura quase total da página (sem coluna ao lado); o utilizador
