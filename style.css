@@ -146,7 +146,11 @@
     .pic img {
       display: block; width: 100%; height: 100%;
       object-fit: cover;
+      transition: transform 0.5s ease;
     }
+    /* zoom leve de destaque, só na imagem em hover — contido dentro da
+       própria caixa (overflow:hidden do .pic), não desloca mais nada */
+    .pic:hover img { transform: scale(1.04); }
 
     .pic-dim {
       position: absolute; inset: 0;
