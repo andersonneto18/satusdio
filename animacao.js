@@ -492,15 +492,54 @@ function isVideoUrl(url) {
   return /\.(mp4|webm|mov|ogg)(\?|$)/i.test(url);
 }
 
-/* capa do projeto: imagem ou vídeo, estático, no centro do painel —
-   ao contrário do slideshow antigo, não passa automaticamente por
-   várias imagens; a galeria completa continua disponível como
-   painéis próprios mais à frente no #lb-track. */
+/* capa do projeto: vídeo (hover_gif) tocado uma vez (sem loop); quando
+   acaba, passa a fazer transição (crossfade) pelas imagens da galeria
+   — assim que estas estiverem disponíveis (o vídeo normalmente acaba
+   antes de a galeria ter sido carregada, por isso os dois "sinais"
+   ficam à espera um do outro em maybeStartCoverSlideshow). Sem vídeo,
+   mostra só a imagem de destaque, estática. */
+let coverGalleryImgs   = [];
+let coverVideoEnded    = false;
+let coverGalleryReady  = false;
+let coverSlideshowTimer = null;
+
+function stopCoverSlideshow() {
+  if (coverSlideshowTimer) { clearInterval(coverSlideshowTimer); coverSlideshowTimer = null; }
+}
+
+function startCoverSlideshow(images) {
+  stopCoverSlideshow();
+  if (!images || images.length < 2) return;
+  lbCoverMedia.innerHTML = '';
+  const slides = images.map((url, i) => {
+    const el = document.createElement('div');
+    el.className = 'lb-cover-slide' + (i === 0 ? ' active' : '');
+    el.style.backgroundImage = `url("${url}")`;
+    lbCoverMedia.appendChild(el);
+    return el;
+  });
+  let idx = 0;
+  coverSlideshowTimer = setInterval(() => {
+    slides[idx].classList.remove('active');
+    idx = (idx + 1) % slides.length;
+    slides[idx].classList.add('active');
+  }, 4000);
+}
+
+function maybeStartCoverSlideshow() {
+  if (coverVideoEnded && coverGalleryReady) startCoverSlideshow(coverGalleryImgs);
+}
+
 function setCoverMedia(featSrc, hoverGif) {
+  stopCoverSlideshow();
+  coverGalleryImgs = [];
+  coverVideoEnded = false;
+  coverGalleryReady = false;
   lbCoverMedia.innerHTML = '';
   if (hoverGif && isVideoUrl(hoverGif)) {
     const vid = document.createElement('video');
-    vid.src = hoverGif; vid.muted = true; vid.loop = true; vid.autoplay = true; vid.playsInline = true;
+    vid.src = hoverGif; vid.muted = true; vid.autoplay = true; vid.playsInline = true;
+    vid.addEventListener('ended', () => { coverVideoEnded = true; maybeStartCoverSlideshow(); });
     lbCoverMedia.appendChild(vid);
   } else {
     const img = document.createElement('img');
@@ -589,6 +628,7 @@ function closeProject() {
       lbView.classList.remove('show');
       lbView.style.opacity = '';
       lbView.scrollTop = 0;
+      stopCoverSlideshow();
       lbCoverMedia.innerHTML = '';
       lbContent.innerHTML = '';
       lbContent.classList.remove('visible');
@@ -772,6 +812,13 @@ async function fetchProjectContent(id) {
         }
       });
     }
+
+    /* disponibiliza as imagens da galeria para a transição da capa
+       (ver setCoverMedia/maybeStartCoverSlideshow) assim que o vídeo
+       de hover (se existir) tiver terminado */
+    coverGalleryImgs = galleryImgs.map(g => g.url);
+    coverGalleryReady = true;
+    maybeStartCoverSlideshow();
 
     if (galleryImgs.length) {
       /* cada foto da galeria vira o seu próprio painel horizontal,

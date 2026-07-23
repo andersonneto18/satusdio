@@ -247,12 +247,20 @@ add_shortcode('single_projetos', function () {
      altura, para os cards ficarem visualmente consistentes entre
      projetos; object-fit:cover ajusta a imagem a essa caixa (pode
      recortar as margens conforme a proporção original). */
-  #sp-cover-media { width: 65%; height: 55vh; margin: 0 auto; }
+  #sp-cover-media { width: 65%; height: 55vh; margin: 0 auto; position: relative; }
   #sp-cover-media img,
   #sp-cover-media video {
     width: 100%; height: 100%;
     object-fit: cover; display: block;
   }
+  /* transição (crossfade) pelas imagens da galeria depois de o vídeo
+     de hover acabar — ver startSpCoverSlideshow */
+  .sp-cover-slide {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center;
+    opacity: 0; transition: opacity 1.2s ease;
+  }
+  .sp-cover-slide.active { opacity: 1; }
 
   /* ── PAINEL DA DESCRIÇÃO — próprio painel horizontal, texto a
      largura quase total da página (sem coluna ao lado); o utilizador
@@ -427,6 +435,33 @@ add_shortcode('single_projetos', function () {
 
 <script>
 (function () {
+  /* transição (crossfade) pelas imagens da galeria depois de o vídeo
+     de hover da capa acabar (toca uma vez, sem loop). */
+  var SP_GALLERY_IMGS = <?php echo wp_json_encode(array_values($gallery_urls)); ?>;
+  var spCoverSlideshowTimer = null;
+  function stopSpCoverSlideshow() {
+    if (spCoverSlideshowTimer) { clearInterval(spCoverSlideshowTimer); spCoverSlideshowTimer = null; }
+  }
+  function startSpCoverSlideshow() {
+    stopSpCoverSlideshow();
+    var coverMedia = document.getElementById('sp-cover-media');
+    if (!coverMedia || SP_GALLERY_IMGS.length < 2) return;
+    coverMedia.innerHTML = '';
+    var slides = SP_GALLERY_IMGS.map(function (url, i) {
+      var el = document.createElement('div');
+      el.className = 'sp-cover-slide' + (i === 0 ? ' active' : '');
+      el.style.backgroundImage = 'url("' + url + '")';
+      coverMedia.appendChild(el);
+      return el;
+    });
+    var idx = 0;
+    spCoverSlideshowTimer = setInterval(function () {
+      slides[idx].classList.remove('active');
+      idx = (idx + 1) % slides.length;
+      slides[idx].classList.add('active');
+    }, 4000);
+  }
+
   /* Cria a tag <video> da capa só depois de a página estar carregada,
      para o tema (The7/MediaElement.js) não a apanhar e a embrulhar no
      player nativo dele — se não existir nenhuma <video> quando esse
@@ -436,7 +471,8 @@ add_shortcode('single_projetos', function () {
     if (cover && cover.dataset.videoSrc) {
       var vid = document.createElement('video');
       vid.src = cover.dataset.videoSrc;
-      vid.muted = true; vid.loop = true; vid.autoplay = true; vid.playsInline = true;
+      vid.muted = true; vid.autoplay = true; vid.playsInline = true;
+      vid.addEventListener('ended', startSpCoverSlideshow);
       cover.appendChild(vid);
       vid.play().catch(function () {});
     }

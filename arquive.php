@@ -283,12 +283,20 @@ add_shortcode('sastudio_gallery', function () {
      altura, para os cards ficarem visualmente consistentes entre
      projetos; object-fit:cover ajusta a imagem a essa caixa (pode
      recortar as margens conforme a proporção original). */
-  #sg-cover-media { width: 65%; height: 55vh; margin: 0 auto; }
+  #sg-cover-media { width: 65%; height: 55vh; margin: 0 auto; position: relative; }
   #sg-cover-media img,
   #sg-cover-media video {
     width: 100%; height: 100%;
     object-fit: cover; display: block;
   }
+  /* transição (crossfade) pelas imagens da galeria depois de o vídeo
+     de hover acabar — ver startSgCoverSlideshow */
+  .sg-cover-slide {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center;
+    opacity: 0; transition: opacity 1.2s ease;
+  }
+  .sg-cover-slide.active { opacity: 1; }
 
   /* ── PAINEL DA DESCRIÇÃO — próprio painel horizontal, texto a
      largura quase total da página (sem coluna ao lado); o utilizador
@@ -681,13 +689,14 @@ add_shortcode('sastudio_gallery', function () {
       var galleryImgs = Array.isArray(acf.project_gallery) ? acf.project_gallery : [];
       var hoverGif = (acf.hover_gif || '').trim();
 
-      /* capa: vídeo (hover_gif) se existir, senão a imagem principal —
-         estática, sem slideshow (a galeria completa continua disponível
-         como painéis próprios logo a seguir). */
+      /* capa: vídeo (hover_gif) se existir, tocado uma vez (sem loop);
+         quando acaba, passa a fazer transição (crossfade) pelas imagens
+         da galeria (ver wireCoverSlideshow, chamado depois de inserir
+         este HTML no DOM). Sem vídeo, mostra só a imagem de destaque. */
       var coverUrl     = hoverGif || featSrc;
       var coverIsVideo = !!hoverGif && isVideoUrl(hoverGif);
       var coverHtml    = coverIsVideo
-        ? '<video src="' + esc(coverUrl) + '" muted loop autoplay playsinline></video>'
+        ? '<video src="' + esc(coverUrl) + '" muted autoplay playsinline></video>'
         : '<img src="' + esc(coverUrl) + '" alt=""/>';
 
       var titleBlockHtml = '<div class="sg-meta">' + esc(meta) + '</div><h1>' + esc(title) + '</h1>';
@@ -733,6 +742,7 @@ add_shortcode('sastudio_gallery', function () {
       modalBody.innerHTML = html;
       wireRelatedClicks();
       if (window.resetSgTrack) window.resetSgTrack();
+      wireCoverSlideshow(galleryImgs);
     }).catch(function () {
       modalBody.innerHTML = '<div id="sg-modal-content"><h2>' + esc(title) + '</h2><p>Não foi possível carregar o conteúdo.</p></div>';
     });
@@ -782,6 +792,39 @@ add_shortcode('sastudio_gallery', function () {
 
   function isVideoUrl(url) {
     return /\.(mp4|webm|mov|ogg)(\?|$)/i.test(url);
+  }
+
+  /* transição (crossfade) pelas imagens da galeria depois de o vídeo
+     de hover da capa acabar (ver coverIsVideo/coverHtml acima). */
+  var sgCoverSlideshowTimer = null;
+  function stopSgCoverSlideshow() {
+    if (sgCoverSlideshowTimer) { clearInterval(sgCoverSlideshowTimer); sgCoverSlideshowTimer = null; }
+  }
+  function startSgCoverSlideshow(images) {
+    stopSgCoverSlideshow();
+    var coverMedia = document.getElementById('sg-cover-media');
+    if (!coverMedia || !images || images.length < 2) return;
+    coverMedia.innerHTML = '';
+    var slides = images.map(function (url, i) {
+      var el = document.createElement('div');
+      el.className = 'sg-cover-slide' + (i === 0 ? ' active' : '');
+      el.style.backgroundImage = 'url("' + url + '")';
+      coverMedia.appendChild(el);
+      return el;
+    });
+    var idx = 0;
+    sgCoverSlideshowTimer = setInterval(function () {
+      slides[idx].classList.remove('active');
+      idx = (idx + 1) % slides.length;
+      slides[idx].classList.add('active');
+    }, 4000);
+  }
+  function wireCoverSlideshow(images) {
+    stopSgCoverSlideshow();
+    var coverMedia = document.getElementById('sg-cover-media');
+    var vid = coverMedia ? coverMedia.querySelector('video') : null;
+    if (!vid) return;
+    vid.addEventListener('ended', function () { startSgCoverSlideshow(images); });
   }
 
   /* ── Navegação horizontal entre painéis (Capa/Dados/Descrição →
@@ -851,6 +894,7 @@ add_shortcode('sastudio_gallery', function () {
     opts = opts || {};
     modal.classList.remove('sg-open');
     document.body.classList.remove('sg-modal-open');
+    stopSgCoverSlideshow();
     if (!opts.skipHistory) popProjectUrl();
   }
   modalClose.addEventListener('click', function () { closeModal(); });

@@ -789,12 +789,21 @@
        altura, para os cards ficarem visualmente consistentes entre
        projetos; object-fit:cover ajusta a imagem a essa caixa (pode
        recortar as margens conforme a proporção original). */
-    #lb-cover-media { width: 65%; height: 55vh; margin: 0 auto; }
+    #lb-cover-media { width: 65%; height: 55vh; margin: 0 auto; position: relative; }
     #lb-cover-media img,
     #lb-cover-media video {
       width: 100%; height: 100%;
       object-fit: cover; display: block;
     }
+    /* transição (crossfade) pelas imagens da galeria depois de o vídeo
+       de hover acabar — ver setCoverMedia/startCoverSlideshow em
+       animacao.js */
+    .lb-cover-slide {
+      position: absolute; inset: 0;
+      background-size: cover; background-position: center;
+      opacity: 0; transition: opacity 1.2s ease;
+    }
+    .lb-cover-slide.active { opacity: 1; }
 
     /* ── PAINEL DA DESCRIÇÃO — próprio painel horizontal, texto a
        largura quase total da página (sem coluna ao lado); o utilizador
