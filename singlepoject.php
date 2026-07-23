@@ -209,16 +209,22 @@ add_shortcode('single_projetos', function () {
      slideshow). A Descrição já não vive aqui — é o painel seguinte, a
      largura quase total da página (#sp-panel-desc), sem coluna ao lado. */
   #sp-panel-main { position: relative; padding: 4.5rem 5vw 6rem; }
-  #sp-main-top { max-width: 1800px; margin: 0 auto 3rem; }
-  #sp-main-top .sp-meta {
+  /* .sp-title-block (não só #sp-main-top): a mesma classe é reutilizada,
+     invisível, dentro do painel da Descrição (.sp-desc-spacer) — isto
+     garante que o título "Descrição:" fica exatamente à mesma altura
+     que "Dados do projeto:" por construção em CSS (mesma marcação =
+     mesma altura), sem depender de medir posições em JS. */
+  .sp-title-block { max-width: 1800px; margin: 0 auto 3rem; }
+  .sp-title-block .sp-meta {
     font-size: 0.68rem; letter-spacing: 0.3em; text-transform: uppercase;
     color: #7a5c3a; margin-bottom: 0.8rem;
   }
-  #sp-main-top h1 {
+  .sp-title-block h1 {
     font-family: 'Inter', sans-serif; font-weight: 300;
     font-size: clamp(1.8rem, 3.2vw, 2.8rem); line-height: 1.05;
     color: #151512; margin: 0; letter-spacing: 0.01em;
   }
+  .sp-desc-spacer { visibility: hidden; pointer-events: none; }
   #sp-main-cols {
     display: flex; align-items: start; gap: 4vw;
     max-width: 1800px; margin: 0 auto;
@@ -241,13 +247,14 @@ add_shortcode('single_projetos', function () {
      largura quase total da página (sem coluna ao lado); o utilizador
      roda o rato (navegação horizontal já existente) para chegar a
      este painel e depois à Galeria. ── */
-  /* align-items:flex-start (não center) — o padding-top de #sp-content
-     é ajustado em JS (alignSpDescHeading) para o título "Descrição:"
-     ficar à mesma altura do "Dados do projeto:" no painel anterior. */
+  /* align-items:flex-start (não center) — o padding-top igual ao do
+     painel principal (4.5rem) + o .sp-desc-spacer invisível (ver acima)
+     fazem o título "Descrição:" ficar à mesma altura do "Dados do
+     projeto:" no painel anterior. */
   #sp-panel-desc { display: flex; align-items: flex-start; }
   #sp-content.sp-desc-col {
     width: 100%; max-width: 1300px; margin: 0 auto;
-    padding: 3.5rem 8vw 5rem;
+    padding: 4.5rem 8vw 5rem;
   }
   .sp-section-heading {
     font-family: 'Inter', sans-serif !important; font-size: 1rem !important;
@@ -269,6 +276,7 @@ add_shortcode('single_projetos', function () {
   #sp-acf { flex-basis: auto; min-width: 0; }
     #sp-cover-col { position: static; }
     #sp-content.sp-desc-col { padding: 2.5rem 5vw 3rem; }
+    .sp-desc-spacer { display: none; }
   }
 
   /* ── Galeria — cada foto é o seu próprio painel horizontal, tal como
@@ -324,7 +332,7 @@ add_shortcode('single_projetos', function () {
   <div id="sp-viewport">
     <div id="sp-track">
       <section id="sp-panel-main" class="sp-panel sp-panel-scrollable">
-        <div id="sp-main-top">
+        <div id="sp-main-top" class="sp-title-block">
           <div class="sp-meta"><?php echo esc_html($meta_line); ?></div>
           <h1><?php echo esc_html($title); ?></h1>
         </div>
@@ -354,6 +362,10 @@ add_shortcode('single_projetos', function () {
 
       <section id="sp-panel-desc" class="sp-panel sp-panel-scrollable">
         <div id="sp-content" class="sp-desc-col">
+          <div class="sp-title-block sp-desc-spacer" aria-hidden="true">
+            <div class="sp-meta"><?php echo esc_html($meta_line); ?></div>
+            <h1><?php echo esc_html($title); ?></h1>
+          </div>
           <h3 class="sp-section-heading">Descrição:</h3>
           <div class="sp-desc"><?php echo $desc ? $desc : '<p>Sem descrição para este projeto.</p>'; ?></div>
         </div>
@@ -411,35 +423,7 @@ add_shortcode('single_projetos', function () {
       cover.appendChild(vid);
       vid.play().catch(function () {});
     }
-    alignSpDescHeading();
   });
-
-  /* alinha o título "Descrição:" (painel seguinte) com a altura real do
-     título "Dados do projeto:" (painel principal) — evita ter de
-     adivinhar a altura do bloco de título (varia com o comprimento do
-     nome do projeto). Só se aplica em ecrãs largos (ver #sp-main-cols
-     no media query de 900px). */
-  function alignSpDescHeading() {
-    var descCol = document.getElementById('sp-content');
-    var panel = document.getElementById('sp-panel-desc');
-    if (!descCol) return;
-    descCol.style.paddingTop = '';
-    if (window.innerWidth <= 900 || !panel) return;
-    var heading = document.querySelector('#sp-acf > .sp-section-heading');
-    if (!heading) return;
-
-    var target = heading.getBoundingClientRect().top;
-    descCol.style.paddingTop = target + 'px';
-
-    /* se este padding empurrar o conteúdo para além do ecrã, reduz até
-       caber sem scroll — alinhar os títulos nunca deve obrigar a rolar */
-    var overflow = panel.scrollHeight - panel.clientHeight;
-    if (overflow > 0) {
-      descCol.style.paddingTop = Math.max(0, target - overflow) + 'px';
-    }
-  }
-  alignSpDescHeading();
-  window.addEventListener('resize', alignSpDescHeading);
 
   /* ── Navegação horizontal entre painéis (Capa/Dados/Descrição →
      Galeria → Relacionados), igual ao index.html/arquive.php. Aqui não

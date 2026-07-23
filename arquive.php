@@ -245,16 +245,22 @@ add_shortcode('sastudio_gallery', function () {
      slideshow). A Descrição já não vive aqui — é o painel seguinte, a
      largura quase total da página (#sg-panel-desc), sem coluna ao lado. */
   #sg-panel-main { position: relative; padding: 4.5rem 5vw 6rem; }
-  #sg-main-top { max-width: 1800px; margin: 0 auto 3rem; }
-  #sg-main-top .sg-meta {
+  /* .sg-title-block (não só #sg-main-top): a mesma classe é reutilizada,
+     invisível, dentro do painel da Descrição (.sg-desc-spacer) — isto
+     garante que o título "Descrição:" fica exatamente à mesma altura
+     que "Dados do projeto:" por construção em CSS (mesma marcação =
+     mesma altura), sem depender de medir posições em JS. */
+  .sg-title-block { max-width: 1800px; margin: 0 auto 3rem; }
+  .sg-title-block .sg-meta {
     font-size: 0.68rem; letter-spacing: 0.3em; text-transform: uppercase;
     color: #7a5c3a; margin-bottom: 0.8rem;
   }
-  #sg-main-top h1 {
+  .sg-title-block h1 {
     font-family: 'Inter', sans-serif; font-weight: 300;
     font-size: clamp(1.8rem, 3.2vw, 2.8rem); line-height: 1.05;
     color: #151512; margin: 0; letter-spacing: 0.01em;
   }
+  .sg-desc-spacer { visibility: hidden; pointer-events: none; }
   #sg-main-cols {
     display: flex; align-items: start; gap: 4vw;
     max-width: 1800px; margin: 0 auto;
@@ -277,13 +283,14 @@ add_shortcode('sastudio_gallery', function () {
      largura quase total da página (sem coluna ao lado); o utilizador
      roda o rato (navegação horizontal já existente) para chegar a
      este painel e depois à Galeria. ── */
-  /* align-items:flex-start (não center) — o padding-top de #sg-content
-     é ajustado em JS (alignSgDescHeading) para o título "Descrição:"
-     ficar à mesma altura do "Dados do projeto:" no painel anterior. */
+  /* align-items:flex-start (não center) — o padding-top igual ao do
+     painel principal (4.5rem) + o .sg-desc-spacer invisível (ver acima)
+     fazem o título "Descrição:" ficar à mesma altura do "Dados do
+     projeto:" no painel anterior. */
   #sg-panel-desc { display: flex; align-items: flex-start; }
   #sg-content.sg-desc-col {
     width: 100%; max-width: 1300px; margin: 0 auto;
-    padding: 3.5rem 8vw 5rem;
+    padding: 4.5rem 8vw 5rem;
   }
   .sg-section-heading {
     font-family: 'Inter', sans-serif !important; font-size: 1rem !important;
@@ -305,6 +312,7 @@ add_shortcode('sastudio_gallery', function () {
     #sg-acf { flex-basis: auto; min-width: 0; }
     #sg-cover-col { position: static; }
     #sg-content.sg-desc-col { padding: 2.5rem 5vw 3rem; }
+    .sg-desc-spacer { display: none; }
   }
   /* ── Galeria — cada foto é o seu próprio painel horizontal,
      sem faixa de scroll interna, tal como o resto do #sg-track.
@@ -629,32 +637,6 @@ add_shortcode('sastudio_gallery', function () {
     }
   }
 
-  /* alinha o título "Descrição:" (painel seguinte) com a altura real do
-     título "Dados do projeto:" (painel principal) — evita ter de
-     adivinhar a altura do bloco de título (varia com o comprimento do
-     nome do projeto). Só se aplica em ecrãs largos (ver #sg-main-cols
-     no media query de 900px). */
-  function alignSgDescHeading() {
-    var descCol = document.getElementById('sg-content');
-    var panel = document.getElementById('sg-panel-desc');
-    if (!descCol) return;
-    descCol.style.paddingTop = '';
-    if (window.innerWidth <= 900 || !panel) return;
-    var heading = document.querySelector('#sg-acf > .sg-section-heading');
-    if (!heading) return;
-
-    var target = heading.getBoundingClientRect().top;
-    descCol.style.paddingTop = target + 'px';
-
-    /* se este padding empurrar o conteúdo para além do ecrã, reduz até
-       caber sem scroll — alinhar os títulos nunca deve obrigar a rolar */
-    var overflow = panel.scrollHeight - panel.clientHeight;
-    if (overflow > 0) {
-      descCol.style.paddingTop = Math.max(0, target - overflow) + 'px';
-    }
-  }
-  window.addEventListener('resize', alignSgDescHeading);
-
   function loadModalContent(post) {
     var id = post.id;
     var featSrc = post._embedded && post._embedded['wp:featuredmedia'] && post._embedded['wp:featuredmedia'][0]
@@ -696,12 +678,11 @@ add_shortcode('sastudio_gallery', function () {
         ? '<video src="' + esc(coverUrl) + '" muted loop autoplay playsinline></video>'
         : '<img src="' + esc(coverUrl) + '" alt=""/>';
 
+      var titleBlockHtml = '<div class="sg-meta">' + esc(meta) + '</div><h1>' + esc(title) + '</h1>';
+
       var html = '<div id="sg-track">';
       html += '<section id="sg-panel-main" class="sg-panel sg-panel-scrollable">';
-      html += '<div id="sg-main-top">';
-      html += '<div class="sg-meta">' + esc(meta) + '</div>';
-      html += '<h1>' + esc(title) + '</h1>';
-      html += '</div>';
+      html += '<div id="sg-main-top" class="sg-title-block">' + titleBlockHtml + '</div>';
       html += '<div id="sg-main-cols">';
       if (metaFields.length) {
         html += '<div id="sg-acf" class="sg-col">';
@@ -716,6 +697,7 @@ add_shortcode('sastudio_gallery', function () {
       html += '</section>';
       html += '<section id="sg-panel-desc" class="sg-panel sg-panel-scrollable">';
       html += '<div id="sg-content" class="sg-desc-col">';
+      html += '<div class="sg-title-block sg-desc-spacer" aria-hidden="true">' + titleBlockHtml + '</div>';
       html += '<h3 class="sg-section-heading">Descrição:</h3>';
       html += '<div class="sg-desc">' + (desc || '<p>Sem descrição para este projeto.</p>') + '</div>';
       html += '</div>';
@@ -730,7 +712,6 @@ add_shortcode('sastudio_gallery', function () {
       modalBody.innerHTML = html;
       wireRelatedClicks();
       if (window.resetSgTrack) window.resetSgTrack();
-      alignSgDescHeading();
     }).catch(function () {
       modalBody.innerHTML = '<div id="sg-modal-content"><h2>' + esc(title) + '</h2><p>Não foi possível carregar o conteúdo.</p></div>';
     });

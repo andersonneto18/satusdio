@@ -554,8 +554,11 @@
     #lb-ext-link:hover { color: #fff; }
 
     /* título do painel principal — texto normal (não é mais overlay
-       sobre imagem de hero), por isso cor escura em vez de branca */
-    #lb-proj-title {
+       sobre imagem de hero), por isso cor escura em vez de branca.
+       .lb-proj-title-spacer partilha este estilo — é a cópia invisível
+       usada no painel da Descrição para alinhar os títulos (ver
+       .lb-desc-spacer). */
+    #lb-proj-title, .lb-proj-title-spacer {
       font-family: 'Inter', sans-serif !important;
       font-size: clamp(1.8rem, 3.2vw, 2.8rem) !important;
       font-weight: 300 !important; letter-spacing: 0.01em !important;
@@ -647,8 +650,10 @@
       margin-top: 0.55rem; letter-spacing: 0.01em;
     }
 
-    /* meta mais visível e destacado */
-    #lb-proj-meta {
+    /* meta mais visível e destacado. .lb-proj-meta-spacer partilha este
+       estilo — cópia invisível no painel da Descrição (ver
+       .lb-desc-spacer). */
+    #lb-proj-meta, .lb-proj-meta-spacer {
       font-family: 'Inter', sans-serif !important;
       font-size: 0.68rem !important; letter-spacing: 0.38em !important;
       text-transform: uppercase !important;
@@ -749,9 +754,16 @@
       position: relative;
       padding: 4.5rem 5vw 6rem;
     }
-    #lb-main-top {
+    /* .lb-title-block (não só #lb-main-top): a mesma classe é
+       reutilizada, invisível, dentro do painel da Descrição
+       (.lb-desc-spacer) — isto garante que o título "Descrição:" fica
+       exatamente à mesma altura que "Dados do projeto:" por construção
+       em CSS (mesma marcação = mesma altura), sem depender de medir
+       posições em JS. */
+    .lb-title-block {
       max-width: 1800px; margin: 0 auto 3rem;
     }
+    .lb-desc-spacer { visibility: hidden; pointer-events: none; }
     #lb-main-cols {
       display: flex;
       align-items: start;
@@ -777,14 +789,18 @@
        largura quase total da página (sem coluna ao lado); o utilizador
        roda o rato (navegação horizontal já existente no site) para
        chegar a este painel e depois à Galeria. ── */
-    /* align-items:flex-start (não center) — o padding-top de
-       #lb-content é ajustado em JS (alignDescHeading em animacao.js)
-       para o título "Descrição:" ficar à mesma altura do "Dados do
-       projeto:" no painel anterior. */
+    /* align-items:flex-start (não center) — o padding-top igual ao do
+       painel principal (4.5rem) + o .lb-desc-spacer invisível (ver
+       acima) fazem o título "Descrição:" ficar à mesma altura do
+       "Dados do projeto:" no painel anterior. */
     #lb-panel-desc { display: flex; align-items: flex-start; }
-    #lb-content.lb-desc-col {
+    /* #lb-desc-wrap (não #lb-content) carrega a largura/padding — o
+       #lb-content, cujo innerHTML é reescrito a cada projeto aberto,
+       fica aninhado lá dentro a seguir ao .lb-desc-spacer (estático,
+       nunca é apagado), para o spacer sobreviver às trocas de conteúdo. */
+    #lb-desc-wrap.lb-desc-col {
       width: 100%; max-width: 1300px; margin: 0 auto;
-      padding: 3.5rem 8vw 5rem;
+      padding: 4.5rem 8vw 5rem;
     }
     .lb-desc-col * { max-width: 100%; box-sizing: border-box; }
     .lb-desc-col p {
@@ -1012,6 +1028,7 @@
       }
       #lb-acf { flex-basis: auto; min-width: 0; }
       #lb-cover-col { position: static; }
+      .lb-desc-spacer { display: none; }
       .footer-top {
         grid-template-columns: 1fr 1fr;
         gap: 2.5rem;
@@ -1057,7 +1074,7 @@
       #lb-main-cols { flex-direction: column; align-items: stretch; gap: 2.5rem; }
       #lb-acf { flex-basis: auto; min-width: 0; }
       #lb-cover-col { position: static; }
-      #lb-content.lb-desc-col { padding: 2.5rem 5vw 3rem; }
+      #lb-desc-wrap.lb-desc-col { padding: 2.5rem 5vw 3rem; }
       #lb-content p { font-size: 0.95rem !important; }
 
       /* ACF TABLE */

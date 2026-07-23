@@ -539,6 +539,13 @@ function openProject(pic) {
   /* populate UI */
   lbProjTitle.textContent = title;
   lbProjMeta.textContent  = meta;
+  /* cópia invisível do título/meta no painel da Descrição — ver
+     .lb-desc-spacer em style.css, garante o alinhamento com "Dados do
+     projeto:" só com CSS (mesma marcação = mesma altura). */
+  const lbTitleSpacer = document.querySelector('.lb-proj-title-spacer');
+  const lbMetaSpacer  = document.querySelector('.lb-proj-meta-spacer');
+  if (lbTitleSpacer) lbTitleSpacer.textContent = title;
+  if (lbMetaSpacer)  lbMetaSpacer.textContent  = meta;
   if (lbExtLink) lbExtLink.href = href || '#';
   lbContent.classList.remove('visible');
   lbContent.innerHTML     = '';
@@ -661,33 +668,6 @@ function buildContentGallery(images, captions = []) {
   outer.appendChild(grid);
   return outer;
 }
-
-/* alinha o título "Descrição:" (painel seguinte) com a altura real do
-   título "Dados do projeto:" (painel principal) — como o painel da
-   descrição já não tem título/capa acima, teria ficado centrado numa
-   posição diferente; medindo a posição real do heading de Dados
-   evita ter de adivinhar a altura do bloco de título (que varia
-   consoante o comprimento do nome do projeto). Só se aplica em
-   ecrãs largos, onde Dados/Capa ficam lado a lado (ver #lb-main-cols
-   nos media queries de 1024px/768px). */
-function alignDescHeading() {
-  lbContent.style.paddingTop = '';
-  if (window.innerWidth <= 1024) return;
-  const heading = document.querySelector('#lb-acf > .lb-section-heading');
-  const panel = document.getElementById('lb-panel-desc');
-  if (!heading || !panel) return;
-
-  const target = heading.getBoundingClientRect().top;
-  lbContent.style.paddingTop = target + 'px';
-
-  /* se este padding empurrar o conteúdo para além do ecrã, reduz até
-     caber sem scroll — alinhar os títulos nunca deve obrigar a rolar */
-  const overflow = panel.scrollHeight - panel.clientHeight;
-  if (overflow > 0) {
-    lbContent.style.paddingTop = Math.max(0, target - overflow) + 'px';
-  }
-}
-window.addEventListener('resize', alignDescHeading);
 
 async function fetchProjectContent(id) {
   lbContent.classList.remove('visible');
@@ -817,7 +797,6 @@ async function fetchProjectContent(id) {
   } finally {
     lbLoader.style.display = 'none';
     lbContent.classList.add('visible');
-    alignDescHeading();
   }
 }
 
