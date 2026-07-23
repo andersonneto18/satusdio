@@ -302,16 +302,19 @@ add_shortcode('single_projetos', function () {
      ponta a ponta do ecrã, com um espaço pequeno entre elas (como na
      referência) — em vez de 1 foto pequena centrada com muito vazio
      à volta. Se sobrar 1 foto sozinha (número ímpar), ocupa o painel
-     todo (igual ao .sg-photo-panel/.lb-photo-panel). ── */
+     todo (igual ao .sg-photo-panel/.lb-photo-panel).
+     O painel usa a MESMA estrutura de topo do painel principal
+     (padding-top 4.5rem + .sp-title-block invisível, reaproveitando o
+     truque do .sp-desc-spacer) para as fotos começarem exatamente na
+     mesma altura (linha de cima) que a imagem central — como ambas têm
+     55vh de altura, a linha de baixo também fica alinhada por
+     construção, sem precisar de medir nada em JS. ── */
   .sp-photo-panel {
-    display: flex; align-items: center; justify-content: center;
-    gap: 20px;
+    display: flex; flex-direction: column;
+    padding: 4.5rem 2vw 2vh;
     background: #fff;
-    padding: 2vh 2vw;
   }
-  /* tamanho fixo pedido: 1320×750 — flex-shrink permite encolher
-     (mantendo a proporção via aspect-ratio) em ecrãs mais estreitos,
-     nunca ultrapassando 1320px de largura. */
+  .sp-photo-row { display: flex; align-items: flex-start; justify-content: center; gap: 20px; }
   /* mesma altura da imagem central (capa, #sp-cover-media: 55vh) —
      fica alinhada com ela; a largura preenche o espaço disponível
      lado a lado (2 por painel), recortando via object-fit:cover. */
@@ -324,7 +327,12 @@ add_shortcode('single_projetos', function () {
     object-fit: cover; display: block;
     pointer-events: none; -webkit-user-drag: none;
   }
-  @media (max-width: 700px) { .sp-photo-panel { flex-direction: column; gap: 12px; padding: 1.5vh 3vw; } .sp-photo-item { height: 40vh; } }
+  @media (max-width: 700px) {
+    .sp-photo-panel { padding: 1.5vh 3vw; }
+    .sp-photo-panel .sp-desc-spacer { display: none; }
+    .sp-photo-row { flex-direction: column; gap: 12px; }
+    .sp-photo-item { height: 40vh; }
+  }
 
   /* ── Outros projetos (relacionados), igual ao #sg-related/#lb-related ── */
   #sp-panel-related { display: flex; align-items: center; }
@@ -402,9 +410,15 @@ add_shortcode('single_projetos', function () {
 
       <?php foreach (array_chunk($gallery_urls, 2) as $pair): ?>
       <section class="sp-panel sp-panel-scrollable sp-photo-panel">
-        <?php foreach ($pair as $url): ?>
-        <div class="sp-photo-item"><img src="<?php echo esc_url($url); ?>" loading="lazy" alt=""/></div>
-        <?php endforeach; ?>
+        <div class="sp-title-block sp-desc-spacer" aria-hidden="true">
+          <div class="sp-meta"><?php echo esc_html($meta_line); ?></div>
+          <h1><?php echo esc_html($title); ?></h1>
+        </div>
+        <div class="sp-photo-row">
+          <?php foreach ($pair as $url): ?>
+          <div class="sp-photo-item"><img src="<?php echo esc_url($url); ?>" loading="lazy" alt=""/></div>
+          <?php endforeach; ?>
+        </div>
       </section>
       <?php endforeach; ?>
 

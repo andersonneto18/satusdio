@@ -338,15 +338,18 @@ add_shortcode('sastudio_gallery', function () {
      referência) — em vez de 1 foto pequena centrada com muito vazio
      à volta. Se sobrar 1 foto sozinha (número ímpar), ocupa o painel
      todo. ── */
+  /* o painel usa a MESMA estrutura de topo do painel principal
+     (padding-top 4.5rem + .sg-title-block invisível, reaproveitando o
+     truque do .sg-desc-spacer) para as fotos começarem exatamente na
+     mesma altura (linha de cima) que a imagem central — como ambas têm
+     55vh de altura, a linha de baixo também fica alinhada por
+     construção, sem precisar de medir nada em JS. */
   .sg-photo-panel {
-    display: flex; align-items: center; justify-content: center;
-    gap: 20px;
+    display: flex; flex-direction: column;
+    padding: 4.5rem 2vw 2vh;
     background: #fff;
-    padding: 2vh 2vw;
   }
-  /* tamanho fixo pedido: 1320×750 — flex-shrink permite encolher
-     (mantendo a proporção via aspect-ratio) em ecrãs mais estreitos,
-     nunca ultrapassando 1320px de largura. */
+  .sg-photo-row { display: flex; align-items: flex-start; justify-content: center; gap: 20px; }
   /* mesma altura da imagem central (capa, #sg-cover-media: 55vh) —
      fica alinhada com ela; a largura preenche o espaço disponível
      lado a lado (2 por painel), recortando via object-fit:cover. */
@@ -359,7 +362,12 @@ add_shortcode('sastudio_gallery', function () {
     object-fit: cover; display: block;
     pointer-events: none; -webkit-user-drag: none;
   }
-  @media (max-width: 700px) { .sg-photo-panel { flex-direction: column; gap: 12px; padding: 1.5vh 3vw; } .sg-photo-item { height: 40vh; } }
+  @media (max-width: 700px) {
+    .sg-photo-panel { padding: 1.5vh 3vw; }
+    .sg-photo-panel .sg-desc-spacer { display: none; }
+    .sg-photo-row { flex-direction: column; gap: 12px; }
+    .sg-photo-item { height: 40vh; }
+  }
   #sg-modal-loading {
     display: flex; align-items: center; justify-content: center;
     height: 60vh; font-size: 0.8rem; color: rgba(21,21,18,0.45);
@@ -736,10 +744,12 @@ add_shortcode('sastudio_gallery', function () {
         for (var gi = 0; gi < galleryImgs.length; gi += 2) {
           var pair = galleryImgs.slice(gi, gi + 2);
           photoPanelsHtml += '<section class="sg-panel sg-panel-scrollable sg-photo-panel">' +
+            '<div class="sg-title-block sg-desc-spacer" aria-hidden="true">' + titleBlockHtml + '</div>' +
+            '<div class="sg-photo-row">' +
             pair.map(function (url) {
               return '<div class="sg-photo-item"><img src="' + esc(url) + '" loading="lazy" alt=""/></div>';
             }).join('') +
-            '</section>';
+            '</div></section>';
         }
         html += photoPanelsHtml;
       }

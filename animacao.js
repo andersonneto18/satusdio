@@ -833,11 +833,18 @@ async function fetchProjectContent(id) {
           const pair = galleryImgs.slice(i, i + 2);
           const panel = document.createElement('section');
           panel.className = 'lb-panel lb-panel-scrollable lb-photo-panel';
-          panel.innerHTML = pair.map(({ url, caption }) => `
-            <div class="lb-photo-item">
-              <img src="${url}" alt="${caption}" loading="lazy"/>
-              ${caption ? `<div class="lb-photo-caption">${caption}</div>` : ''}
-            </div>`).join('');
+          panel.innerHTML = `
+            <div class="lb-title-block lb-desc-spacer" aria-hidden="true">
+              <div class="lb-proj-meta-spacer">${lbProjMeta.textContent}</div>
+              <h1 class="lb-proj-title-spacer">${lbProjTitle.textContent}</h1>
+            </div>
+            <div class="lb-photo-row">` +
+            pair.map(({ url, caption }) => `
+              <div class="lb-photo-item">
+                <img src="${url}" alt="${caption}" loading="lazy"/>
+                ${caption ? `<div class="lb-photo-caption">${caption}</div>` : ''}
+              </div>`).join('') +
+            `</div>`;
           photoPanels.push(panel);
         }
         descPanel.after(...photoPanels);
