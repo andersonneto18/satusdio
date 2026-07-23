@@ -251,6 +251,24 @@
     }
     .lb-panel-scrollable::-webkit-scrollbar { display: none; }
 
+    /* ── BARRA DE PROGRESSO VERTICAL ──
+       os painéis navegam na horizontal (translateX), por isso não existe
+       scrollbar nativa a indicar o progresso; esta barra fininha à direita
+       do ecrã sobe/desce (top-to-bottom) consoante o avanço entre painéis,
+       atualizada em JS a par do #lb-track (ver tick() em animacao.js). */
+    #lb-scrollbar {
+      position: fixed; top: 0; right: 4px; bottom: 0;
+      width: 3px; z-index: 2010;
+      pointer-events: none;
+      opacity: 0; transition: opacity 0.3s ease;
+    }
+    #lightbox.open #lb-scrollbar { opacity: 1; }
+    #lb-scrollbar-thumb {
+      position: absolute; left: 0; width: 100%;
+      background: rgba(21,21,18,0.28);
+      border-radius: 999px;
+    }
+
     #lb-loader {
       display: flex; align-items: center; justify-content: center;
       padding: 5rem 2rem;

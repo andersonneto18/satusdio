@@ -206,6 +206,24 @@ add_shortcode('sastudio_gallery', function () {
   }
   .sg-panel-scrollable::-webkit-scrollbar { display: none; }
 
+  /* ── BARRA DE PROGRESSO VERTICAL ──
+     os painéis navegam na horizontal (translateX), por isso não existe
+     scrollbar nativa a indicar o progresso; esta barra fininha à direita
+     do ecrã sobe/desce (top-to-bottom) consoante o avanço entre painéis,
+     atualizada em JS a par do #sg-track (ver sgTick()). */
+  #sg-scrollbar {
+    position: fixed; top: 0; right: 4px; bottom: 0;
+    width: 3px; z-index: 100010;
+    pointer-events: none;
+    opacity: 0; transition: opacity 0.3s ease;
+  }
+  #sg-modal.sg-open #sg-scrollbar { opacity: 1; }
+  #sg-scrollbar-thumb {
+    position: absolute; left: 0; width: 100%;
+    background: rgba(21,21,18,0.28);
+    border-radius: 999px;
+  }
+
   #sg-modal-close {
     position: fixed; top: 2.4rem; right: 1.5rem; z-index: 100010;
     display: flex; align-items: center; justify-content: center;
@@ -366,6 +384,7 @@ add_shortcode('sastudio_gallery', function () {
     <button id="sg-modal-close" aria-label="Fechar">&times;</button>
     <div id="sg-modal-body"></div>
   </div>
+  <div id="sg-scrollbar"><div id="sg-scrollbar-thumb"></div></div>
 </div>
 
 <script>
@@ -742,6 +761,20 @@ add_shortcode('sastudio_gallery', function () {
     return { min: -(n - 1) * window.innerWidth, max: 0 };
   }
 
+  var sgScrollbarThumb = document.getElementById('sg-scrollbar-thumb');
+
+  /* barra vertical de progresso — desce à medida que se avança pelos
+     painéis horizontais, como substituta visual da scrollbar nativa. */
+  function updateSgScrollbar(b) {
+    if (!sgScrollbarThumb) return;
+    var track = document.getElementById('sg-track');
+    var n = track ? Math.max(track.querySelectorAll('.sg-panel').length, 1) : 1;
+    var progress = b.min !== 0 ? Math.min(1, Math.max(0, sgTx / b.min)) : 0;
+    var thumbPct = 100 / n;
+    sgScrollbarThumb.style.height = thumbPct + '%';
+    sgScrollbarThumb.style.top = (progress * (100 - thumbPct)) + '%';
+  }
+
   (function sgTick() {
     var track = document.getElementById('sg-track');
     if (track) {
@@ -749,6 +782,7 @@ add_shortcode('sastudio_gallery', function () {
       sgTTx = Math.max(b.min, Math.min(b.max, sgTTx));
       sgTx += (sgTTx - sgTx) * 0.14;
       track.style.transform = 'translateX(' + sgTx + 'px)';
+      updateSgScrollbar(b);
     }
     requestAnimationFrame(sgTick);
   })();

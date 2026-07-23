@@ -183,6 +183,22 @@ add_shortcode('single_projetos', function () {
   }
   .sp-panel-scrollable::-webkit-scrollbar { display: none; }
 
+  /* ── BARRA DE PROGRESSO VERTICAL ──
+     os painéis navegam na horizontal (translateX), por isso não existe
+     scrollbar nativa a indicar o progresso; esta barra fininha à direita
+     do ecrã sobe/desce (top-to-bottom) consoante o avanço entre painéis,
+     atualizada em JS a par do #sp-track (ver spTick()). */
+  #sp-scrollbar {
+    position: fixed; top: 0; right: 4px; bottom: 0;
+    width: 3px; z-index: 100010;
+    pointer-events: none;
+  }
+  #sp-scrollbar-thumb {
+    position: absolute; left: 0; width: 100%;
+    background: rgba(21,21,18,0.28);
+    border-radius: 999px;
+  }
+
   /* ── Painel principal (Dados | Capa) ──
      título/categoria no topo (#sp-main-top), depois duas colunas lado
      a lado: Dados do projeto e a capa (imagem/vídeo estático, sem
@@ -296,6 +312,8 @@ add_shortcode('single_projetos', function () {
 <div id="sp-root">
   <a id="sp-close" href="<?php echo esc_url( home_url('/projects/') ); ?>" aria-label="Fechar">&times;</a>
 
+  <div id="sp-scrollbar"><div id="sp-scrollbar-thumb"></div></div>
+
   <div id="sp-viewport">
     <div id="sp-track">
       <section id="sp-panel-main" class="sp-panel sp-panel-scrollable">
@@ -392,11 +410,24 @@ add_shortcode('single_projetos', function () {
      Galeria → Relacionados), igual ao index.html/arquive.php. Aqui não
      há abrir/fechar de modal — a página inteira é sempre o "track". ── */
   var spTx = 0, spTTx = 0;
+  var spScrollbarThumb = document.getElementById('sp-scrollbar-thumb');
 
   function spBounds() {
     var track = document.getElementById('sp-track');
     var n = track ? Math.max(track.querySelectorAll('.sp-panel').length, 1) : 1;
     return { min: -(n - 1) * window.innerWidth, max: 0 };
+  }
+
+  /* barra vertical de progresso — desce à medida que se avança pelos
+     painéis horizontais, como substituta visual da scrollbar nativa. */
+  function updateSpScrollbar(b) {
+    if (!spScrollbarThumb) return;
+    var track = document.getElementById('sp-track');
+    var n = track ? Math.max(track.querySelectorAll('.sp-panel').length, 1) : 1;
+    var progress = b.min !== 0 ? Math.min(1, Math.max(0, spTx / b.min)) : 0;
+    var thumbPct = 100 / n;
+    spScrollbarThumb.style.height = thumbPct + '%';
+    spScrollbarThumb.style.top = (progress * (100 - thumbPct)) + '%';
   }
 
   (function spTick() {
@@ -406,6 +437,7 @@ add_shortcode('single_projetos', function () {
       spTTx = Math.max(b.min, Math.min(b.max, spTTx));
       spTx += (spTTx - spTx) * 0.14;
       track.style.transform = 'translateX(' + spTx + 'px)';
+      updateSpScrollbar(b);
     }
     requestAnimationFrame(spTick);
   })();

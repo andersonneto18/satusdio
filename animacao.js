@@ -867,6 +867,8 @@ initDragScroll('lb-related-grid');
   const track = document.getElementById('lb-track');
   if (!track) return;
 
+  const scrollbarThumb = document.getElementById('lb-scrollbar-thumb');
+
   let tx = 0, tTx = 0;
 
   function visiblePanels() {
@@ -883,10 +885,24 @@ initDragScroll('lb-related-grid');
     tTx = Math.max(b.min, Math.min(b.max, tTx));
   }
 
+  /* barra vertical de progresso — desce à medida que se avança pelos
+     painéis horizontais, como substituta visual da scrollbar nativa
+     (que não existe aqui, já que a navegação é lateral). */
+  function updateScrollbar() {
+    if (!scrollbarThumb) return;
+    const n = Math.max(visiblePanels().length, 1);
+    const b = bounds();
+    const progress = b.min !== 0 ? Math.min(1, Math.max(0, tx / b.min)) : 0;
+    const thumbPct = 100 / n;
+    scrollbarThumb.style.height = thumbPct + '%';
+    scrollbarThumb.style.top = (progress * (100 - thumbPct)) + '%';
+  }
+
   (function tick() {
     clampTx();
     tx += (tTx - tx) * 0.14;
     track.style.transform = `translateX(${tx}px)`;
+    updateScrollbar();
     requestAnimationFrame(tick);
   })();
 
