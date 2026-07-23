@@ -34,15 +34,17 @@
       position: fixed; top: 0; left: 2.4rem; height: var(--nav-h);
       display: flex; align-items: center;
       z-index: 600;
-      font-family: 'Inter', sans-serif;
-      font-size: 1.7rem; font-weight: 800; letter-spacing: -0.01em;
-      text-transform: uppercase;
-      color: #fff;
       text-decoration: none;
+      /* revela o que está por trás (galeria/imagens), em vez de tapar
+         com uma cor sólida — mesma técnica do logo do ecrã inicial */
       mix-blend-mode: difference;
     }
+    #site-logo img {
+      height: 30px; width: auto; display: block;
+    }
     @media (max-width: 768px) {
-      #site-logo { left: 1.2rem; font-size: 1.4rem; }
+      #site-logo { left: 1.2rem; }
+      #site-logo img { height: 24px; }
     }
 
     /* ── CURSOR ── */
