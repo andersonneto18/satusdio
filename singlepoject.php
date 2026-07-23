@@ -112,16 +112,24 @@ add_shortcode('single_projetos', function () {
      vertical próprio, o #sp-viewport é que ocupa o ecrã todo. */
   html, body { overflow: hidden !important; height: 100% !important; }
 
+  #nav, #site-logo { display: none !important; } /* só existem na home, nada a ver com esta página */
+
   /* Header do tema (The7/Elementor "Header Sastudio", classe
-     top_panel_custom_header-sastudio — nada a ver com o #nav/#site-logo
-     que só existem na home) e o menu mobile fullscreen — nesta página
-     (link direto/partilhado de um projeto) ficam escondidos, tal como já
-     acontece no lightbox da home quando um projeto está aberto. O
-     #sp-close faz de "voltar". */
-  header.top_panel_custom_header-sastudio,
-  .menu_mobile_overlay,
-  .menu_mobile,
-  #nav, #site-logo { display: none !important; }
+     top_panel_custom_header-sastudio) — a pedido do cliente, o header
+     real do site (mesmo logo/menu de /projects/) fica visível e por
+     cima do conteúdo aqui também, em vez de ser escondido. Normalmente
+     não é fixo (rola com a página); força-se position:fixed + z-index
+     alto para não ficar tapado pelo #sp-viewport (que ocupa o ecrã
+     todo). --sp-header-h é uma ESTIMATIVA da altura real do header
+     (usada abaixo para o #sp-viewport começar só depois dele) — pode
+     precisar de ajuste fino depois de ver ao vivo. */
+  :root { --sp-header-h: 110px; }
+  @media (max-width: 700px) { :root { --sp-header-h: 76px; } }
+  header.top_panel_custom_header-sastudio {
+    position: fixed !important;
+    top: 0 !important; left: 0 !important; right: 0 !important;
+    z-index: 100030 !important;
+  }
 
   /* Se este template estiver a ser renderizado dentro de um wrapper com
      scroll/transform próprio (ex: popup do Elementor), isso criaria um
@@ -149,10 +157,11 @@ add_shortcode('single_projetos', function () {
   #sp-root, #sp-root * { box-sizing: border-box; }
   #sp-root { font-family: 'Inter', sans-serif; color: #151512; }
 
-  /* botão "X" de fechar (leva de volta a /projects/), igual ao
-     #sg-modal-close/#lb-close — canto superior direito, sem texto. */
+  /* botão "X" de fechar (leva de volta a /projects/) — fica agora
+     abaixo do header real (ver --sp-header-h acima), para não ficar
+     tapado por ele nem sobrepor o seu menu. */
   #sp-close {
-    position: fixed; top: 2.4rem; right: 1.5rem; z-index: 100010;
+    position: fixed; top: calc(var(--sp-header-h) + 1rem); right: 1.5rem; z-index: 100010;
     display: flex; align-items: center; justify-content: center;
     width: 46px; height: 46px;
     border-radius: 50%; border: none;
@@ -162,35 +171,7 @@ add_shortcode('single_projetos', function () {
     color: #151512; text-decoration: none;
   }
   @media (max-width: 700px) {
-    #sp-close { top: 0.9rem; right: 0.9rem; width: 42px; height: 42px; }
-  }
-
-  /* ── Barra de topo (logo + menu) — a página de projeto individual não
-     mostra o header do tema (ver header.top_panel_custom_header-sastudio
-     escondido acima), por isso ganha a sua própria barra fixa com o
-     logo à esquerda e o menu à direita, alinhados com o botão "X". ── */
-  #sp-topbar {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 100009;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 1.9rem 6.5rem 1.9rem 5vw;
-    pointer-events: none;
-  }
-  #sp-topbar a { pointer-events: all; }
-  .sp-topbar-logo { display: flex; align-items: center; }
-  .sp-topbar-logo img { height: 30px; width: auto; display: block; }
-  .sp-topbar-nav { display: flex; align-items: center; gap: 2rem; }
-  .sp-topbar-nav a {
-    font-family: 'Inter', sans-serif; font-size: 0.7rem;
-    letter-spacing: 0.15em; text-transform: uppercase;
-    color: #151512; text-decoration: none;
-    transition: opacity 0.2s ease;
-  }
-  .sp-topbar-nav a:hover { opacity: 0.55; }
-  @media (max-width: 700px) {
-    #sp-topbar { padding: 1.1rem 4.2rem 1.1rem 4vw; }
-    .sp-topbar-logo img { height: 22px; }
-    .sp-topbar-nav { gap: 1.2rem; }
-    .sp-topbar-nav a { font-size: 0.62rem; letter-spacing: 0.1em; }
+    #sp-close { right: 0.9rem; width: 42px; height: 42px; }
   }
 
   /* ── Navegação horizontal entre painéis (Capa/Dados/Descrição →
@@ -198,8 +179,10 @@ add_shortcode('single_projetos', function () {
      é deslocado via transform:translateX pelo wheel handler; cada
      .sp-panel mantém o seu próprio scroll vertical (texto longo) até
      chegar ao topo/fundo, altura em que o wheel passa a mudar de painel. */
+  /* top:var(--sp-header-h) (não inset:0) — o "track" começa só depois
+     do header real (fixo, ver acima), em vez de ficar por baixo dele. */
   #sp-viewport {
-    position: fixed; inset: 0; z-index: 1;
+    position: fixed; top: var(--sp-header-h); left: 0; right: 0; bottom: 0; z-index: 1;
     background: #fff; overflow: hidden;
   }
   #sp-track { display: flex; height: 100%; will-change: transform; }
@@ -221,7 +204,7 @@ add_shortcode('single_projetos', function () {
      do ecrã sobe/desce (top-to-bottom) consoante o avanço entre painéis,
      atualizada em JS a par do #sp-track (ver spTick()). */
   #sp-scrollbar {
-    position: fixed; top: 0; right: 4px; bottom: 0;
+    position: fixed; top: var(--sp-header-h); right: 4px; bottom: 0;
     width: 3px; z-index: 100010;
     pointer-events: none;
   }
@@ -391,17 +374,6 @@ add_shortcode('single_projetos', function () {
 
 <div id="sp-root">
   <a id="sp-close" href="<?php echo esc_url( home_url('/projects/') ); ?>" aria-label="Fechar">&times;</a>
-
-  <div id="sp-topbar">
-    <a class="sp-topbar-logo" href="<?php echo esc_url( home_url('/') ); ?>" aria-label="SASTUDIO">
-      <img src="https://sastudio.brand22creativeagency.pt/wp-content/uploads/2026/06/sastudio_test_logo_png-300x120-1.png" alt="SASTUDIO"/>
-    </a>
-    <nav class="sp-topbar-nav">
-      <a href="<?php echo esc_url( home_url('/projects/') ); ?>">Projects</a>
-      <a href="<?php echo esc_url( home_url('/about/') ); ?>">About</a>
-      <a href="<?php echo esc_url( home_url('/contact/') ); ?>">Contact</a>
-    </nav>
-  </div>
 
   <div id="sp-scrollbar"><div id="sp-scrollbar-thumb"></div></div>
 
