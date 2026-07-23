@@ -221,27 +221,19 @@
     }
 
     /* full-screen project view — navegação horizontal entre painéis
-       (Capa/Dados/Descrição → Galeria → Relacionados). O scroll vertical
-       NATIVO do #lb-view (barra original do browser, não uma barra
-       fictícia) é convertido em translateX do #lb-track em animacao.js:
-       #lb-scroll-spacer dá espaço extra (1 viewport de altura por painel)
-       para o #lb-view rolar, enquanto o #lb-track fica "preso" (sticky)
-       no topo — dando a sensação de navegação horizontal com a barra de
-       scroll vertical real a acompanhar o progresso. Cada .lb-panel
-       mantém o seu próprio scroll vertical (textos longos): o scroll
-       nativo "encadeia" para o #lb-view assim que esse painel chega ao
-       topo/fundo, sem necessidade de JS a testar isso manualmente. */
+       (Capa/Dados/Descrição → Galeria → Relacionados), ao estilo do
+       scroll da home. #lb-track é deslocado via transform:translateX
+       pelo wheel handler em animacao.js; cada .lb-panel mantém o seu
+       próprio scroll vertical (para textos longos) até chegar ao
+       topo/fundo, altura em que o wheel passa a mudar de painel. */
     #lb-view {
       position: absolute; inset: 0;
-      overflow-y: scroll; overflow-x: hidden;
+      overflow: hidden;
       opacity: 0;
     }
     #lb-view.show { opacity: 1; transition: opacity 0.4s ease; }
 
-    #lb-scroll-spacer { width: 100%; }
-
     #lb-track {
-      position: sticky; top: 0;
       display: flex;
       height: 100%;
       will-change: transform;
@@ -258,6 +250,24 @@
       scrollbar-width: none;
     }
     .lb-panel-scrollable::-webkit-scrollbar { display: none; }
+
+    /* ── BARRA DE PROGRESSO VERTICAL ──
+       os painéis navegam na horizontal (translateX), por isso não existe
+       scrollbar nativa a indicar o progresso; esta barra fininha à direita
+       do ecrã sobe/desce (top-to-bottom) consoante o avanço entre painéis,
+       atualizada em JS a par do #lb-track (ver tick() em animacao.js). */
+    #lb-scrollbar {
+      position: fixed; top: 0; right: 4px; bottom: 0;
+      width: 3px; z-index: 2010;
+      pointer-events: none;
+      opacity: 0; transition: opacity 0.3s ease;
+    }
+    #lightbox.open #lb-scrollbar { opacity: 1; }
+    #lb-scrollbar-thumb {
+      position: absolute; left: 0; width: 100%;
+      background: rgba(21,21,18,0.28);
+      border-radius: 999px;
+    }
 
     #lb-loader {
       display: flex; align-items: center; justify-content: center;
@@ -763,11 +773,7 @@
        largura quase total da página (sem coluna ao lado); o utilizador
        roda o rato (navegação horizontal já existente no site) para
        chegar a este painel e depois à Galeria. ── */
-    /* align-items:flex-start (não center) — o padding-top de
-       #lb-content é ajustado em JS (alignDescHeading em animacao.js)
-       para o título "Descrição:" ficar à mesma altura do "Dados do
-       projeto:" no painel anterior. */
-    #lb-panel-desc { display: flex; align-items: flex-start; }
+    #lb-panel-desc { display: flex; align-items: center; }
     #lb-content.lb-desc-col {
       width: 100%; max-width: 900px; margin: 0 auto;
       padding: 3.5rem 8vw 5rem;

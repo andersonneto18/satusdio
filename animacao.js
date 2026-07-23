@@ -627,7 +627,6 @@ function populateRelated(currentPic) {
 
   const relatedPanel = document.getElementById('lb-panel-related');
   if (relatedPanel) relatedPanel.style.display = grid.children.length ? '' : 'none';
-  if (window.syncLbTrack) window.syncLbTrack();
 }
 
 function buildContentGallery(images, captions = []) {
@@ -663,22 +662,6 @@ function buildContentGallery(images, captions = []) {
   return outer;
 }
 
-/* alinha o título "Descrição:" (painel seguinte) com a altura real do
-   título "Dados do projeto:" (painel principal) — como o painel da
-   descrição já não tem título/capa acima, teria ficado centrado numa
-   posição diferente; medindo a posição real do heading de Dados
-   evita ter de adivinhar a altura do bloco de título (que varia
-   consoante o comprimento do nome do projeto). Só se aplica em
-   ecrãs largos, onde Dados/Capa ficam lado a lado (ver #lb-main-cols
-   nos media queries de 1024px/768px). */
-function alignDescHeading() {
-  if (window.innerWidth <= 1024) { lbContent.style.paddingTop = ''; return; }
-  const heading = document.querySelector('#lb-acf > .lb-section-heading');
-  if (!heading) { lbContent.style.paddingTop = ''; return; }
-  lbContent.style.paddingTop = heading.getBoundingClientRect().top + 'px';
-}
-window.addEventListener('resize', alignDescHeading);
-
 async function fetchProjectContent(id) {
   lbContent.classList.remove('visible');
   lbContent.innerHTML = '';
@@ -687,7 +670,6 @@ async function fetchProjectContent(id) {
   const lbAcf = document.getElementById('lb-acf');
   if (lbAcf) lbAcf.innerHTML = '';
   document.querySelectorAll('#lb-track .lb-photo-panel').forEach(p => p.remove());
-  if (window.syncLbTrack) window.syncLbTrack();
 
   try {
     if (!projectCache.has(id)) {
@@ -798,7 +780,6 @@ async function fetchProjectContent(id) {
           return panel;
         });
         descPanel.after(...photoPanels);
-        if (window.syncLbTrack) window.syncLbTrack();
       }
     }
 
@@ -809,7 +790,6 @@ async function fetchProjectContent(id) {
   } finally {
     lbLoader.style.display = 'none';
     lbContent.classList.add('visible');
-    alignDescHeading();
   }
 }
 
@@ -884,48 +864,69 @@ initDragScroll('lb-related-grid');
    trocar de painel.
 ══════════════════════════════════════════════════ */
 (function () {
-  const view   = document.getElementById('lb-view');
-  const spacer = document.getElementById('lb-scroll-spacer');
-  const track  = document.getElementById('lb-track');
-  if (!track || !view || !spacer) return;
+  const track = document.getElementById('lb-track');
+  if (!track) return;
+
+  const scrollbarThumb = document.getElementById('lb-scrollbar-thumb');
+
+  let tx = 0, tTx = 0;
 
   function visiblePanels() {
     return Array.from(track.querySelectorAll('.lb-panel')).filter(p => p.style.display !== 'none');
   }
 
-  /* o "spacer" dá ao #lb-view (scrollável, barra nativa do browser)
-     1 viewport de altura extra por painel — o #lb-track fica sticky
-     no topo, e o progresso desse scroll vertical real é o que move
-     o translateX horizontal em applyScroll(). */
-  function syncSpacer() {
+  function bounds() {
     const n = Math.max(visiblePanels().length, 1);
-    spacer.style.height = (n * view.clientHeight) + 'px';
+    return { min: -(n - 1) * window.innerWidth, max: 0 };
   }
 
-  function applyScroll() {
-    const n = Math.max(visiblePanels().length, 1);
-    const maxScroll = Math.max((n - 1) * view.clientHeight, 1);
-    const fraction = Math.min(1, Math.max(0, view.scrollTop / maxScroll));
-    track.style.transform = `translateX(${-fraction * (n - 1) * window.innerWidth}px)`;
+  function clampTx() {
+    const b = bounds();
+    tTx = Math.max(b.min, Math.min(b.max, tTx));
   }
 
-  view.addEventListener('scroll', () => requestAnimationFrame(applyScroll), { passive: true });
-  window.addEventListener('resize', () => { syncSpacer(); applyScroll(); });
+  /* barra vertical de progresso — desce à medida que se avança pelos
+     painéis horizontais, como substituta visual da scrollbar nativa
+     (que não existe aqui, já que a navegação é lateral). */
+  function updateScrollbar() {
+    if (!scrollbarThumb) return;
+    const n = Math.max(visiblePanels().length, 1);
+    const b = bounds();
+    const progress = b.min !== 0 ? Math.min(1, Math.max(0, tx / b.min)) : 0;
+    const thumbPct = 100 / n;
+    scrollbarThumb.style.height = thumbPct + '%';
+    scrollbarThumb.style.top = (progress * (100 - thumbPct)) + '%';
+  }
 
-  syncSpacer();
-  applyScroll();
+  (function tick() {
+    clampTx();
+    tx += (tTx - tx) * 0.14;
+    track.style.transform = `translateX(${tx}px)`;
+    updateScrollbar();
+    requestAnimationFrame(tick);
+  })();
+
+  window.addEventListener('wheel', e => {
+    if (!lb.classList.contains('open')) return;
+
+    /* dentro de um painel com scroll vertical próprio (texto longo),
+       deixa o scroll nativo agir até chegar ao topo/fundo */
+    const scrollable = e.target.closest('.lb-panel-scrollable');
+    if (scrollable) {
+      const atTop     = scrollable.scrollTop <= 0;
+      const atBottom  = scrollable.scrollTop + scrollable.clientHeight >= scrollable.scrollHeight - 1;
+      const goingDown = e.deltaY > 0;
+      if ((goingDown && !atBottom) || (!goingDown && !atTop)) return;
+    }
+
+    e.preventDefault();
+    const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    tTx -= delta * 1.3;
+  }, { passive: false });
 
   window.resetLbTrack = function () {
-    view.scrollTop = 0;
-    syncSpacer();
-    applyScroll();
-  };
-  /* chamado depois de os painéis de fotos serem adicionados/removidos
-     dinamicamente (fetchProjectContent), já que o número de painéis
-     muda e o spacer tem de refletir isso. */
-  window.syncLbTrack = function () {
-    syncSpacer();
-    applyScroll();
+    tx = 0; tTx = 0;
+    track.style.transform = 'translateX(0px)';
   };
 })();
 
