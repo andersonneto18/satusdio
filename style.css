@@ -208,7 +208,6 @@
     /* ── HERO SCREEN ── */
     #hero {
       position: fixed; inset: 0; z-index: 800;
-      background: var(--bg);
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
       gap: 0;
@@ -219,6 +218,10 @@
       height: auto;
       display: block;
       opacity: 0; transform: translateY(16px);
+      /* sem fundo no #hero por baixo, a galeria (#vp) fica visível através
+         do logo — mix-blend-mode faz o logo reagir/inverter consoante o
+         que está por trás, em vez de tapar tudo com uma cor sólida */
+      mix-blend-mode: difference;
     }
 
     /* ── GRAIN ── */
