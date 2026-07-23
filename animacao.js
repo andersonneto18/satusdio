@@ -184,91 +184,90 @@ function getMasonryConfig() {
   return BREAKPOINTS.find(c => vw <= c.maxW);
 }
 
-/* Gera a sequência de quantas imagens cada coluna leva (3, 2, 3, 2...),
-   mas corrige o fim para nunca sobrar uma coluna com 1 imagem sozinha —
-   junta/reparte com a coluna anterior nesse caso. */
-function computeColumnCounts(n) {
-  const counts = [];
+/* Padrões de coluna — largura relativa à coluna "normal", divisão
+   interna de altura, e um recuo vertical (topInset/bottomInset) que faz
+   a coluna NÃO tocar sempre no topo/fundo do ecrã. É o recuo que quebra
+   a "linha reta" contínua entre colunas (pedido do cliente): variar só
+   a largura não chega, porque o vão entre duas colunas continua a
+   percorrer o ecrã todo de alto a baixo se ambas forem de topo a fundo;
+   com alturas diferentes por coluna essa linha deixa de ser contínua. */
+const COLUMN_PATTERNS = [
+  { count: 3, widthMul: 1.15, ratios: [0.42, 0.33, 0.25], topInset: 0,  bottomInset: 0 },
+  { count: 2, widthMul: 0.80, ratios: [0.55, 0.45],       topInset: 70, bottomInset: 0 },
+  { count: 1, widthMul: 1.35, ratios: [1],                topInset: 0,  bottomInset: 100 },
+  { count: 3, widthMul: 0.90, ratios: [0.28, 0.40, 0.32], topInset: 45, bottomInset: 45 },
+  { count: 2, widthMul: 1.20, ratios: [0.38, 0.62],       topInset: 0,  bottomInset: 80 },
+  { count: 3, widthMul: 0.75, ratios: [0.36, 0.24, 0.40], topInset: 90, bottomInset: 0 },
+  { count: 1, widthMul: 0.95, ratios: [1],                topInset: 35, bottomInset: 35 },
+  { count: 2, widthMul: 1.05, ratios: [0.48, 0.52],       topInset: 0,  bottomInset: 0 },
+  { count: 3, widthMul: 1.30, ratios: [0.30, 0.46, 0.24], topInset: 55, bottomInset: 25 },
+  { count: 2, widthMul: 0.85, ratios: [0.60, 0.40],       topInset: 25, bottomInset: 65 },
+];
+
+/* Gera o plano de colunas consumindo exatamente n fotos, ciclando
+   COLUMN_PATTERNS — a última coluna é cortada ao que sobrar, com os
+   pesos de altura do padrão renormalizados para continuarem a somar 1. */
+function computeColumnPlan(n) {
+  const plan = [];
   let remaining = n, i = 0;
   while (remaining > 0) {
-    const target = (i % 2 === 0) ? 3 : 2;
-    const c = Math.min(target, remaining);
-    counts.push(c);
-    remaining -= c;
+    const pattern = COLUMN_PATTERNS[i % COLUMN_PATTERNS.length];
+    const count   = Math.min(pattern.count, remaining);
+    let ratios = pattern.ratios;
+    if (count !== pattern.count) {
+      const slice = pattern.ratios.slice(0, count);
+      const sum   = slice.reduce((a, b) => a + b, 0);
+      ratios = slice.map(r => r / sum);
+    }
+    plan.push({
+      count, ratios,
+      widthMul:    pattern.widthMul,
+      topInset:    pattern.topInset,
+      bottomInset: pattern.bottomInset,
+    });
+    remaining -= count;
     i++;
   }
-  if (counts.length >= 2 && counts[counts.length - 1] === 1) {
-    const last = counts.length - 1, prev = last - 1;
-    if (counts[prev] > 2) {
-      counts[prev]--;
-      counts[last]++;
-    } else {
-      counts[prev] += counts[last];
-      counts.pop();
-    }
-  }
-  return counts;
+  return plan;
 }
 
-/* Para cada coluna: usa a contagem já decidida (computeColumnCounts) e
-   ajusta a largura dessa coluna, dentro de um intervalo controlado, para
-   fechar exatamente a altura do ecrã sem deixar vão nem esticar demais.
-   Novas colunas abrem-se à direita, reveladas ao fazer scroll horizontal. */
+/* Para cada coluna: usa o plano já decidido (computeColumnPlan) — largura,
+   divisão de altura e recuo vertical próprios por coluna. Novas colunas
+   abrem-se à direita, reveladas ao fazer scroll horizontal. */
 function layoutMasonry() {
   const { gap, approxCols } = getMasonryConfig();
   const vw    = window.innerWidth;
   const vh    = window.innerHeight;
-  const maxH  = vh - gap * 2;
   const baseColW = (vw - gap * (approxCols + 1)) / approxCols;
 
-  const pics   = Array.from(gallery.querySelectorAll('.pic'));
-  const counts = computeColumnCounts(pics.length);
+  const pics = Array.from(gallery.querySelectorAll('.pic'));
+  const plan = computeColumnPlan(pics.length);
 
   let idx = 0, x = gap;
 
-  counts.forEach((count, colIdx) => {
+  plan.forEach(({ count, widthMul, ratios, topInset, bottomInset }) => {
     const group = pics.slice(idx, idx + count);
+    /* tamanhos sempre com proporções fixas e diferentes entre si (não
+       derivadas da proporção real da foto) — senão fotos com
+       enquadramento parecido ficavam com o mesmo tamanho na coluna.
+       A imagem recorta (object-fit: cover) em vez de esticar, por isso
+       o corte não distorce nada. */
+    const colW   = baseColW * widthMul;
+    const top    = gap + topInset;
+    const bottom = vh - gap - bottomInset;
+    const availH = (bottom - top) - gap * (count - 1);
 
-    if (count === 2 || count === 3) {
-      /* tamanhos sempre com proporções fixas e diferentes entre si
-         (não derivadas da proporção real da foto) — senão fotos com
-         enquadramento parecido ficavam com o mesmo tamanho na coluna.
-         Largura normal da coluna; a imagem recorta (object-fit: cover)
-         em vez de esticar, por isso o corte não distorce nada. */
-      const colW    = baseColW;
-      const availH  = maxH - gap * (count + 1);
-      const ratios2 = [[0.6, 0.4], [0.4, 0.6]];
-      const ratios3 = [[0.40, 0.34, 0.26], [0.26, 0.40, 0.34], [0.34, 0.26, 0.40]];
-      const ratios  = count === 2 ? ratios2[colIdx % 2] : ratios3[colIdx % 3];
+    let y = top;
+    group.forEach((pic, i) => {
+      const h = availH * ratios[i];
+      pic.style.left   = x + 'px';
+      pic.style.top    = y + 'px';
+      pic.style.width  = colW + 'px';
+      pic.style.height = h + 'px';
+      y += h + gap;
+    });
 
-      let y = gap;
-      group.forEach((pic, i) => {
-        const h = availH * ratios[i];
-        pic.style.left   = x + 'px';
-        pic.style.top    = y + 'px';
-        pic.style.width  = colW + 'px';
-        pic.style.height = h + 'px';
-        y += h + gap;
-      });
-
-      x += colW + gap;
-    } else {
-      /* caso raro (ex: só sobra 1 imagem no total) — preenche a altura toda */
-      const colW = baseColW;
-      const h    = maxH - gap * 2;
-
-      let y = gap;
-      group.forEach(pic => {
-        pic.style.left   = x + 'px';
-        pic.style.top    = y + 'px';
-        pic.style.width  = colW + 'px';
-        pic.style.height = h + 'px';
-        y += h + gap;
-      });
-
-      x += colW + gap;
-    }
-
+    x += colW + gap;
     idx += count;
   });
 
