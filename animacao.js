@@ -184,33 +184,39 @@ function getMasonryConfig() {
   return BREAKPOINTS.find(c => vw <= c.maxW);
 }
 
-/* Larguras de coluna variam ciclicamente — evita colunas todas iguais
-   (grelha de linhas retas), mas cada foto usa sempre a SUA proporção
-   real (dataset.aspect, vinda das dimensões reais do WordPress) para
-   decidir a altura: largura da coluna ÷ aspect, nunca cortando nada.
-   O fundo da coluna pode ficar um pouco aquém da altura do ecrã (em vez
-   de forçar a foto a esticar/cortar para encaixar exato) — essa folga
-   também ajuda a quebrar a linha reta contínua entre colunas vizinhas. */
+/* Largura de coluna e recuo vertical (topo/fundo) variam ciclicamente —
+   só variar a largura não chega, porque todas as colunas continuavam a
+   começar/acabar exatamente na mesma altura, e a linha reta entre
+   colunas continuava contínua de alto a baixo. Com o recuo, colunas
+   vizinhas raramente partilham as mesmas bordas. Cada foto usa sempre a
+   SUA proporção real (dataset.aspect, vinda das dimensões reais do
+   WordPress) para decidir a altura: largura da coluna ÷ aspect, nunca
+   cortando nada. */
 const WIDTH_MULTIPLIERS = [1.15, 0.80, 1.35, 0.90, 1.20, 0.75, 0.95, 1.05, 1.30, 0.85];
+const TOP_INSETS         = [0,    60,   20,   90,   40,   0,    70,   30,   0,    50  ];
+const BOTTOM_INSETS      = [80,   0,    60,   0,    90,   40,   0,    70,   30,   0   ];
 const DEFAULT_ASPECT = 4 / 3;
 
 /* Para cada coluna: enche com fotos (na ordem em que aparecem) até
-   chegar perto da altura do ecrã, cada uma com a sua altura natural
-   (colW / aspect real). Novas colunas abrem-se à direita, reveladas ao
-   fazer scroll horizontal. */
+   chegar perto do espaço vertical disponível (já descontado o recuo),
+   cada uma com a sua altura natural (colW / aspect real). Novas colunas
+   abrem-se à direita, reveladas ao fazer scroll horizontal. */
 function layoutMasonry() {
   const { gap, approxCols } = getMasonryConfig();
   const vw = window.innerWidth;
   const vh = window.innerHeight;
   const baseColW = (vw - gap * (approxCols + 1)) / approxCols;
-  const targetH  = vh - gap * 2;
+  const n = WIDTH_MULTIPLIERS.length;
 
   const pics = Array.from(gallery.querySelectorAll('.pic'));
 
   let idx = 0, x = gap, colIdx = 0;
 
   while (idx < pics.length) {
-    const colW = baseColW * WIDTH_MULTIPLIERS[colIdx % WIDTH_MULTIPLIERS.length];
+    const colW    = baseColW * WIDTH_MULTIPLIERS[colIdx % n];
+    const top     = gap + TOP_INSETS[colIdx % n];
+    const bottom  = vh - gap - BOTTOM_INSETS[colIdx % n];
+    const targetH = bottom - top;
 
     const group = [];
     let usedH = 0;
@@ -218,9 +224,10 @@ function layoutMasonry() {
       const pic    = pics[idx];
       const aspect = parseFloat(pic.dataset.aspect) || DEFAULT_ASPECT;
       const h      = colW / aspect;
-      /* já tem pelo menos 1 foto e esta próxima passaria bastante da
-         altura do ecrã — fica para a coluna seguinte (a não ser que seja
-         a última foto de todas, aí tem de entrar nesta coluna na mesma) */
+      /* já tem pelo menos 1 foto e esta próxima passaria bastante do
+         espaço disponível — fica para a coluna seguinte (a não ser que
+         seja a última foto de todas, aí tem de entrar nesta coluna na
+         mesma) */
       if (group.length && usedH + gap + h > targetH && idx < pics.length - 1) break;
       group.push({ pic, h });
       usedH += h + gap;
@@ -228,7 +235,7 @@ function layoutMasonry() {
       if (usedH >= targetH) break;
     }
 
-    let y = gap;
+    let y = top;
     group.forEach(({ pic, h }) => {
       pic.style.left   = x + 'px';
       pic.style.top    = y + 'px';
