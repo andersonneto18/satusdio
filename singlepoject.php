@@ -2,11 +2,11 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 /**
  * Shortcode [single_projetos] — página de projeto individual (link limpo,
  * ex: /projects/nome-do-projeto/). Mostra o mesmo conteúdo do modal do
- * [sastudio_gallery] (hero com vídeo/imagens, descrição, dados do projeto,
- * galeria e "Confira outros projetos"), com a MESMA navegação horizontal
- * por painéis (Hero → Descrição/Dados → Galeria → Relacionados) do
- * index.html e do arquive.php — sem modal, sem fetch, dados vêm direto
- * do ACF do post atual (a página inteira É o "track").
+ * [sastudio_gallery] (capa, dados do projeto, descrição, galeria e
+ * "Confira outros projetos"), com a MESMA navegação horizontal por
+ * painéis (Capa/Dados/Descrição → Galeria → Relacionados) do index.html
+ * e do arquive.php — sem modal, sem fetch, dados vêm direto do ACF do
+ * post atual (a página inteira É o "track").
  * Cola [single_projetos] no template Elementor "Single Project".
  */
 add_shortcode('single_projetos', function () {
@@ -81,11 +81,11 @@ add_shortcode('single_projetos', function () {
         ['label' => 'Ano',         'value' => $year],
     ], function ($f) { return $f['value'] && trim((string) $f['value']) !== ''; });
 
-    // slides: vídeo (hover_gif) primeiro se existir, depois imagem principal, depois galeria
-    $slide_urls = [];
-    if ($hover_gif_url) $slide_urls[] = $hover_gif_url;
-    if ($feat_url)      $slide_urls[] = $feat_url;
-    foreach ($gallery_urls as $u) { if ($u) $slide_urls[] = $u; }
+    // capa: vídeo (hover_gif) se existir, senão a imagem principal —
+    // estática, sem slideshow (a galeria completa continua disponível
+    // como painéis próprios mais à frente).
+    $cover_url      = $hover_gif_url ?: $feat_url;
+    $cover_is_video = $hover_gif_url && preg_match('/\.(mp4|webm|mov|ogg)(\?|$)/i', $hover_gif_url);
 
     // relacionados: 3 projetos aleatórios, excluindo o atual
     $related = get_posts([
@@ -102,7 +102,7 @@ add_shortcode('single_projetos', function () {
   /* Ativa Cross-Document View Transitions (Chrome/Edge) — ao clicar num
      card em "Confira outros projetos", a miniatura (view-transition-name
      "sp-hero-{ID}" no .sp-rel-card-img-wrap) morfa automaticamente para
-     o hero da página seguinte (mesmo nome no primeiro .sp-slide), dando
+     a capa da página seguinte (mesmo nome no #sp-cover-media), dando
      o efeito de zoom sem precisar de JS nem de SPA/modal. Navegadores
      sem suporte (Firefox/Safari) simplesmente navegam sem animação. */
   @view-transition { navigation: auto; }
@@ -165,7 +165,7 @@ add_shortcode('single_projetos', function () {
     #sp-close { top: 0.9rem; right: 0.9rem; width: 42px; height: 42px; }
   }
 
-  /* ── Navegação horizontal entre painéis (Hero → Descrição/Dados →
+  /* ── Navegação horizontal entre painéis (Capa/Dados/Descrição →
      Galeria → Relacionados), igual ao index.html/arquive.php — #sp-track
      é deslocado via transform:translateX pelo wheel handler; cada
      .sp-panel mantém o seu próprio scroll vertical (texto longo) até
@@ -183,51 +183,41 @@ add_shortcode('single_projetos', function () {
   }
   .sp-panel-scrollable::-webkit-scrollbar { display: none; }
 
-  #sp-hero { position: relative; overflow: hidden; background: #000; }
-  #sp-slides { position: absolute; inset: 0; }
-  .sp-slide { position: absolute; inset: 0; opacity: 0; }
-  .sp-slide.active { opacity: 1; z-index: 1; }
-  .sp-slide img, .sp-slide video { width: 100%; height: 100%; object-fit: cover; display: block; }
-  #sp-hero-overlay {
-    position: absolute; inset: 0; z-index: 2;
-    display: flex; flex-direction: column; justify-content: flex-end;
-    padding: 2.4rem clamp(1.2rem, 6vw, 5vw);
-    background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 55%);
-    pointer-events: none;
+  /* ── Painel principal (Dados | Capa | Descrição) ──
+     título/categoria no topo (#sp-main-top), depois três colunas lado
+     a lado: Dados do projeto, a capa (imagem/vídeo estático, sem
+     slideshow) e Descrição — como a referência do cliente. */
+  #sp-panel-main { position: relative; padding: 4.5rem 5vw 6rem; }
+  #sp-main-top { max-width: 1800px; margin: 0 auto 3rem; }
+  #sp-main-top .sp-meta {
+    font-size: 0.68rem; letter-spacing: 0.3em; text-transform: uppercase;
+    color: #7a5c3a; margin-bottom: 0.8rem;
   }
-  #sp-hero-overlay > * { pointer-events: all; }
-  #sp-hero .sp-meta {
-    font-size: 0.7rem; letter-spacing: 0.3em; text-transform: uppercase;
-    color: rgba(255,255,255,0.75); margin-bottom: 0.8rem;
-  }
-  #sp-hero h1 {
+  #sp-main-top h1 {
     font-family: 'Inter', sans-serif; font-weight: 300;
-    font-size: clamp(2.2rem, 5.5vw, 4.5rem); line-height: 1.05;
-    color: #fff; margin: 0 0 1.5rem; letter-spacing: 0.01em;
+    font-size: clamp(1.8rem, 3.2vw, 2.8rem); line-height: 1.05;
+    color: #151512; margin: 0; letter-spacing: 0.01em;
   }
-  #sp-slide-nav { display: flex; align-items: center; gap: 0.9rem; align-self: flex-end; margin-left: auto; }
-  #sp-slide-nav button {
-    width: 36px; height: 36px; border-radius: 50%;
-    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.32);
-    color: #fff; font-size: 1.1rem; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
+  #sp-main-cols {
+    display: flex; align-items: start; gap: 4vw;
+    max-width: 1800px; margin: 0 auto;
   }
-  #sp-slide-nav button:hover { background: rgba(255,255,255,0.22); border-color: rgba(255,255,255,0.75); }
-  #sp-slide-count { font-size: 0.48rem; letter-spacing: 0.14em; color: rgba(255,255,255,0.6); min-width: 2.5rem; text-align: center; }
-
-  /* flex (não grid): Descrição e Dados são blocos independentes lado a
-     lado. A coluna da descrição fica larga (flex:1 1 0) e o painel
-     inteiro é mais largo (1600px), tal como no index.html/arquive.php. */
-  #sp-content { padding: 4.5rem clamp(1.2rem, 6vw, 5vw) 2rem; }
-  #sp-main { display: flex; align-items: start; gap: 5vw; max-width: 1600px; margin: 0 auto; }
+  .sp-col { flex: 1 1 0; min-width: 0; }
+  #sp-acf { flex: 0 1 280px; min-width: 200px; }
+  #sp-cover-col { flex: 1 1 42%; }
+  /* sem aspect-ratio/object-fit:cover fixo — a capa usa sempre a
+     proporção real da imagem/vídeo (largura 100%, altura automática),
+     para nunca cortar nada, seja qual for a orientação. */
+  #sp-cover-media { width: 100%; }
+  #sp-cover-media img,
+  #sp-cover-media video { width: 100%; height: auto; display: block; }
   .sp-desc-col { flex: 1 1 0; min-width: 0; }
-  #sp-acf { flex: 0 1 320px; min-width: 220px; }
   .sp-section-heading {
     font-family: 'Inter', sans-serif !important; font-size: 1rem !important;
     font-weight: 300 !important; white-space: nowrap !important;
     color: #151512; margin: 0 0 2rem; line-height: 1.1;
   }
-  #sp-content .sp-desc { font-size: 1rem; line-height: 1.85; color: rgba(21,21,18,0.82); text-align: justify; }
+  .sp-desc { font-size: 1rem; line-height: 1.85; color: rgba(21,21,18,0.82); text-align: justify; }
   .sp-acf-table { width: 100%; }
   .sp-acf-row {
     display: grid; grid-template-columns: 140px 1fr; gap: 1rem;
@@ -237,7 +227,7 @@ add_shortcode('single_projetos', function () {
   .sp-acf-row:first-child { border-top: 1px solid rgba(21,21,18,0.09); }
   .sp-acf-label { font-weight: 400; color: #151512; }
   .sp-acf-value { color: rgba(21,21,18,0.75); line-height: 1.55; }
-  @media (max-width: 900px) { #sp-main { flex-direction: column; gap: 2.5rem; } }
+  @media (max-width: 900px) { #sp-main-cols { flex-direction: column; gap: 2.5rem; } }
 
   /* ── Galeria — cada foto é o seu próprio painel horizontal, tal como
      o resto do #sp-track (igual ao .sg-photo-panel/.lb-photo-panel). ── */
@@ -290,51 +280,35 @@ add_shortcode('single_projetos', function () {
 
   <div id="sp-viewport">
     <div id="sp-track">
-      <section id="sp-hero" class="sp-panel">
-        <div id="sp-slides">
-          <?php foreach ($slide_urls as $i => $url):
-            $is_video = preg_match('/\.(mp4|webm|mov|ogg)(\?|$)/i', $url);
-          ?>
-            <div class="sp-slide<?php echo $i === 0 ? ' active' : ''; ?>"<?php echo $is_video ? ' data-video-src="' . esc_url($url) . '"' : ''; ?><?php echo $i === 0 ? ' style="view-transition-name: sp-hero-' . (int) $post_id . '"' : ''; ?>>
-              <?php if (!$is_video): ?>
-                <img src="<?php echo esc_url($url); ?>" alt="" loading="<?php echo $i === 0 ? 'eager' : 'lazy'; ?>"/>
-              <?php endif; ?>
-            </div>
-          <?php endforeach; ?>
-        </div>
-        <div id="sp-hero-overlay">
+      <section id="sp-panel-main" class="sp-panel sp-panel-scrollable">
+        <div id="sp-main-top">
           <div class="sp-meta"><?php echo esc_html($meta_line); ?></div>
           <h1><?php echo esc_html($title); ?></h1>
-          <?php if (count($slide_urls) > 1): ?>
-            <div id="sp-slide-nav">
-              <button id="sp-slide-prev" aria-label="Anterior">&#8249;</button>
-              <span id="sp-slide-count"></span>
-              <button id="sp-slide-next" aria-label="Seguinte">&#8250;</button>
-            </div>
-          <?php endif; ?>
         </div>
-      </section>
-
-      <section id="sp-panel-content" class="sp-panel sp-panel-scrollable">
-        <div id="sp-content">
-          <div id="sp-main">
-            <div id="sp-desc-wrap" class="sp-desc-col">
-              <h3 class="sp-section-heading">Descrição:</h3>
-              <div class="sp-desc"><?php echo $desc ? $desc : '<p>Sem descrição para este projeto.</p>'; ?></div>
+        <div id="sp-main-cols">
+          <?php if (!empty($meta_fields)): ?>
+          <div id="sp-acf" class="sp-col">
+            <h3 class="sp-section-heading">Dados do projeto:</h3>
+            <div class="sp-acf-table">
+              <?php foreach ($meta_fields as $f): ?>
+                <div class="sp-acf-row">
+                  <span class="sp-acf-label"><?php echo esc_html($f['label']); ?>:</span>
+                  <span class="sp-acf-value"><?php echo esc_html($f['value']); ?></span>
+                </div>
+              <?php endforeach; ?>
             </div>
-            <?php if (!empty($meta_fields)): ?>
-            <div id="sp-acf">
-              <h3 class="sp-section-heading">Dados do projeto:</h3>
-              <div class="sp-acf-table">
-                <?php foreach ($meta_fields as $f): ?>
-                  <div class="sp-acf-row">
-                    <span class="sp-acf-label"><?php echo esc_html($f['label']); ?>:</span>
-                    <span class="sp-acf-value"><?php echo esc_html($f['value']); ?></span>
-                  </div>
-                <?php endforeach; ?>
-              </div>
+          </div>
+          <?php endif; ?>
+          <div id="sp-cover-col" class="sp-col">
+            <div id="sp-cover-media"<?php echo $cover_is_video ? ' data-video-src="' . esc_url($cover_url) . '"' : ''; ?> style="view-transition-name: sp-hero-<?php echo (int) $post_id; ?>">
+              <?php if ($cover_url && !$cover_is_video): ?>
+                <img src="<?php echo esc_url($cover_url); ?>" alt=""/>
+              <?php endif; ?>
             </div>
-            <?php endif; ?>
+          </div>
+          <div id="sp-content" class="sp-col sp-desc-col">
+            <h3 class="sp-section-heading">Descrição:</h3>
+            <div class="sp-desc"><?php echo $desc ? $desc : '<p>Sem descrição para este projeto.</p>'; ?></div>
           </div>
         </div>
       </section>
@@ -378,74 +352,22 @@ add_shortcode('single_projetos', function () {
 
 <script>
 (function () {
-  /* Cria as tags <video> só depois de a página estar carregada, para o
-     tema (The7/MediaElement.js) não as apanhar e as embrulhar no player
-     nativo dele — se não existir nenhuma <video> quando esse script corre,
-     ele não tem nada para "roubar". */
+  /* Cria a tag <video> da capa só depois de a página estar carregada,
+     para o tema (The7/MediaElement.js) não a apanhar e a embrulhar no
+     player nativo dele — se não existir nenhuma <video> quando esse
+     script corre, ele não tem nada para "roubar". */
   window.addEventListener('load', function () {
-    document.querySelectorAll('#sp-slides .sp-slide[data-video-src]').forEach(function (slide) {
+    var cover = document.getElementById('sp-cover-media');
+    if (cover && cover.dataset.videoSrc) {
       var vid = document.createElement('video');
-      vid.src = slide.dataset.videoSrc;
-      vid.muted = true;
-      vid.playsInline = true;
-      vid.preload = slide.classList.contains('active') ? 'auto' : 'none';
-      slide.appendChild(vid);
-    });
-    initSlideshow();
+      vid.src = cover.dataset.videoSrc;
+      vid.muted = true; vid.loop = true; vid.autoplay = true; vid.playsInline = true;
+      cover.appendChild(vid);
+      vid.play().catch(function () {});
+    }
   });
 
-  var SLIDE_DELAY = 5000;
-  var slideInterval = null;
-  var currentSlide = 0;
-
-  function initSlideshow() {
-
-  function stopAutoPlay() { if (slideInterval) { clearInterval(slideInterval); slideInterval = null; } }
-  function startAutoPlay(total) {
-    stopAutoPlay();
-    if (total < 2) return;
-    slideInterval = setInterval(function () { goToSlide((currentSlide + 1) % total); }, SLIDE_DELAY);
-  }
-  function goToSlide(n) {
-    var slides = document.querySelectorAll('#sp-slides .sp-slide');
-    if (!slides.length) return;
-    var total = slides.length;
-    var newIdx = ((n % total) + total) % total;
-    if (newIdx === currentSlide) return;
-
-    var oldVid = slides[currentSlide].querySelector('video');
-    if (oldVid) { oldVid.pause(); oldVid.currentTime = 0; }
-    slides[currentSlide].classList.remove('active');
-    currentSlide = newIdx;
-    slides[currentSlide].classList.add('active');
-    var newVid = slides[currentSlide].querySelector('video');
-    if (newVid) { newVid.currentTime = 0; newVid.play().catch(function () {}); }
-
-    var countEl = document.getElementById('sp-slide-count');
-    if (countEl) countEl.textContent = (currentSlide + 1) + ' / ' + total;
-  }
-
-  var slides = document.querySelectorAll('#sp-slides .sp-slide');
-  var total = slides.length;
-  var countEl = document.getElementById('sp-slide-count');
-  if (countEl) countEl.textContent = total > 1 ? ('1 / ' + total) : '';
-
-  var prevBtn = document.getElementById('sp-slide-prev');
-  var nextBtn = document.getElementById('sp-slide-next');
-  if (prevBtn) prevBtn.addEventListener('click', function (e) { e.stopPropagation(); goToSlide(currentSlide - 1); startAutoPlay(total); });
-  if (nextBtn) nextBtn.addEventListener('click', function (e) { e.stopPropagation(); goToSlide(currentSlide + 1); startAutoPlay(total); });
-
-  var firstSlide = slides[0];
-  var firstVid = firstSlide ? firstSlide.querySelector('video') : null;
-  if (firstVid) {
-    firstVid.addEventListener('ended', function () { goToSlide(1); startAutoPlay(total); });
-    firstVid.play().catch(function () {});
-  } else {
-    startAutoPlay(total);
-  }
-  } /* fim initSlideshow */
-
-  /* ── Navegação horizontal entre painéis (Hero → Descrição/Dados →
+  /* ── Navegação horizontal entre painéis (Capa/Dados/Descrição →
      Galeria → Relacionados), igual ao index.html/arquive.php. Aqui não
      há abrir/fechar de modal — a página inteira é sempre o "track". ── */
   var spTx = 0, spTTx = 0;
