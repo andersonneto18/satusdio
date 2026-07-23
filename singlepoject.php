@@ -238,7 +238,8 @@ add_shortcode('single_projetos', function () {
   .sp-acf-label { font-weight: 400; color: #151512; }
   .sp-acf-value { color: rgba(21,21,18,0.75); line-height: 1.55; }
   @media (max-width: 900px) {
-    #sp-main-cols { flex-direction: column; gap: 2.5rem; }
+    #sp-main-cols { flex-direction: column; align-items: stretch; gap: 2.5rem; }
+  #sp-acf { flex-basis: auto; min-width: 0; }
     #sp-content.sp-desc-col { padding: 2.5rem 5vw 3rem; }
   }
 

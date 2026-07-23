@@ -272,7 +272,8 @@ add_shortcode('sastudio_gallery', function () {
   .sg-acf-label { font-weight: 400; color: #151512; }
   .sg-acf-value { color: rgba(21,21,18,0.75); line-height: 1.55; }
   @media (max-width: 900px) {
-    #sg-main-cols { flex-direction: column; gap: 2.5rem; }
+    #sg-main-cols { flex-direction: column; align-items: stretch; gap: 2.5rem; }
+    #sg-acf { flex-basis: auto; min-width: 0; }
     #sg-content.sg-desc-col { padding: 2.5rem 5vw 3rem; }
   }
   /* ── Galeria — cada foto é o seu próprio painel horizontal,
