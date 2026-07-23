@@ -717,11 +717,12 @@
       font-variant-numeric: tabular-nums;
     }
 
-    /* ── MAIN LAYOUT (Dados | Capa | Descrição) ──
-       flex (não grid): três blocos lado a lado — Dados do projeto,
-       a capa (imagem/vídeo estático, tamanho contido) e a Descrição —
-       como a referência do cliente. Título/categoria ficam acima
-       (#lb-main-top), fora das colunas. */
+    /* ── MAIN LAYOUT (Dados | Capa) ──
+       flex (não grid): dois blocos lado a lado — Dados do projeto e a
+       capa (imagem/vídeo estático, tamanho contido). Título/categoria
+       ficam acima (#lb-main-top), fora das colunas. A Descrição já não
+       vive aqui — é o painel seguinte, a largura quase total da
+       página (ver #lb-panel-desc), sem coluna ao lado. */
     #lb-panel-main {
       position: relative;
       padding: 4.5rem 5vw 6rem;
@@ -738,14 +739,23 @@
     }
     .lb-col { flex: 1 1 0; min-width: 0; }
     #lb-acf { flex: 0 1 280px; min-width: 200px; }
-    #lb-cover-col { flex: 1 1 32%; }
+    #lb-cover-col { flex: 1 1 0; min-width: 0; }
     /* sem aspect-ratio/object-fit:cover fixo — a capa usa sempre a
        proporção real da imagem/vídeo (largura 100%, altura automática),
        para nunca cortar nada, seja qual for a orientação. */
     #lb-cover-media { width: 100%; }
     #lb-cover-media img,
     #lb-cover-media video { width: 100%; height: auto; display: block; }
-    .lb-desc-col { flex: 1.8 1 0; min-width: 0; }
+
+    /* ── PAINEL DA DESCRIÇÃO — próprio painel horizontal, texto a
+       largura quase total da página (sem coluna ao lado); o utilizador
+       roda o rato (navegação horizontal já existente no site) para
+       chegar a este painel e depois à Galeria. ── */
+    #lb-panel-desc { display: flex; align-items: center; }
+    #lb-content.lb-desc-col {
+      width: 100%; max-width: 1400px; margin: 0 auto;
+      padding: 3.5rem 8vw 5rem;
+    }
     .lb-desc-col * { max-width: 100%; box-sizing: border-box; }
     .lb-desc-col p {
       font-family: 'Inter', sans-serif !important;
@@ -756,7 +766,6 @@
       margin-bottom: 1.4rem !important;
       text-align: justify !important;
     }
-    #lb-content,
     #lb-acf { padding-top: 0 !important; margin-top: 0 !important; }
     #lb-content > .lb-section-heading,
     #lb-acf    > .lb-section-heading {
@@ -1014,6 +1023,7 @@
       /* CONTENT */
       #lb-panel-main { padding: 2.5rem 5vw 3rem; }
       #lb-main-cols { flex-direction: column; gap: 2.5rem; }
+      #lb-content.lb-desc-col { padding: 2.5rem 5vw 3rem; }
       #lb-content p { font-size: 0.95rem !important; }
 
       /* ACF TABLE */

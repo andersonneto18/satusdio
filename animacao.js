@@ -768,10 +768,10 @@ async function fetchProjectContent(id) {
 
     if (galleryImgs.length) {
       /* cada foto da galeria vira o seu próprio painel horizontal,
-         inserido a seguir ao painel principal (capa/Dados/Descrição) —
-         sem faixa de scroll interna, tal como o resto do #lb-track */
-      const mainPanel = document.getElementById('lb-panel-main');
-      if (mainPanel) {
+         inserido a seguir ao painel da Descrição — sem faixa de scroll
+         interna, tal como o resto do #lb-track */
+      const descPanel = document.getElementById('lb-panel-desc');
+      if (descPanel) {
         const photoPanels = galleryImgs.map(({ url, caption }) => {
           const panel = document.createElement('section');
           panel.className = 'lb-panel lb-panel-scrollable lb-photo-panel';
@@ -779,7 +779,7 @@ async function fetchProjectContent(id) {
             (caption ? `<div class="lb-photo-caption">${caption}</div>` : '');
           return panel;
         });
-        mainPanel.after(...photoPanels);
+        descPanel.after(...photoPanels);
       }
     }
 
