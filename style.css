@@ -760,7 +760,7 @@
       margin: 0 auto;
     }
     .lb-col { flex: 1 1 0; min-width: 0; }
-    #lb-acf { flex: 0 1 280px; min-width: 200px; }
+    #lb-acf { flex: 0 1 360px; min-width: 240px; }
     /* sticky: a capa fica fixa no ecrã enquanto o utilizador rola para
        ler a lista de Dados do projeto (quando é mais alta que a capa),
        em vez de subir/descer junto com o texto. */
@@ -783,7 +783,7 @@
        projeto:" no painel anterior. */
     #lb-panel-desc { display: flex; align-items: flex-start; }
     #lb-content.lb-desc-col {
-      width: 100%; max-width: 900px; margin: 0 auto;
+      width: 100%; max-width: 1300px; margin: 0 auto;
       padding: 3.5rem 8vw 5rem;
     }
     .lb-desc-col * { max-width: 100%; box-sizing: border-box; }

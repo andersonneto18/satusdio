@@ -224,7 +224,7 @@ add_shortcode('single_projetos', function () {
     max-width: 1800px; margin: 0 auto;
   }
   .sp-col { flex: 1 1 0; min-width: 0; }
-  #sp-acf { flex: 0 1 280px; min-width: 200px; }
+  #sp-acf { flex: 0 1 360px; min-width: 240px; }
   /* sticky: a capa fica fixa no ecrã enquanto o utilizador rola para
      ler a lista de Dados do projeto (quando é mais alta que a capa),
      em vez de subir/descer junto com o texto. */
@@ -246,7 +246,7 @@ add_shortcode('single_projetos', function () {
      ficar à mesma altura do "Dados do projeto:" no painel anterior. */
   #sp-panel-desc { display: flex; align-items: flex-start; }
   #sp-content.sp-desc-col {
-    width: 100%; max-width: 900px; margin: 0 auto;
+    width: 100%; max-width: 1300px; margin: 0 auto;
     padding: 3.5rem 8vw 5rem;
   }
   .sp-section-heading {
@@ -428,11 +428,7 @@ add_shortcode('single_projetos', function () {
     var heading = document.querySelector('#sp-acf > .sp-section-heading');
     if (!heading) return;
 
-    /* limite máximo — se o título "Dados do projeto:" ficar muito abaixo
-       (título longo, ecrã grande), alinhar perfeitamente criava um vão
-       enorme antes do texto da Descrição; acima deste valor, prefere-se
-       ficar mais perto do topo a ter esse espaço vazio todo. */
-    var target = Math.min(heading.getBoundingClientRect().top, 96);
+    var target = heading.getBoundingClientRect().top;
     descCol.style.paddingTop = target + 'px';
 
     /* se este padding empurrar o conteúdo para além do ecrã, reduz até
