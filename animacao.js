@@ -191,6 +191,7 @@ function getMasonryConfig() {
    corte (object-fit: cover não recorta nada porque a caixa já é feita
    à medida da proporção real). */
 const DEFAULT_ASPECT = 4 / 3;
+const MAX_PER_COLUMN = 3;
 
 /* Para cada coluna: decide que fotos entram (na ordem em que aparecem,
    usando a largura da coluna como referência) até chegar perto da
@@ -226,6 +227,10 @@ function layoutMasonry() {
       group.push({ pic, h });
       sumH += h;
       idx++;
+      /* nunca mais de 3 fotos por coluna, mesmo que ainda coubesse mais
+         alguma (mantém a variedade de tamanhos, evita colunas com 4+
+         fotos pequenas demais) */
+      if (group.length >= MAX_PER_COLUMN) break;
       if (sumH + (group.length - 1) * gap >= targetH) break;
     }
 
