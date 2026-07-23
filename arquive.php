@@ -196,7 +196,41 @@ add_shortcode('sastudio_gallery', function () {
   #sg-modal.sg-open { display: block; }
   body.sg-modal-open { overflow: hidden; }
   #sg-modal-inner { position: relative; height: 100%; }
-  #sg-modal-body { height: 100%; }
+  /* box-sizing:border-box + padding-top:var(--sg-header-h) — o conteúdo
+     do modal começa logo a seguir ao #sg-header-clone (abaixo), em vez
+     de ficar por baixo dele. --sg-header-h é medida em JS a partir da
+     altura real do clone (ver syncSgHeaderHeight), não é adivinhada. */
+  #sg-modal-body { height: 100%; box-sizing: border-box; padding-top: var(--sg-header-h); }
+  :root { --sg-header-h: 96px; }
+  /* ── #sg-header-clone — reconstrói só o essencial do header real do
+     tema (logo + menu, mesmas classes: sc_layouts_logo, logo_image,
+     sc_layouts_menu_nav, menu-item) por cima do modal, tal como no
+     singlepoject.php — o header normal da página /projects/ (por trás
+     do modal) fica coberto por este ecrã cheio, daí precisar da sua
+     própria cópia fixa aqui. ── */
+  #sg-header-clone {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100031;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.6rem 5vw;
+    background: #fff;
+  }
+  #sg-header-clone .logo_image { display: block; height: 32px; width: auto; }
+  #sg-header-clone .sc_layouts_menu_nav {
+    display: flex; align-items: center; gap: 2rem;
+    list-style: none; margin: 0; padding: 0;
+  }
+  #sg-header-clone .sc_layouts_menu_nav .menu-item a {
+    text-decoration: none;
+    font-family: 'Inter', sans-serif; font-size: 0.7rem;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: #151512;
+  }
+  @media (max-width: 700px) {
+    #sg-header-clone { padding: 1rem 4vw; }
+    #sg-header-clone .logo_image { height: 24px; }
+    #sg-header-clone .sc_layouts_menu_nav { gap: 1rem; }
+    #sg-header-clone .sc_layouts_menu_nav .menu-item a { font-size: 0.6rem; letter-spacing: 0.08em; }
+  }
   #sg-track { display: flex; height: 100%; will-change: transform; }
   .sg-panel { flex: 0 0 100vw; width: 100vw; height: 100%; background: #fff; }
   .sg-panel-scrollable {
@@ -216,7 +250,7 @@ add_shortcode('sastudio_gallery', function () {
      do ecrã sobe/desce (top-to-bottom) consoante o avanço entre painéis,
      atualizada em JS a par do #sg-track (ver sgTick()). */
   #sg-scrollbar {
-    position: fixed; top: 0; right: 4px; bottom: 0;
+    position: fixed; top: var(--sg-header-h); right: 4px; bottom: 0;
     width: 3px; z-index: 100010;
     pointer-events: none;
     opacity: 0; transition: opacity 0.3s ease;
@@ -228,8 +262,10 @@ add_shortcode('sastudio_gallery', function () {
     border-radius: 999px;
   }
 
+  /* fica abaixo do #sg-header-clone (ver --sg-header-h acima), para não
+     ficar tapado por ele nem sobrepor o seu menu. */
   #sg-modal-close {
-    position: fixed; top: 2.4rem; right: 1.5rem; z-index: 100010;
+    position: fixed; top: calc(var(--sg-header-h) + 1rem); right: 1.5rem; z-index: 100010;
     display: flex; align-items: center; justify-content: center;
     width: 46px; height: 46px;
     border-radius: 50%; border: none;
@@ -429,6 +465,18 @@ add_shortcode('sastudio_gallery', function () {
 <div id="sg-fly"><img id="sg-fly-img" src="" alt="" /></div>
 
 <div id="sg-modal">
+  <div id="sg-header-clone">
+    <a href="<?php echo esc_url( home_url('/') ); ?>" class="sc_layouts_logo sc_layouts_logo_default">
+      <img class="logo_image" src="https://sastudio.brand22creativeagency.pt/wp-content/uploads/2026/06/sastudio_test_logo_png-300x120-1.png" alt="Sastudio" width="300" height="120"/>
+    </a>
+    <nav>
+      <ul class="sc_layouts_menu_nav">
+        <li class="menu-item"><a href="<?php echo esc_url( home_url('/projects/') ); ?>"><span>Projects</span></a></li>
+        <li class="menu-item"><a href="<?php echo esc_url( home_url('/about/') ); ?>"><span>About</span></a></li>
+        <li class="menu-item"><a href="<?php echo esc_url( home_url('/contact/') ); ?>"><span>Contact</span></a></li>
+      </ul>
+    </nav>
+  </div>
   <div id="sg-modal-inner">
     <button id="sg-modal-close" aria-label="Fechar">&times;</button>
     <div id="sg-modal-body"></div>
@@ -652,6 +700,7 @@ add_shortcode('sastudio_gallery', function () {
       modal.classList.add('sg-open');
       modal.scrollTop = 0;
       document.body.classList.add('sg-modal-open');
+      syncSgHeaderHeight();
       loadModalContent(post);
     }
 
@@ -809,6 +858,21 @@ add_shortcode('sastudio_gallery', function () {
   function isVideoUrl(url) {
     return /\.(mp4|webm|mov|ogg)(\?|$)/i.test(url);
   }
+
+  /* mede a altura REAL de #sg-header-clone (em vez de adivinhar) e
+     aplica-a a --sg-header-h, para o conteúdo do modal/botão de
+     fechar/barra de progresso começarem sempre logo a seguir ao
+     header, mesmo que o tamanho do logo/menu mude. Só faz sentido
+     medir enquanto o modal está aberto (senão o clone está a 0px,
+     escondido dentro de #sg-modal { display:none }). */
+  function syncSgHeaderHeight() {
+    var header = document.getElementById('sg-header-clone');
+    if (!header) return;
+    document.documentElement.style.setProperty('--sg-header-h', header.offsetHeight + 'px');
+  }
+  window.addEventListener('resize', function () {
+    if (modal.classList.contains('sg-open')) syncSgHeaderHeight();
+  });
 
   /* transição (crossfade) pelas imagens da galeria depois de o vídeo
      de hover da capa acabar (ver coverIsVideo/coverHtml acima). */
