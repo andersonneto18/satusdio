@@ -184,83 +184,93 @@ function getMasonryConfig() {
   return BREAKPOINTS.find(c => vw <= c.maxW);
 }
 
-/* Largura de coluna e recuo vertical (topo/fundo) variam ciclicamente —
-   só variar a largura não chega, e um recuo pequeno (poucas dezenas de
-   px) também não: face a um ecrã de 900-1900px de altura, as colunas
-   continuavam sobrepostas em quase toda a extensão, e o vão entre elas
-   lia-se na mesma como uma linha contínua de alto a baixo. Por isso o
-   recuo agora é uma FRAÇÃO da altura do ecrã (não px fixos): colunas
-   alternam entre "metade de cima" e "metade de baixo" (com alguma
-   variação), sobrepondo-se só numa faixa estreita ao centro — na maior
-   parte da altura só existe uma das duas colunas, o resto é fundo,
-   quebrando mesmo a linha. Cada foto usa sempre a SUA proporção real
-   (dataset.aspect, vinda das dimensões reais do WordPress) para decidir
-   a altura: largura da coluna ÷ aspect, nunca cortando nada. */
-const WIDTH_MULTIPLIERS = [1.15, 0.80, 1.35, 0.90, 1.20, 0.75, 0.95, 1.05, 1.30, 0.85];
-const TOP_FRACS          = [0.00, 0.42, 0.00, 0.45, 0.05, 0.38, 0.00, 0.40, 0.02, 0.42];
-const BOTTOM_FRACS       = [0.42, 0.00, 0.45, 0.00, 0.38, 0.00, 0.40, 0.00, 0.42, 0.00];
-const DEFAULT_ASPECT = 4 / 3;
+/* Gera a sequência de quantas imagens cada coluna leva (3, 2, 3, 2...),
+   mas corrige o fim para nunca sobrar uma coluna com 1 imagem sozinha —
+   junta/reparte com a coluna anterior nesse caso. */
+function computeColumnCounts(n) {
+  const counts = [];
+  let remaining = n, i = 0;
+  while (remaining > 0) {
+    const target = (i % 2 === 0) ? 3 : 2;
+    const c = Math.min(target, remaining);
+    counts.push(c);
+    remaining -= c;
+    i++;
+  }
+  if (counts.length >= 2 && counts[counts.length - 1] === 1) {
+    const last = counts.length - 1, prev = last - 1;
+    if (counts[prev] > 2) {
+      counts[prev]--;
+      counts[last]++;
+    } else {
+      counts[prev] += counts[last];
+      counts.pop();
+    }
+  }
+  return counts;
+}
 
-/* Para cada coluna: decide que fotos entram (na ordem em que aparecem,
-   usando a largura "base" da coluna como referência) até chegar perto
-   do espaço vertical disponível (já descontado o recuo), depois
-   reescala a coluna toda (largura + cada altura, no mesmo fator) para
-   fechar exatamente esse espaço — sem isto sobrava um vão em branco no
-   fundo sempre que a próxima foto não coubesse certinha. Como largura e
-   altura escalam sempre juntas, a proporção real de cada foto mantém-se
-   perfeita (nunca corta, nunca distorce). Novas colunas abrem-se à
-   direita, reveladas ao fazer scroll horizontal. */
+/* Para cada coluna: usa a contagem já decidida (computeColumnCounts) e
+   ajusta a largura dessa coluna, dentro de um intervalo controlado, para
+   fechar exatamente a altura do ecrã sem deixar vão nem esticar demais.
+   Novas colunas abrem-se à direita, reveladas ao fazer scroll horizontal. */
 function layoutMasonry() {
   const { gap, approxCols } = getMasonryConfig();
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
+  const vw    = window.innerWidth;
+  const vh    = window.innerHeight;
+  const maxH  = vh - gap * 2;
   const baseColW = (vw - gap * (approxCols + 1)) / approxCols;
-  const n = WIDTH_MULTIPLIERS.length;
 
-  const pics = Array.from(gallery.querySelectorAll('.pic'));
+  const pics   = Array.from(gallery.querySelectorAll('.pic'));
+  const counts = computeColumnCounts(pics.length);
 
-  let idx = 0, x = gap, colIdx = 0;
+  let idx = 0, x = gap;
 
-  while (idx < pics.length) {
-    const baseW   = baseColW * WIDTH_MULTIPLIERS[colIdx % n];
-    const top     = gap + vh * TOP_FRACS[colIdx % n];
-    const bottom  = vh - gap - vh * BOTTOM_FRACS[colIdx % n];
-    const targetH = bottom - top;
+  counts.forEach((count, colIdx) => {
+    const group = pics.slice(idx, idx + count);
 
-    const group = [];
-    let sumH = 0;
-    while (idx < pics.length) {
-      const pic    = pics[idx];
-      const aspect = parseFloat(pic.dataset.aspect) || DEFAULT_ASPECT;
-      const h      = baseW / aspect;
-      /* já tem pelo menos 1 foto e esta próxima passaria bastante do
-         espaço disponível — fica para a coluna seguinte (a não ser que
-         seja a última foto de todas, aí tem de entrar nesta coluna na
-         mesma) */
-      if (group.length && sumH + h + group.length * gap > targetH && idx < pics.length - 1) break;
-      group.push({ pic, h });
-      sumH += h;
-      idx++;
-      if (sumH + (group.length - 1) * gap >= targetH) break;
+    if (count === 2 || count === 3) {
+      /* tamanhos sempre com proporções fixas e diferentes entre si
+         (não derivadas da proporção real da foto) — senão fotos com
+         enquadramento parecido ficavam com o mesmo tamanho na coluna.
+         Largura normal da coluna; a imagem recorta (object-fit: cover)
+         em vez de esticar, por isso o corte não distorce nada. */
+      const colW    = baseColW;
+      const availH  = maxH - gap * (count + 1);
+      const ratios2 = [[0.6, 0.4], [0.4, 0.6]];
+      const ratios3 = [[0.40, 0.34, 0.26], [0.26, 0.40, 0.34], [0.34, 0.26, 0.40]];
+      const ratios  = count === 2 ? ratios2[colIdx % 2] : ratios3[colIdx % 3];
+
+      let y = gap;
+      group.forEach((pic, i) => {
+        const h = availH * ratios[i];
+        pic.style.left   = x + 'px';
+        pic.style.top    = y + 'px';
+        pic.style.width  = colW + 'px';
+        pic.style.height = h + 'px';
+        y += h + gap;
+      });
+
+      x += colW + gap;
+    } else {
+      /* caso raro (ex: só sobra 1 imagem no total) — preenche a altura toda */
+      const colW = baseColW;
+      const h    = maxH - gap * 2;
+
+      let y = gap;
+      group.forEach(pic => {
+        pic.style.left   = x + 'px';
+        pic.style.top    = y + 'px';
+        pic.style.width  = colW + 'px';
+        pic.style.height = h + 'px';
+        y += h + gap;
+      });
+
+      x += colW + gap;
     }
 
-    const nGaps = Math.max(group.length - 1, 0) * gap;
-    const scale = (targetH - nGaps) / sumH;
-    const colW  = baseW * scale;
-
-    let y = top;
-    group.forEach(({ pic, h }) => {
-      const scaledH = h * scale;
-      pic.style.left   = x + 'px';
-      pic.style.top    = y + 'px';
-      pic.style.width  = colW + 'px';
-      pic.style.height = scaledH + 'px';
-      y += scaledH + gap;
-    });
-
-    x += colW + gap;
-    colIdx++;
-  }
+    idx += count;
+  });
 
   gallery.style.width  = x + 'px';
   gallery.style.height = vh + 'px';
@@ -1343,9 +1353,7 @@ function initParallax() {
 
   function leaveActivePic() {
     if (!activePic) return;
-    const img = activePic.querySelector('img');
     activePic.style.zIndex = '';
-    gsap.to(img, { scale: 1.06, duration: 0.85, ease: 'power3.out' });
     if (activeVid) {
       const vid = activeVid;
       gsap.to(vid, { opacity: 0, duration: 0.3, onComplete: () => {
@@ -1368,9 +1376,7 @@ function initParallax() {
       if (activePic) leaveActivePic();
       /* entra no novo card */
       if (pic) {
-        const img = pic.querySelector('img');
         pic.style.zIndex = '100';
-        gsap.to(img, { scale: 1.14, duration: 0.7, ease: 'power2.out' });
         document.body.classList.add('on-pic');
         const vid = pic.querySelector('.pic-hover-vid');
         if (vid) {
