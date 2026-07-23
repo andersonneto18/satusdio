@@ -283,11 +283,11 @@ add_shortcode('single_projetos', function () {
        com object-fit:cover a preencher/recortar, independentemente da
        proporção original. Menor que o painel todo (não colado às
        bordas), como na referência. */
-    width: 58vw; height: 64vh;
+    width: 70vw; height: 74vh;
     object-fit: cover; display: block;
     pointer-events: none; -webkit-user-drag: none;
   }
-  @media (max-width: 700px) { .sp-photo-panel { padding: 1vh 1.5vw; } .sp-photo-panel img { width: 84vw; height: 48vh; } }
+  @media (max-width: 700px) { .sp-photo-panel { padding: 1vh 1.5vw; } .sp-photo-panel img { width: 90vw; height: 55vh; } }
 
   /* ── Outros projetos (relacionados), igual ao #sg-related/#lb-related ── */
   #sp-panel-related { display: flex; align-items: center; }
@@ -428,7 +428,11 @@ add_shortcode('single_projetos', function () {
     var heading = document.querySelector('#sp-acf > .sp-section-heading');
     if (!heading) return;
 
-    var target = heading.getBoundingClientRect().top;
+    /* limite máximo — se o título "Dados do projeto:" ficar muito abaixo
+       (título longo, ecrã grande), alinhar perfeitamente criava um vão
+       enorme antes do texto da Descrição; acima deste valor, prefere-se
+       ficar mais perto do topo a ter esse espaço vazio todo. */
+    var target = Math.min(heading.getBoundingClientRect().top, 96);
     descCol.style.paddingTop = target + 'px';
 
     /* se este padding empurrar o conteúdo para além do ecrã, reduz até

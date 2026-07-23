@@ -321,11 +321,11 @@ add_shortcode('sastudio_gallery', function () {
        proporção original. Sem isto, fotos em retrato ficavam muito mais
        pequenas que as em paisagem, criando um vazio enorme entre elas.
        Menor que o painel todo (não colado às bordas), como na referência. */
-    width: 58vw; height: 64vh;
+    width: 70vw; height: 74vh;
     object-fit: cover; display: block;
     pointer-events: none; -webkit-user-drag: none;
   }
-  @media (max-width: 700px) { .sg-photo-panel { padding: 1vh 1.5vw; } .sg-photo-panel img { width: 84vw; height: 48vh; } }
+  @media (max-width: 700px) { .sg-photo-panel { padding: 1vh 1.5vw; } .sg-photo-panel img { width: 90vw; height: 55vh; } }
   #sg-modal-loading {
     display: flex; align-items: center; justify-content: center;
     height: 60vh; font-size: 0.8rem; color: rgba(21,21,18,0.45);
@@ -643,7 +643,11 @@ add_shortcode('sastudio_gallery', function () {
     var heading = document.querySelector('#sg-acf > .sg-section-heading');
     if (!heading) return;
 
-    var target = heading.getBoundingClientRect().top;
+    /* limite máximo — se o título "Dados do projeto:" ficar muito abaixo
+       (título longo, ecrã grande), alinhar perfeitamente criava um vão
+       enorme antes do texto da Descrição; acima deste valor, prefere-se
+       ficar mais perto do topo a ter esse espaço vazio todo. */
+    var target = Math.min(heading.getBoundingClientRect().top, 96);
     descCol.style.paddingTop = target + 'px';
 
     /* se este padding empurrar o conteúdo para além do ecrã, reduz até

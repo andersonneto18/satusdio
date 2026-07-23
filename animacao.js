@@ -677,7 +677,11 @@ function alignDescHeading() {
   const panel = document.getElementById('lb-panel-desc');
   if (!heading || !panel) return;
 
-  const target = heading.getBoundingClientRect().top;
+  /* limite máximo — se o título "Dados do projeto:" ficar muito abaixo
+     (título longo, ecrã grande), alinhar perfeitamente criava um vão
+     enorme antes do texto da Descrição; acima deste valor, prefere-se
+     ficar mais perto do topo a ter esse espaço vazio todo. */
+  const target = Math.min(heading.getBoundingClientRect().top, 96);
   lbContent.style.paddingTop = target + 'px';
 
   /* se este padding empurrar o conteúdo para além do ecrã, reduz até

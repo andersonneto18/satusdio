@@ -877,7 +877,7 @@
          proporção original. Sem isto, fotos em retrato ficavam muito mais
          pequenas que as em paisagem, criando um vazio enorme entre elas.
          Menor que o painel todo (não colado às bordas), como na referência. */
-      width: 58vw; height: 64vh;
+      width: 70vw; height: 74vh;
       object-fit: cover; display: block;
       pointer-events: none;
       -webkit-user-drag: none;
@@ -892,7 +892,7 @@
     }
     @media (max-width: 768px) {
       .lb-photo-panel { padding: 1vh 1.5vw; }
-      .lb-photo-panel img { width: 84vw; height: 48vh; }
+      .lb-photo-panel img { width: 90vw; height: 55vh; }
     }
 
     /* ── FOOTER ── */
