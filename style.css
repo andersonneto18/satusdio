@@ -763,7 +763,11 @@
        largura quase total da página (sem coluna ao lado); o utilizador
        roda o rato (navegação horizontal já existente no site) para
        chegar a este painel e depois à Galeria. ── */
-    #lb-panel-desc { display: flex; align-items: center; }
+    /* align-items:flex-start (não center) — o padding-top de
+       #lb-content é ajustado em JS (alignDescHeading em animacao.js)
+       para o título "Descrição:" ficar à mesma altura do "Dados do
+       projeto:" no painel anterior. */
+    #lb-panel-desc { display: flex; align-items: flex-start; }
     #lb-content.lb-desc-col {
       width: 100%; max-width: 900px; margin: 0 auto;
       padding: 3.5rem 8vw 5rem;

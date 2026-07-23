@@ -227,7 +227,10 @@ add_shortcode('single_projetos', function () {
      largura quase total da página (sem coluna ao lado); o utilizador
      roda o rato (navegação horizontal já existente) para chegar a
      este painel e depois à Galeria. ── */
-  #sp-panel-desc { display: flex; align-items: center; }
+  /* align-items:flex-start (não center) — o padding-top de #sp-content
+     é ajustado em JS (alignSpDescHeading) para o título "Descrição:"
+     ficar à mesma altura do "Dados do projeto:" no painel anterior. */
+  #sp-panel-desc { display: flex; align-items: flex-start; }
   #sp-content.sp-desc-col {
     width: 100%; max-width: 900px; margin: 0 auto;
     padding: 3.5rem 8vw 5rem;
@@ -394,7 +397,24 @@ add_shortcode('single_projetos', function () {
       cover.appendChild(vid);
       vid.play().catch(function () {});
     }
+    alignSpDescHeading();
   });
+
+  /* alinha o título "Descrição:" (painel seguinte) com a altura real do
+     título "Dados do projeto:" (painel principal) — evita ter de
+     adivinhar a altura do bloco de título (varia com o comprimento do
+     nome do projeto). Só se aplica em ecrãs largos (ver #sp-main-cols
+     no media query de 900px). */
+  function alignSpDescHeading() {
+    var descCol = document.getElementById('sp-content');
+    if (!descCol) return;
+    if (window.innerWidth <= 900) { descCol.style.paddingTop = ''; return; }
+    var heading = document.querySelector('#sp-acf > .sp-section-heading');
+    if (!heading) { descCol.style.paddingTop = ''; return; }
+    descCol.style.paddingTop = heading.getBoundingClientRect().top + 'px';
+  }
+  alignSpDescHeading();
+  window.addEventListener('resize', alignSpDescHeading);
 
   /* ── Navegação horizontal entre painéis (Capa/Dados/Descrição →
      Galeria → Relacionados). O scroll vertical NATIVO do #sp-viewport
