@@ -279,14 +279,15 @@ add_shortcode('sastudio_gallery', function () {
      empurrem o painel para além do ecrã, obrigando a rolar — a
      imagem encolhe (mantendo a proporção real, sem cortar) até caber
      nessa altura, mesmo que fique mais estreita que os 65% da largura. */
-  #sg-cover-media {
-    width: 65%; max-height: 60vh; margin: 0 auto;
-    display: flex; justify-content: center;
-  }
+  /* altura FIXA (não max-height) — todas as capas ficam com a mesma
+     altura, para os cards ficarem visualmente consistentes entre
+     projetos; object-fit:cover ajusta a imagem a essa caixa (pode
+     recortar as margens conforme a proporção original). */
+  #sg-cover-media { width: 65%; height: 55vh; margin: 0 auto; }
   #sg-cover-media img,
   #sg-cover-media video {
-    max-width: 100%; max-height: 60vh;
-    width: auto; height: auto; display: block;
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
   }
 
   /* ── PAINEL DA DESCRIÇÃO — próprio painel horizontal, texto a
