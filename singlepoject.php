@@ -166,15 +166,21 @@ add_shortcode('single_projetos', function () {
   }
 
   /* ── Navegação horizontal entre painéis (Capa/Dados/Descrição →
-     Galeria → Relacionados), igual ao index.html/arquive.php — #sp-track
-     é deslocado via transform:translateX pelo wheel handler; cada
-     .sp-panel mantém o seu próprio scroll vertical (texto longo) até
-     chegar ao topo/fundo, altura em que o wheel passa a mudar de painel. */
+     Galeria → Relacionados). O scroll vertical NATIVO do #sp-viewport
+     (barra original do browser) é convertido em translateX do #sp-track
+     em JS: #sp-scroll-spacer dá espaço extra (1 viewport de altura por
+     painel) para rolar, enquanto o #sp-track fica "preso" (sticky) no
+     topo — dando a navegação horizontal com a barra de scroll vertical
+     real a acompanhar o progresso. Cada .sp-panel mantém o seu próprio
+     scroll vertical (texto longo): o scroll nativo "encadeia" para o
+     #sp-viewport assim que esse painel chega ao topo/fundo, sem JS a
+     testar isso manualmente. */
   #sp-viewport {
     position: fixed; inset: 0; z-index: 1;
-    background: #fff; overflow: hidden;
+    background: #fff; overflow-y: scroll; overflow-x: hidden;
   }
-  #sp-track { display: flex; height: 100%; will-change: transform; }
+  #sp-scroll-spacer { width: 100%; }
+  #sp-track { position: sticky; top: 0; display: flex; height: 100%; will-change: transform; }
   .sp-panel { flex: 0 0 100vw; width: 100vw; height: 100%; background: #fff; }
   .sp-panel-scrollable {
     overflow-y: auto; overflow-x: hidden;
@@ -182,22 +188,6 @@ add_shortcode('single_projetos', function () {
     scrollbar-width: none;
   }
   .sp-panel-scrollable::-webkit-scrollbar { display: none; }
-
-  /* ── BARRA DE PROGRESSO VERTICAL ──
-     os painéis navegam na horizontal (translateX), por isso não existe
-     scrollbar nativa a indicar o progresso; esta barra fininha à direita
-     do ecrã sobe/desce (top-to-bottom) consoante o avanço entre painéis,
-     atualizada em JS a par do #sp-track (ver spTick()). */
-  #sp-scrollbar {
-    position: fixed; top: 0; right: 4px; bottom: 0;
-    width: 3px; z-index: 100010;
-    pointer-events: none;
-  }
-  #sp-scrollbar-thumb {
-    position: absolute; left: 0; width: 100%;
-    background: rgba(21,21,18,0.28);
-    border-radius: 999px;
-  }
 
   /* ── Painel principal (Dados | Capa) ──
      título/categoria no topo (#sp-main-top), depois duas colunas lado
@@ -312,9 +302,8 @@ add_shortcode('single_projetos', function () {
 <div id="sp-root">
   <a id="sp-close" href="<?php echo esc_url( home_url('/projects/') ); ?>" aria-label="Fechar">&times;</a>
 
-  <div id="sp-scrollbar"><div id="sp-scrollbar-thumb"></div></div>
-
   <div id="sp-viewport">
+    <div id="sp-scroll-spacer">
     <div id="sp-track">
       <section id="sp-panel-main" class="sp-panel sp-panel-scrollable">
         <div id="sp-main-top">
@@ -386,6 +375,7 @@ add_shortcode('single_projetos', function () {
       </section>
       <?php endif; ?>
     </div>
+    </div>
   </div>
 </div>
 
@@ -407,57 +397,42 @@ add_shortcode('single_projetos', function () {
   });
 
   /* ── Navegação horizontal entre painéis (Capa/Dados/Descrição →
-     Galeria → Relacionados), igual ao index.html/arquive.php. Aqui não
-     há abrir/fechar de modal — a página inteira é sempre o "track". ── */
-  var spTx = 0, spTTx = 0;
-  var spScrollbarThumb = document.getElementById('sp-scrollbar-thumb');
+     Galeria → Relacionados). O scroll vertical NATIVO do #sp-viewport
+     (barra original do browser, não uma barra fictícia) é convertido em
+     translateX do #sp-track: #sp-scroll-spacer dá espaço extra (1
+     viewport de altura por painel) para o #sp-viewport rolar, enquanto
+     o #sp-track fica sticky no topo. Cada .sp-panel mantém o seu próprio
+     scroll vertical (texto longo): o scroll nativo "encadeia" para o
+     #sp-viewport assim que esse painel chega ao topo/fundo, sem JS a
+     testar isso manualmente. ── */
+  var spViewport = document.getElementById('sp-viewport');
+  var spSpacer   = document.getElementById('sp-scroll-spacer');
+  var spTrack    = document.getElementById('sp-track');
 
-  function spBounds() {
-    var track = document.getElementById('sp-track');
-    var n = track ? Math.max(track.querySelectorAll('.sp-panel').length, 1) : 1;
-    return { min: -(n - 1) * window.innerWidth, max: 0 };
+  function spVisiblePanels() {
+    return spTrack ? Array.prototype.filter.call(spTrack.querySelectorAll('.sp-panel'), function (p) { return p.style.display !== 'none'; }) : [];
   }
 
-  /* barra vertical de progresso — desce à medida que se avança pelos
-     painéis horizontais, como substituta visual da scrollbar nativa. */
-  function updateSpScrollbar(b) {
-    if (!spScrollbarThumb) return;
-    var track = document.getElementById('sp-track');
-    var n = track ? Math.max(track.querySelectorAll('.sp-panel').length, 1) : 1;
-    var progress = b.min !== 0 ? Math.min(1, Math.max(0, spTx / b.min)) : 0;
-    var thumbPct = 100 / n;
-    spScrollbarThumb.style.height = thumbPct + '%';
-    spScrollbarThumb.style.top = (progress * (100 - thumbPct)) + '%';
+  function syncSpSpacer() {
+    if (!spSpacer) return;
+    var n = Math.max(spVisiblePanels().length, 1);
+    spSpacer.style.height = (n * spViewport.clientHeight) + 'px';
   }
 
-  (function spTick() {
-    var track = document.getElementById('sp-track');
-    if (track) {
-      var b = spBounds();
-      spTTx = Math.max(b.min, Math.min(b.max, spTTx));
-      spTx += (spTTx - spTx) * 0.14;
-      track.style.transform = 'translateX(' + spTx + 'px)';
-      updateSpScrollbar(b);
-    }
-    requestAnimationFrame(spTick);
-  })();
+  function applySpScroll() {
+    if (!spTrack) return;
+    var n = Math.max(spVisiblePanels().length, 1);
+    var maxScroll = Math.max((n - 1) * spViewport.clientHeight, 1);
+    var fraction = Math.min(1, Math.max(0, spViewport.scrollTop / maxScroll));
+    spTrack.style.transform = 'translateX(' + (-fraction * (n - 1) * window.innerWidth) + 'px)';
+  }
 
-  window.addEventListener('wheel', function (e) {
-    var track = document.getElementById('sp-track');
-    if (!track) return;
-
-    var scrollable = e.target.closest('.sp-panel-scrollable');
-    if (scrollable) {
-      var atTop     = scrollable.scrollTop <= 0;
-      var atBottom  = scrollable.scrollTop + scrollable.clientHeight >= scrollable.scrollHeight - 1;
-      var goingDown = e.deltaY > 0;
-      if ((goingDown && !atBottom) || (!goingDown && !atTop)) return;
-    }
-
-    e.preventDefault();
-    var delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-    spTTx -= delta * 1.3;
-  }, { passive: false });
+  if (spViewport && spTrack) {
+    spViewport.addEventListener('scroll', function () { requestAnimationFrame(applySpScroll); }, { passive: true });
+    window.addEventListener('resize', function () { syncSpSpacer(); applySpScroll(); });
+    syncSpSpacer();
+    applySpScroll();
+  }
 })();
 </script>
     <?php

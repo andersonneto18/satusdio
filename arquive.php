@@ -183,10 +183,14 @@ add_shortcode('sastudio_gallery', function () {
 
   /* ── Modal — ecrã inteiro, como o lightbox do index.html ──
      Navegação horizontal entre painéis (Capa/Dados/Descrição →
-     Galeria → Relacionados): #sg-track é deslocado via
-     transform:translateX pelo wheel handler; cada .sg-panel mantém
-     o seu próprio scroll vertical (texto longo) até chegar ao
-     topo/fundo, altura em que o wheel passa a mudar de painel. */
+     Galeria → Relacionados). O scroll vertical NATIVO do #sg-modal-body
+     (barra original do browser) é convertido em translateX do #sg-track
+     em JS: #sg-scroll-spacer dá espaço extra (1 viewport de altura por
+     painel) para rolar, enquanto o #sg-track fica "preso" (sticky) no
+     topo — dando a navegação horizontal com a barra de scroll vertical
+     real a acompanhar o progresso. Cada .sg-panel mantém o seu próprio
+     scroll vertical (texto longo): o scroll nativo "encadeia" para o
+     #sg-modal-body assim que esse painel chega ao topo/fundo. */
   #sg-modal {
     position: fixed; inset: 0; z-index: 100000;
     background: #fff;
@@ -196,8 +200,9 @@ add_shortcode('sastudio_gallery', function () {
   #sg-modal.sg-open { display: block; }
   body.sg-modal-open { overflow: hidden; }
   #sg-modal-inner { position: relative; height: 100%; }
-  #sg-modal-body { height: 100%; }
-  #sg-track { display: flex; height: 100%; will-change: transform; }
+  #sg-modal-body { height: 100%; overflow-y: scroll; overflow-x: hidden; }
+  #sg-scroll-spacer { width: 100%; }
+  #sg-track { position: sticky; top: 0; display: flex; height: 100%; will-change: transform; }
   .sg-panel { flex: 0 0 100vw; width: 100vw; height: 100%; background: #fff; }
   .sg-panel-scrollable {
     overflow-y: auto; overflow-x: hidden;
@@ -205,24 +210,6 @@ add_shortcode('sastudio_gallery', function () {
     scrollbar-width: none;
   }
   .sg-panel-scrollable::-webkit-scrollbar { display: none; }
-
-  /* ── BARRA DE PROGRESSO VERTICAL ──
-     os painéis navegam na horizontal (translateX), por isso não existe
-     scrollbar nativa a indicar o progresso; esta barra fininha à direita
-     do ecrã sobe/desce (top-to-bottom) consoante o avanço entre painéis,
-     atualizada em JS a par do #sg-track (ver sgTick()). */
-  #sg-scrollbar {
-    position: fixed; top: 0; right: 4px; bottom: 0;
-    width: 3px; z-index: 100010;
-    pointer-events: none;
-    opacity: 0; transition: opacity 0.3s ease;
-  }
-  #sg-modal.sg-open #sg-scrollbar { opacity: 1; }
-  #sg-scrollbar-thumb {
-    position: absolute; left: 0; width: 100%;
-    background: rgba(21,21,18,0.28);
-    border-radius: 999px;
-  }
 
   #sg-modal-close {
     position: fixed; top: 2.4rem; right: 1.5rem; z-index: 100010;
@@ -384,7 +371,6 @@ add_shortcode('sastudio_gallery', function () {
     <button id="sg-modal-close" aria-label="Fechar">&times;</button>
     <div id="sg-modal-body"></div>
   </div>
-  <div id="sg-scrollbar"><div id="sg-scrollbar-thumb"></div></div>
 </div>
 
 <script>
@@ -663,7 +649,7 @@ add_shortcode('sastudio_gallery', function () {
         ? '<video src="' + esc(coverUrl) + '" muted loop autoplay playsinline></video>'
         : '<img src="' + esc(coverUrl) + '" alt=""/>';
 
-      var html = '<div id="sg-track">';
+      var html = '<div id="sg-scroll-spacer"><div id="sg-track">';
       html += '<section id="sg-panel-main" class="sg-panel sg-panel-scrollable">';
       html += '<div id="sg-main-top">';
       html += '<div class="sg-meta">' + esc(meta) + '</div>';
@@ -693,7 +679,7 @@ add_shortcode('sastudio_gallery', function () {
         }).join('');
       }
       html += buildRelatedHtml(post);
-      html += '</div>'; /* fim #sg-track */
+      html += '</div></div>'; /* fim #sg-track e #sg-scroll-spacer */
       modalBody.innerHTML = html;
       wireRelatedClicks();
       if (window.resetSgTrack) window.resetSgTrack();
@@ -749,66 +735,44 @@ add_shortcode('sastudio_gallery', function () {
   }
 
   /* ── Navegação horizontal entre painéis (Capa/Dados/Descrição →
-     Galeria → Relacionados), igual ao index.html — #sg-track é
-     recriado a cada abertura de projeto (modalBody.innerHTML), por
-     isso é preciso voltar a procurá-lo em cada frame/evento em vez
-     de o guardar numa variável fixa. ── */
-  var sgTx = 0, sgTTx = 0;
-
-  function sgBounds() {
+     Galeria → Relacionados). O scroll vertical NATIVO do #sg-modal-body
+     (barra original do browser, não uma barra fictícia) é convertido
+     em translateX do #sg-track: #sg-scroll-spacer dá espaço extra (1
+     viewport de altura por painel) para o #sg-modal-body rolar,
+     enquanto o #sg-track fica sticky no topo. #sg-track/#sg-scroll-spacer
+     são recriados a cada abertura de projeto (modalBody.innerHTML), por
+     isso vão sendo procurados de novo em vez de guardados numa variável
+     fixa. Cada .sg-panel mantém o seu próprio scroll vertical (texto
+     longo): o scroll nativo "encadeia" para o #sg-modal-body assim que
+     esse painel chega ao topo/fundo, sem JS a testar isso manualmente. ── */
+  function sgVisiblePanels() {
     var track = document.getElementById('sg-track');
-    var n = track ? Math.max(track.querySelectorAll('.sg-panel').length, 1) : 1;
-    return { min: -(n - 1) * window.innerWidth, max: 0 };
+    return track ? Array.prototype.filter.call(track.querySelectorAll('.sg-panel'), function (p) { return p.style.display !== 'none'; }) : [];
   }
 
-  var sgScrollbarThumb = document.getElementById('sg-scrollbar-thumb');
-
-  /* barra vertical de progresso — desce à medida que se avança pelos
-     painéis horizontais, como substituta visual da scrollbar nativa. */
-  function updateSgScrollbar(b) {
-    if (!sgScrollbarThumb) return;
-    var track = document.getElementById('sg-track');
-    var n = track ? Math.max(track.querySelectorAll('.sg-panel').length, 1) : 1;
-    var progress = b.min !== 0 ? Math.min(1, Math.max(0, sgTx / b.min)) : 0;
-    var thumbPct = 100 / n;
-    sgScrollbarThumb.style.height = thumbPct + '%';
-    sgScrollbarThumb.style.top = (progress * (100 - thumbPct)) + '%';
+  function syncSgSpacer() {
+    var spacer = document.getElementById('sg-scroll-spacer');
+    if (!spacer) return;
+    var n = Math.max(sgVisiblePanels().length, 1);
+    spacer.style.height = (n * modalBody.clientHeight) + 'px';
   }
 
-  (function sgTick() {
-    var track = document.getElementById('sg-track');
-    if (track) {
-      var b = sgBounds();
-      sgTTx = Math.max(b.min, Math.min(b.max, sgTTx));
-      sgTx += (sgTTx - sgTx) * 0.14;
-      track.style.transform = 'translateX(' + sgTx + 'px)';
-      updateSgScrollbar(b);
-    }
-    requestAnimationFrame(sgTick);
-  })();
-
-  window.addEventListener('wheel', function (e) {
-    if (!modal.classList.contains('sg-open')) return;
+  function applySgScroll() {
     var track = document.getElementById('sg-track');
     if (!track) return;
+    var n = Math.max(sgVisiblePanels().length, 1);
+    var maxScroll = Math.max((n - 1) * modalBody.clientHeight, 1);
+    var fraction = Math.min(1, Math.max(0, modalBody.scrollTop / maxScroll));
+    track.style.transform = 'translateX(' + (-fraction * (n - 1) * window.innerWidth) + 'px)';
+  }
 
-    var scrollable = e.target.closest('.sg-panel-scrollable');
-    if (scrollable) {
-      var atTop     = scrollable.scrollTop <= 0;
-      var atBottom  = scrollable.scrollTop + scrollable.clientHeight >= scrollable.scrollHeight - 1;
-      var goingDown = e.deltaY > 0;
-      if ((goingDown && !atBottom) || (!goingDown && !atTop)) return;
-    }
-
-    e.preventDefault();
-    var delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-    sgTTx -= delta * 1.3;
-  }, { passive: false });
+  modalBody.addEventListener('scroll', function () { requestAnimationFrame(applySgScroll); }, { passive: true });
+  window.addEventListener('resize', function () { syncSgSpacer(); applySgScroll(); });
 
   window.resetSgTrack = function () {
-    sgTx = 0; sgTTx = 0;
-    var track = document.getElementById('sg-track');
-    if (track) track.style.transform = 'translateX(0px)';
+    modalBody.scrollTop = 0;
+    syncSgSpacer();
+    applySgScroll();
   };
 
   function closeModal(opts) {
