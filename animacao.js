@@ -197,10 +197,15 @@ const TOP_INSETS         = [0,    60,   20,   90,   40,   0,    70,   30,   0,  
 const BOTTOM_INSETS      = [80,   0,    60,   0,    90,   40,   0,    70,   30,   0   ];
 const DEFAULT_ASPECT = 4 / 3;
 
-/* Para cada coluna: enche com fotos (na ordem em que aparecem) até
-   chegar perto do espaço vertical disponível (já descontado o recuo),
-   cada uma com a sua altura natural (colW / aspect real). Novas colunas
-   abrem-se à direita, reveladas ao fazer scroll horizontal. */
+/* Para cada coluna: decide que fotos entram (na ordem em que aparecem,
+   usando a largura "base" da coluna como referência) até chegar perto
+   do espaço vertical disponível (já descontado o recuo), depois
+   reescala a coluna toda (largura + cada altura, no mesmo fator) para
+   fechar exatamente esse espaço — sem isto sobrava um vão em branco no
+   fundo sempre que a próxima foto não coubesse certinha. Como largura e
+   altura escalam sempre juntas, a proporção real de cada foto mantém-se
+   perfeita (nunca corta, nunca distorce). Novas colunas abrem-se à
+   direita, reveladas ao fazer scroll horizontal. */
 function layoutMasonry() {
   const { gap, approxCols } = getMasonryConfig();
   const vw = window.innerWidth;
@@ -213,35 +218,40 @@ function layoutMasonry() {
   let idx = 0, x = gap, colIdx = 0;
 
   while (idx < pics.length) {
-    const colW    = baseColW * WIDTH_MULTIPLIERS[colIdx % n];
+    const baseW   = baseColW * WIDTH_MULTIPLIERS[colIdx % n];
     const top     = gap + TOP_INSETS[colIdx % n];
     const bottom  = vh - gap - BOTTOM_INSETS[colIdx % n];
     const targetH = bottom - top;
 
     const group = [];
-    let usedH = 0;
+    let sumH = 0;
     while (idx < pics.length) {
       const pic    = pics[idx];
       const aspect = parseFloat(pic.dataset.aspect) || DEFAULT_ASPECT;
-      const h      = colW / aspect;
+      const h      = baseW / aspect;
       /* já tem pelo menos 1 foto e esta próxima passaria bastante do
          espaço disponível — fica para a coluna seguinte (a não ser que
          seja a última foto de todas, aí tem de entrar nesta coluna na
          mesma) */
-      if (group.length && usedH + gap + h > targetH && idx < pics.length - 1) break;
+      if (group.length && sumH + h + group.length * gap > targetH && idx < pics.length - 1) break;
       group.push({ pic, h });
-      usedH += h + gap;
+      sumH += h;
       idx++;
-      if (usedH >= targetH) break;
+      if (sumH + (group.length - 1) * gap >= targetH) break;
     }
+
+    const nGaps = Math.max(group.length - 1, 0) * gap;
+    const scale = (targetH - nGaps) / sumH;
+    const colW  = baseW * scale;
 
     let y = top;
     group.forEach(({ pic, h }) => {
+      const scaledH = h * scale;
       pic.style.left   = x + 'px';
       pic.style.top    = y + 'px';
       pic.style.width  = colW + 'px';
-      pic.style.height = h + 'px';
-      y += h + gap;
+      pic.style.height = scaledH + 'px';
+      y += scaledH + gap;
     });
 
     x += colW + gap;
