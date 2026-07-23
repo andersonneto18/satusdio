@@ -165,6 +165,34 @@ add_shortcode('single_projetos', function () {
     #sp-close { top: 0.9rem; right: 0.9rem; width: 42px; height: 42px; }
   }
 
+  /* ── Barra de topo (logo + menu) — a página de projeto individual não
+     mostra o header do tema (ver header.top_panel_custom_header-sastudio
+     escondido acima), por isso ganha a sua própria barra fixa com o
+     logo à esquerda e o menu à direita, alinhados com o botão "X". ── */
+  #sp-topbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100009;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.9rem 6.5rem 1.9rem 5vw;
+    pointer-events: none;
+  }
+  #sp-topbar a { pointer-events: all; }
+  .sp-topbar-logo { display: flex; align-items: center; }
+  .sp-topbar-logo img { height: 30px; width: auto; display: block; }
+  .sp-topbar-nav { display: flex; align-items: center; gap: 2rem; }
+  .sp-topbar-nav a {
+    font-family: 'Inter', sans-serif; font-size: 0.7rem;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: #151512; text-decoration: none;
+    transition: opacity 0.2s ease;
+  }
+  .sp-topbar-nav a:hover { opacity: 0.55; }
+  @media (max-width: 700px) {
+    #sp-topbar { padding: 1.1rem 4.2rem 1.1rem 4vw; }
+    .sp-topbar-logo img { height: 22px; }
+    .sp-topbar-nav { gap: 1.2rem; }
+    .sp-topbar-nav a { font-size: 0.62rem; letter-spacing: 0.1em; }
+  }
+
   /* ── Navegação horizontal entre painéis (Capa/Dados/Descrição →
      Galeria → Relacionados), igual ao index.html/arquive.php — #sp-track
      é deslocado via transform:translateX pelo wheel handler; cada
@@ -363,6 +391,17 @@ add_shortcode('single_projetos', function () {
 
 <div id="sp-root">
   <a id="sp-close" href="<?php echo esc_url( home_url('/projects/') ); ?>" aria-label="Fechar">&times;</a>
+
+  <div id="sp-topbar">
+    <a class="sp-topbar-logo" href="<?php echo esc_url( home_url('/') ); ?>" aria-label="SASTUDIO">
+      <img src="https://sastudio.brand22creativeagency.pt/wp-content/uploads/2026/06/sastudio_test_logo_png-300x120-1.png" alt="SASTUDIO"/>
+    </a>
+    <nav class="sp-topbar-nav">
+      <a href="<?php echo esc_url( home_url('/projects/') ); ?>">Projects</a>
+      <a href="<?php echo esc_url( home_url('/') ); ?>">About</a>
+      <a href="<?php echo esc_url( home_url('/') ); ?>">Contact</a>
+    </nav>
+  </div>
 
   <div id="sp-scrollbar"><div id="sp-scrollbar-thumb"></div></div>
 
