@@ -205,7 +205,10 @@ add_shortcode('single_projetos', function () {
   }
   .sp-col { flex: 1 1 0; min-width: 0; }
   #sp-acf { flex: 0 1 280px; min-width: 200px; }
-  #sp-cover-col { flex: 1 1 0; min-width: 0; }
+  /* sticky: a capa fica fixa no ecrã enquanto o utilizador rola para
+     ler a lista de Dados do projeto (quando é mais alta que a capa),
+     em vez de subir/descer junto com o texto. */
+  #sp-cover-col { flex: 1 1 0; min-width: 0; position: sticky; top: 0; }
   /* sem aspect-ratio/object-fit:cover fixo — a capa usa sempre a
      proporção real da imagem/vídeo (largura 100%, altura automática),
      para nunca cortar nada, seja qual for a orientação. */
@@ -240,6 +243,7 @@ add_shortcode('single_projetos', function () {
   @media (max-width: 900px) {
     #sp-main-cols { flex-direction: column; align-items: stretch; gap: 2.5rem; }
   #sp-acf { flex-basis: auto; min-width: 0; }
+    #sp-cover-col { position: static; }
     #sp-content.sp-desc-col { padding: 2.5rem 5vw 3rem; }
   }
 

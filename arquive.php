@@ -239,7 +239,10 @@ add_shortcode('sastudio_gallery', function () {
   }
   .sg-col { flex: 1 1 0; min-width: 0; }
   #sg-acf { flex: 0 1 280px; min-width: 200px; }
-  #sg-cover-col { flex: 1 1 0; min-width: 0; }
+  /* sticky: a capa fica fixa no ecrã enquanto o utilizador rola para
+     ler a lista de Dados do projeto (quando é mais alta que a capa),
+     em vez de subir/descer junto com o texto. */
+  #sg-cover-col { flex: 1 1 0; min-width: 0; position: sticky; top: 0; }
   /* sem aspect-ratio/object-fit:cover fixo — a capa usa sempre a
      proporção real da imagem/vídeo (largura 100%, altura automática),
      para nunca cortar nada, seja qual for a orientação. */
@@ -274,6 +277,7 @@ add_shortcode('sastudio_gallery', function () {
   @media (max-width: 900px) {
     #sg-main-cols { flex-direction: column; align-items: stretch; gap: 2.5rem; }
     #sg-acf { flex-basis: auto; min-width: 0; }
+    #sg-cover-col { position: static; }
     #sg-content.sg-desc-col { padding: 2.5rem 5vw 3rem; }
   }
   /* ── Galeria — cada foto é o seu próprio painel horizontal,

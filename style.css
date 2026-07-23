@@ -739,7 +739,10 @@
     }
     .lb-col { flex: 1 1 0; min-width: 0; }
     #lb-acf { flex: 0 1 280px; min-width: 200px; }
-    #lb-cover-col { flex: 1 1 0; min-width: 0; }
+    /* sticky: a capa fica fixa no ecrã enquanto o utilizador rola para
+       ler a lista de Dados do projeto (quando é mais alta que a capa),
+       em vez de subir/descer junto com o texto. */
+    #lb-cover-col { flex: 1 1 0; min-width: 0; position: sticky; top: 0; }
     /* sem aspect-ratio/object-fit:cover fixo — a capa usa sempre a
        proporção real da imagem/vídeo (largura 100%, altura automática),
        para nunca cortar nada, seja qual for a orientação. */
@@ -980,6 +983,7 @@
         gap: 3rem;
       }
       #lb-acf { flex-basis: auto; min-width: 0; }
+      #lb-cover-col { position: static; }
       .footer-top {
         grid-template-columns: 1fr 1fr;
         gap: 2.5rem;
@@ -1024,6 +1028,7 @@
       #lb-panel-main { padding: 2.5rem 5vw 3rem; }
       #lb-main-cols { flex-direction: column; align-items: stretch; gap: 2.5rem; }
       #lb-acf { flex-basis: auto; min-width: 0; }
+      #lb-cover-col { position: static; }
       #lb-content.lb-desc-col { padding: 2.5rem 5vw 3rem; }
       #lb-content p { font-size: 0.95rem !important; }
 
