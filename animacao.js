@@ -1353,9 +1353,7 @@ function initParallax() {
 
   function leaveActivePic() {
     if (!activePic) return;
-    const img = activePic.querySelector('img');
     activePic.style.zIndex = '';
-    gsap.to(img, { scale: 1.06, duration: 0.85, ease: 'power3.out' });
     if (activeVid) {
       const vid = activeVid;
       gsap.to(vid, { opacity: 0, duration: 0.3, onComplete: () => {
@@ -1378,9 +1376,7 @@ function initParallax() {
       if (activePic) leaveActivePic();
       /* entra no novo card */
       if (pic) {
-        const img = pic.querySelector('img');
         pic.style.zIndex = '100';
-        gsap.to(img, { scale: 1.14, duration: 0.7, ease: 'power2.out' });
         document.body.classList.add('on-pic');
         const vid = pic.querySelector('.pic-hover-vid');
         if (vid) {
