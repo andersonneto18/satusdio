@@ -192,6 +192,13 @@ function getMasonryConfig() {
    à medida da proporção real). */
 const DEFAULT_ASPECT = 4 / 3;
 const MAX_PER_COLUMN = 3;
+/* teto para o fator de reescala da coluna — sem isto, uma coluna com
+   só 1 ou 2 fotos muito panorâmicas (aspect muito alto, pouca altura
+   natural) tinha de esticar a largura MUITO para fechar a altura do
+   ecrã, ficando desproporcionalmente enorme (ex: projeto Calabria). Com
+   o teto, essa coluna fica só um pouco mais curta que o ecrã em vez de
+   larga demais. */
+const MAX_SCALE = 1.35;
 
 /* Para cada coluna: decide que fotos entram (na ordem em que aparecem,
    usando a largura da coluna como referência) até chegar perto da
@@ -235,7 +242,7 @@ function layoutMasonry() {
     }
 
     const nGaps = Math.max(group.length - 1, 0) * gap;
-    const scale = (targetH - nGaps) / sumH;
+    const scale = Math.min((targetH - nGaps) / sumH, MAX_SCALE);
     const colW  = baseColW * scale;
 
     let y = gap;
