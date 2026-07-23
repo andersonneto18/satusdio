@@ -113,48 +113,15 @@ add_shortcode('single_projetos', function () {
   html, body { overflow: hidden !important; height: 100% !important; }
 
   /* Header do tema (The7/Elementor "Header Sastudio", classe
-     top_panel_custom_header-sastudio) e o menu mobile fullscreen —
-     nesta página ficam escondidos (tal como #nav/#site-logo, que só
-     existem na home). O header original vem embrulhado em secções
-     Elementor com JS de "stretched section"/parallax (trx_addons) que
-     seria arriscado forçar para position:fixed neste layout de ecrã
-     cheio — em vez disso, #sp-header-clone (abaixo) reconstrói só o
-     essencial (logo + menu) com as MESMAS classes reais do tema
-     (sc_layouts_logo, logo_image, sc_layouts_menu_nav, menu-item),
-     para herdar a aparência real, num contentor simples e fixo. */
+     top_panel_custom_header-sastudio — nada a ver com o #nav/#site-logo
+     que só existem na home) e o menu mobile fullscreen — nesta página
+     (link direto/partilhado de um projeto) ficam escondidos, tal como já
+     acontece no lightbox da home quando um projeto está aberto. O
+     #sp-close faz de "voltar". */
   header.top_panel_custom_header-sastudio,
   .menu_mobile_overlay,
   .menu_mobile,
   #nav, #site-logo { display: none !important; }
-
-  /* --sp-header-h é medida em JS a partir da altura real de
-     #sp-header-clone (ver script no fim da página) — não é um valor
-     adivinhado; usa-se para o #sp-viewport/botão "X"/barra de
-     progresso começarem logo a seguir ao header, sem ficarem tapados. */
-  :root { --sp-header-h: 96px; }
-  #sp-header-clone {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 100030;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 1.6rem 5vw;
-    background: #fff;
-  }
-  #sp-header-clone .logo_image { display: block; height: 32px; width: auto; }
-  #sp-header-clone .sc_layouts_menu_nav {
-    display: flex; align-items: center; gap: 2rem;
-    list-style: none; margin: 0; padding: 0;
-  }
-  #sp-header-clone .sc_layouts_menu_nav .menu-item a {
-    text-decoration: none;
-    font-family: 'Inter', sans-serif; font-size: 0.7rem;
-    letter-spacing: 0.15em; text-transform: uppercase;
-    color: #151512;
-  }
-  @media (max-width: 700px) {
-    #sp-header-clone { padding: 1rem 4vw; }
-    #sp-header-clone .logo_image { height: 24px; }
-    #sp-header-clone .sc_layouts_menu_nav { gap: 1rem; }
-    #sp-header-clone .sc_layouts_menu_nav .menu-item a { font-size: 0.6rem; letter-spacing: 0.08em; }
-  }
 
   /* Se este template estiver a ser renderizado dentro de um wrapper com
      scroll/transform próprio (ex: popup do Elementor), isso criaria um
@@ -182,11 +149,10 @@ add_shortcode('single_projetos', function () {
   #sp-root, #sp-root * { box-sizing: border-box; }
   #sp-root { font-family: 'Inter', sans-serif; color: #151512; }
 
-  /* botão "X" de fechar (leva de volta a /projects/) — fica agora
-     abaixo do header real (ver --sp-header-h acima), para não ficar
-     tapado por ele nem sobrepor o seu menu. */
+  /* botão "X" de fechar (leva de volta a /projects/), igual ao
+     #sg-modal-close/#lb-close — canto superior direito, sem texto. */
   #sp-close {
-    position: fixed; top: calc(var(--sp-header-h) + 1rem); right: 1.5rem; z-index: 100010;
+    position: fixed; top: 2.4rem; right: 1.5rem; z-index: 100010;
     display: flex; align-items: center; justify-content: center;
     width: 46px; height: 46px;
     border-radius: 50%; border: none;
@@ -196,7 +162,7 @@ add_shortcode('single_projetos', function () {
     color: #151512; text-decoration: none;
   }
   @media (max-width: 700px) {
-    #sp-close { right: 0.9rem; width: 42px; height: 42px; }
+    #sp-close { top: 0.9rem; right: 0.9rem; width: 42px; height: 42px; }
   }
 
   /* ── Navegação horizontal entre painéis (Capa/Dados/Descrição →
@@ -204,10 +170,8 @@ add_shortcode('single_projetos', function () {
      é deslocado via transform:translateX pelo wheel handler; cada
      .sp-panel mantém o seu próprio scroll vertical (texto longo) até
      chegar ao topo/fundo, altura em que o wheel passa a mudar de painel. */
-  /* top:var(--sp-header-h) (não inset:0) — o "track" começa só depois
-     do header real (fixo, ver acima), em vez de ficar por baixo dele. */
   #sp-viewport {
-    position: fixed; top: var(--sp-header-h); left: 0; right: 0; bottom: 0; z-index: 1;
+    position: fixed; inset: 0; z-index: 1;
     background: #fff; overflow: hidden;
   }
   #sp-track { display: flex; height: 100%; will-change: transform; }
@@ -229,7 +193,7 @@ add_shortcode('single_projetos', function () {
      do ecrã sobe/desce (top-to-bottom) consoante o avanço entre painéis,
      atualizada em JS a par do #sp-track (ver spTick()). */
   #sp-scrollbar {
-    position: fixed; top: var(--sp-header-h); right: 4px; bottom: 0;
+    position: fixed; top: 0; right: 4px; bottom: 0;
     width: 3px; z-index: 100010;
     pointer-events: none;
   }
@@ -400,19 +364,6 @@ add_shortcode('single_projetos', function () {
 <div id="sp-root">
   <a id="sp-close" href="<?php echo esc_url( home_url('/projects/') ); ?>" aria-label="Fechar">&times;</a>
 
-  <div id="sp-header-clone">
-    <a href="<?php echo esc_url( home_url('/') ); ?>" class="sc_layouts_logo sc_layouts_logo_default">
-      <img class="logo_image" src="https://sastudio.brand22creativeagency.pt/wp-content/uploads/2026/06/sastudio_test_logo_png-300x120-1.png" alt="Sastudio" width="300" height="120"/>
-    </a>
-    <nav>
-      <ul class="sc_layouts_menu_nav">
-        <li class="menu-item"><a href="<?php echo esc_url( home_url('/projects/') ); ?>"><span>Projects</span></a></li>
-        <li class="menu-item"><a href="<?php echo esc_url( home_url('/about/') ); ?>"><span>About</span></a></li>
-        <li class="menu-item"><a href="<?php echo esc_url( home_url('/contact/') ); ?>"><span>Contact</span></a></li>
-      </ul>
-    </nav>
-  </div>
-
   <div id="sp-scrollbar"><div id="sp-scrollbar-thumb"></div></div>
 
   <div id="sp-viewport">
@@ -530,19 +481,6 @@ add_shortcode('single_projetos', function () {
       slides[idx].classList.add('active');
     }, 4000);
   }
-
-  /* mede a altura REAL de #sp-header-clone (em vez de adivinhar) e
-     aplica-a a --sp-header-h, para o #sp-viewport/botão "X"/barra de
-     progresso começarem sempre logo a seguir ao header, mesmo que o
-     tamanho do logo/menu mude (ex: quebra de linha em ecrãs médios). */
-  function syncHeaderHeight() {
-    var header = document.getElementById('sp-header-clone');
-    if (!header) return;
-    document.documentElement.style.setProperty('--sp-header-h', header.offsetHeight + 'px');
-  }
-  window.addEventListener('load', syncHeaderHeight);
-  window.addEventListener('resize', syncHeaderHeight);
-  syncHeaderHeight();
 
   /* Cria a tag <video> da capa só depois de a página estar carregada,
      para o tema (The7/MediaElement.js) não a apanhar e a embrulhar no
