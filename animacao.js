@@ -191,29 +191,14 @@ function getMasonryConfig() {
    corte (object-fit: cover não recorta nada porque a caixa já é feita
    à medida da proporção real). */
 const DEFAULT_ASPECT = 4 / 3;
-const MAX_PER_COLUMN = 3;
-/* teto para o fator de reescala da coluna — sem isto, uma coluna com
-   só 1 ou 2 fotos muito panorâmicas (aspect muito alto, pouca altura
-   natural) tinha de esticar a largura MUITO para fechar a altura do
-   ecrã, ficando desproporcionalmente enorme (ex: projeto Calabria). Com
-   o teto, essa coluna fica só um pouco mais curta que o ecrã em vez de
-   larga demais. */
-const MAX_SCALE = 1.35;
-/* peso de largura por foto (cicla pela ordem das fotos, não pela
-   posição dentro da coluna) — sem isto, fotos com proporção parecida
-   ficavam todas com o mesmo tamanho dentro da coluna (pedido do
-   cliente: tamanhos diferentes). Cada foto continua a usar a SUA
-   proporção real para a altura (largura do "slot" ÷ aspect), por isso
-   o peso só varia o tamanho geral, nunca corta nem distorce nada. */
-const SLOT_WEIGHTS = [1.25, 0.78, 1.05, 0.9, 1.35, 0.7];
 
 /* Para cada coluna: decide que fotos entram (na ordem em que aparecem,
-   cada uma com o seu "slot" de largura) até chegar perto da altura do
-   ecrã, depois reescala a coluna toda (todas as larguras + alturas, no
-   mesmo fator) para fechar exatamente essa altura — sem isto sobrava
+   usando a largura da coluna como referência) até chegar perto da
+   altura do ecrã, depois reescala a coluna toda (largura + cada altura,
+   no mesmo fator) para fechar exatamente essa altura — sem isto sobrava
    um vão em branco no fundo sempre que a próxima foto não coubesse
-   certinha. Como largura e altura de cada foto escalam sempre juntas,
-   a proporção real mantém-se perfeita (nunca corta, nunca distorce).
+   certinha. Como largura e altura escalam sempre juntas, a proporção
+   real de cada foto mantém-se perfeita (nunca corta, nunca distorce).
    Novas colunas abrem-se à direita, reveladas ao fazer scroll
    horizontal. */
 function layoutMasonry() {
@@ -233,38 +218,32 @@ function layoutMasonry() {
     while (idx < pics.length) {
       const pic    = pics[idx];
       const aspect = parseFloat(pic.dataset.aspect) || DEFAULT_ASPECT;
-      const w      = baseColW * SLOT_WEIGHTS[idx % SLOT_WEIGHTS.length];
-      const h      = w / aspect;
+      const h      = baseColW / aspect;
       /* já tem pelo menos 1 foto e esta próxima passaria bastante da
          altura do ecrã — fica para a coluna seguinte (a não ser que seja
          a última foto de todas, aí tem de entrar nesta coluna na mesma) */
       if (group.length && sumH + h + group.length * gap > targetH && idx < pics.length - 1) break;
-      group.push({ pic, w, h });
+      group.push({ pic, h });
       sumH += h;
       idx++;
-      /* nunca mais de 3 fotos por coluna, mesmo que ainda coubesse mais
-         alguma (mantém a variedade de tamanhos, evita colunas com 4+
-         fotos pequenas demais) */
-      if (group.length >= MAX_PER_COLUMN) break;
       if (sumH + (group.length - 1) * gap >= targetH) break;
     }
 
     const nGaps = Math.max(group.length - 1, 0) * gap;
-    const scale = Math.min((targetH - nGaps) / sumH, MAX_SCALE);
+    const scale = (targetH - nGaps) / sumH;
+    const colW  = baseColW * scale;
 
-    let y = gap, maxW = 0;
-    group.forEach(({ pic, w, h }) => {
-      const scaledW = w * scale;
+    let y = gap;
+    group.forEach(({ pic, h }) => {
       const scaledH = h * scale;
       pic.style.left   = x + 'px';
       pic.style.top    = y + 'px';
-      pic.style.width  = scaledW + 'px';
+      pic.style.width  = colW + 'px';
       pic.style.height = scaledH + 'px';
       y += scaledH + gap;
-      maxW = Math.max(maxW, scaledW);
     });
 
-    x += maxW + gap;
+    x += colW + gap;
   }
 
   gallery.style.width  = x + 'px';
