@@ -217,10 +217,11 @@ add_shortcode('sastudio_gallery', function () {
     color: #151512;
   }
 
-  /* ── Painel principal (Dados | Capa | Descrição) ──
-     título/categoria no topo (#sg-main-top), depois três colunas lado
-     a lado: Dados do projeto, a capa (imagem/vídeo estático, sem
-     slideshow) e Descrição — como a referência do cliente. */
+  /* ── Painel principal (Dados | Capa) ──
+     título/categoria no topo (#sg-main-top), depois duas colunas lado
+     a lado: Dados do projeto e a capa (imagem/vídeo estático, sem
+     slideshow). A Descrição já não vive aqui — é o painel seguinte, a
+     largura quase total da página (#sg-panel-desc), sem coluna ao lado. */
   #sg-panel-main { position: relative; padding: 4.5rem 5vw 6rem; }
   #sg-main-top { max-width: 1800px; margin: 0 auto 3rem; }
   #sg-main-top .sg-meta {
@@ -238,14 +239,23 @@ add_shortcode('sastudio_gallery', function () {
   }
   .sg-col { flex: 1 1 0; min-width: 0; }
   #sg-acf { flex: 0 1 280px; min-width: 200px; }
-  #sg-cover-col { flex: 1 1 32%; }
+  #sg-cover-col { flex: 1 1 0; min-width: 0; }
   /* sem aspect-ratio/object-fit:cover fixo — a capa usa sempre a
      proporção real da imagem/vídeo (largura 100%, altura automática),
      para nunca cortar nada, seja qual for a orientação. */
   #sg-cover-media { width: 100%; }
   #sg-cover-media img,
   #sg-cover-media video { width: 100%; height: auto; display: block; }
-  .sg-desc-col { flex: 1.8 1 0; min-width: 0; }
+
+  /* ── PAINEL DA DESCRIÇÃO — próprio painel horizontal, texto a
+     largura quase total da página (sem coluna ao lado); o utilizador
+     roda o rato (navegação horizontal já existente) para chegar a
+     este painel e depois à Galeria. ── */
+  #sg-panel-desc { display: flex; align-items: center; }
+  #sg-content.sg-desc-col {
+    width: 100%; max-width: 1400px; margin: 0 auto;
+    padding: 3.5rem 8vw 5rem;
+  }
   .sg-section-heading {
     font-family: 'Inter', sans-serif !important; font-size: 1rem !important;
     font-weight: 300 !important; white-space: nowrap !important;
@@ -263,6 +273,7 @@ add_shortcode('sastudio_gallery', function () {
   .sg-acf-value { color: rgba(21,21,18,0.75); line-height: 1.55; }
   @media (max-width: 900px) {
     #sg-main-cols { flex-direction: column; gap: 2.5rem; }
+    #sg-content.sg-desc-col { padding: 2.5rem 5vw 3rem; }
   }
   /* ── Galeria — cada foto é o seu próprio painel horizontal,
      sem faixa de scroll interna, tal como o resto do #sg-track.
@@ -644,11 +655,13 @@ add_shortcode('sastudio_gallery', function () {
         html += '</div>';
       }
       html += '<div id="sg-cover-col" class="sg-col"><div id="sg-cover-media">' + (coverUrl ? coverHtml : '') + '</div></div>';
-      html += '<div id="sg-content" class="sg-col sg-desc-col">';
+      html += '</div>'; /* fim #sg-main-cols */
+      html += '</section>';
+      html += '<section id="sg-panel-desc" class="sg-panel sg-panel-scrollable">';
+      html += '<div id="sg-content" class="sg-desc-col">';
       html += '<h3 class="sg-section-heading">Descrição:</h3>';
       html += '<div class="sg-desc">' + (desc || '<p>Sem descrição para este projeto.</p>') + '</div>';
       html += '</div>';
-      html += '</div>'; /* fim #sg-main-cols */
       html += '</section>';
       if (galleryImgs.length) {
         html += galleryImgs.map(function (url) {
