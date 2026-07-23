@@ -148,16 +148,6 @@ window.addEventListener('load', async () => {
     curR.style.left = rx + 'px'; curR.style.top = ry + 'px';
     requestAnimationFrame(tc);
   })();
-  document.querySelectorAll('.logo,.nav-links a').forEach(el => {
-    el.addEventListener('mouseenter', () => document.body.classList.add('on-pic'));
-    el.addEventListener('mouseleave', () => document.body.classList.remove('on-pic'));
-  });
-  const navEl = document.getElementById('nav');
-  if (navEl) {
-    navEl.addEventListener('mouseenter', () => document.body.classList.add('on-nav'));
-    navEl.addEventListener('mouseleave', () => document.body.classList.remove('on-nav'));
-  }
-
   const lbTopBar = document.getElementById('lb-top-bar');
   if (lbTopBar) {
     lbTopBar.addEventListener('mouseenter', () => document.body.classList.add('on-nav'));
@@ -258,35 +248,6 @@ window.addEventListener('resize', () => {
 /* ══════════════════════════════════════════════════
    ENTRANCE — hero → gallery burst
 ══════════════════════════════════════════════════ */
-/* ── MOBILE NAV ── */
-(function() {
-  const burger    = document.getElementById('nav-burger');
-  const navMobile = document.getElementById('nav-mobile');
-  if (!burger || !navMobile) return;
-
-  function openMenu() {
-    navMobile.style.display = 'flex';
-    requestAnimationFrame(() => requestAnimationFrame(() => navMobile.classList.add('open')));
-    burger.classList.add('open');
-  }
-  function closeMenu() {
-    navMobile.classList.remove('open');
-    burger.classList.remove('open');
-    setTimeout(() => { navMobile.style.display = 'none'; }, 300);
-  }
-
-  burger.addEventListener('click', e => {
-    e.stopPropagation();
-    burger.classList.contains('open') ? closeMenu() : openMenu();
-  });
-  burger.addEventListener('touchend', e => {
-    e.preventDefault();
-    e.stopPropagation();
-    burger.classList.contains('open') ? closeMenu() : openMenu();
-  });
-  navMobile.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMenu));
-})();
-
 /* ── Abre o projeto certo se o URL trouxer um link direto (/projects/slug/) ── */
 function openProjectFromPath() {
   const targetPath = decodeURIComponent(location.pathname);
@@ -299,7 +260,6 @@ function openProjectFromPath() {
 
 function entrance() {
   const pics = document.querySelectorAll('.pic');
-  const nav  = document.getElementById('nav');
   const hud  = document.getElementById('hud');
   const zl   = document.getElementById('zoom-label');
   const hero = document.getElementById('hero');
@@ -314,10 +274,6 @@ function entrance() {
     .to('#h-name', { opacity: 1, y: 0, duration: 0.75, ease: 'power3.out' }, 0.1)
     .call(() => {
       const done = () => {
-        if (nav) {
-          nav.style.opacity = '1';
-          nav.classList.add('ready');
-        }
         gsap.to([hud, zl], { opacity: 1, duration: 0.8 });
         setTimeout(() => gsap.to(hud, { opacity: 0, duration: 1 }), 4000);
         initCanvas();
@@ -1197,9 +1153,8 @@ initDragScroll('lb-related-grid');
     document.getElementById('contact-panel')?.classList.remove('open');
     buildProjectsList();
     plPanel.classList.add('open');
-    document.querySelectorAll('[id="nav-projects"], .lb-nav-links a, #nav-mobile a').forEach(a => {
-      if (a.id === 'nav-projects' || a.textContent.trim().toLowerCase() === 'projects')
-        a.classList.add('nav-active');
+    document.querySelectorAll('.lb-nav-links a, .footer-nav a').forEach(a => {
+      if (a.textContent.trim().toLowerCase() === 'projects') a.classList.add('nav-active');
     });
   }
 
@@ -1216,7 +1171,7 @@ initDragScroll('lb-related-grid');
     document.getElementById('contact-panel')?.classList.remove('open');
     if (lb.classList.contains('open')) closeProject();
     aboutPanel.classList.add('open');
-    document.querySelectorAll('.nav-links a, .lb-nav-links a, #nav-mobile a, .footer-nav a').forEach(a => {
+    document.querySelectorAll('.lb-nav-links a, .footer-nav a').forEach(a => {
       if (a.textContent.trim().toLowerCase() === 'about') a.classList.add('nav-active');
     });
   }
@@ -1229,7 +1184,7 @@ initDragScroll('lb-related-grid');
   aboutPanel.addEventListener('touchstart', e => e.stopPropagation(), { passive: true });
   aboutPanel.addEventListener('wheel',      e => e.stopPropagation(), { passive: true });
 
-  document.querySelectorAll('.nav-links a, .lb-nav-links a, #nav-mobile a, .footer-nav a').forEach(a => {
+  document.querySelectorAll('.lb-nav-links a, .footer-nav a').forEach(a => {
     /* só abre o painel interno se o link não tiver destino real —
        links com href a sério (ex: /about/) navegam normalmente */
     const href = a.getAttribute('href') || '#';
@@ -1274,7 +1229,7 @@ initDragScroll('lb-related-grid');
     contactPanel.classList.add('open');
     contactPanel.scrollTop = 0;
     document.querySelectorAll(
-      '.nav-links a, .lb-nav-links a, #nav-mobile a, .footer-nav a, .cp-nav-links a'
+      '.lb-nav-links a, .footer-nav a, .cp-nav-links a'
     ).forEach(a => {
       if (a.textContent.trim().toLowerCase() === 'contact') a.classList.add('nav-active');
     });
@@ -1293,7 +1248,7 @@ initDragScroll('lb-related-grid');
   /* wiring — todos os links "Contact" no site (só abre o painel interno
      se o link não tiver destino real) */
   document.querySelectorAll(
-    '.nav-links a, .lb-nav-links a, #nav-mobile a, .footer-nav a'
+    '.lb-nav-links a, .footer-nav a'
   ).forEach(a => {
     const href = a.getAttribute('href') || '#';
     if (a.textContent.trim().toLowerCase() === 'contact' && href === '#') {

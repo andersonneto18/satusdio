@@ -24,29 +24,6 @@
     body:has(#vp) { overflow: hidden; }
     html:has(body:has(#vp)) { overflow: hidden; }
 
-    /* ── LOGO (efeito "revela o que está atrás", mesma técnica do cursor) ──
-       Independente do #nav (não aninhado) — aninhar dentro do #nav
-       quebrava o mix-blend-mode (deixava de ver o conteúdo por trás).
-       O alinhamento com os links é feito dando a ambos a MESMA altura
-       fixa e centrando o texto dentro dela (--nav-h), sem precisar de
-       estarem no mesmo elemento pai. */
-    #site-logo {
-      position: fixed; top: 0; left: 2.4rem; height: var(--nav-h);
-      display: flex; align-items: center;
-      z-index: 600;
-      text-decoration: none;
-      /* revela o que está por trás (galeria/imagens), em vez de tapar
-         com uma cor sólida — mesma técnica do logo do ecrã inicial */
-      mix-blend-mode: difference;
-    }
-    #site-logo img {
-      height: 30px; width: auto; display: block;
-    }
-    @media (max-width: 768px) {
-      #site-logo { left: 1.2rem; }
-      #site-logo img { height: 24px; }
-    }
-
     /* ── CURSOR ── */
     #cursor {
       position: fixed; width: 9px; height: 9px;
@@ -67,48 +44,6 @@
     body.grabbing #cursor-ring { transform: translate(-50%,-50%) scale(3.2); opacity: 0.06; }
     body.on-nav #cursor,
     body.on-nav #cursor-ring   { opacity: 0; }
-    #nav, #nav * { cursor: pointer; }
-    #nav-burger { cursor: pointer; }
-
-    /* ── NAV ── */
-    #nav {
-      position: fixed; top: 0; left: 0; right: 0; height: var(--nav-h); z-index: 500;
-      padding: 0 3rem;
-      display: flex; align-items: center;
-      background: transparent;
-      opacity: 0; pointer-events: none; transition: opacity 0.6s ease;
-    }
-    #nav.ready { pointer-events: all; }
-    /* com um projeto aberto (lightbox), esconde o logo/nav do site —
-       fica só o X de fechar do lightbox, como na página Projects */
-    body:has(#lightbox.open) #nav,
-    body:has(#lightbox.open) #site-logo {
-      opacity: 0 !important;
-      pointer-events: none !important;
-      transition: opacity 0.3s ease;
-    }
-    .nav-links {
-      margin-left: auto;
-      display: flex; gap: 2.4rem; list-style: none;
-    }
-    .nav-links a {
-      display: block;
-      font-family: 'Inter', sans-serif;
-      font-size: 1.1rem; font-weight: 500;
-      color: #151512;
-      text-decoration: none;
-      padding-bottom: 0.3rem;
-      transition: opacity 0.2s;
-    }
-    .nav-links a:hover {
-      opacity: 0.6;
-    }
-    .nav-links a.nav-active {
-      font-weight: 500;
-      text-decoration: underline;
-      text-underline-offset: 0.4rem;
-      text-decoration-thickness: 2px;
-    }
 
     /* ── VIEWPORT ── */
     #vp {
@@ -1128,56 +1063,7 @@
     /* ══════════════════════════════════════════════════
        RESPONSIVE — MOBILE (max 768px)
     ══════════════════════════════════════════════════ */
-    /* ── HAMBURGER BUTTON ── */
-    #nav-burger {
-      display: none;
-      flex-direction: column; justify-content: center; gap: 5px;
-      width: 44px; height: 44px;
-      background: none; border: none; cursor: none;
-      padding: 4px; margin-left: auto;
-      pointer-events: auto;
-      -webkit-tap-highlight-color: transparent;
-    }
-    #nav-burger span {
-      display: block; height: 1px; width: 100%;
-      background: var(--text);
-      transition: transform 0.3s ease, opacity 0.3s ease;
-      transform-origin: center;
-    }
-    #nav-burger.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
-    #nav-burger.open span:nth-child(2) { opacity: 0; }
-    #nav-burger.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
-
-    /* ── MOBILE MENU OVERLAY ── */
-    #nav-mobile {
-      display: none;
-      position: fixed; inset: 0; z-index: 490;
-      background: rgba(255,255,255,0.97);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      align-items: center; justify-content: center;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-    #nav-mobile.open { opacity: 1; }
-    #nav-mobile ul { list-style: none; text-align: center; }
-    #nav-mobile ul li { margin: 1.8rem 0; }
-    #nav-mobile ul a {
-      font-family: 'Inter', sans-serif;
-      font-size: clamp(2rem, 8vw, 3rem);
-      font-weight: 300; letter-spacing: 0.12em;
-      color: var(--text); text-decoration: none;
-      text-transform: uppercase;
-      transition: color 0.2s;
-    }
-    #nav-mobile ul a:hover { color: var(--accent); }
-
     @media (max-width: 768px) {
-      /* NAV */
-      #nav { padding: 1rem 1.2rem; }
-      .nav-links { display: none; }
-      #nav-burger { display: flex; }
-
       /* HERO */
       #h-name { width: clamp(140px, 55vw, 260px); }
 
