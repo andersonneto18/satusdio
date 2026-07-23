@@ -384,8 +384,6 @@ function initCanvas() {
   let drag = false, dragMoved = false;
   let dragOriginTx = 0, dragOriginTy = 0, dragStartX = 0, dragStartY = 0;
 
-  let mpx = 0, mpy = 0;
-
   /* puxão elástico ao arrastar: o deslocamento nunca passa muito de
      ELASTIC_MAX, e ao soltar volta sempre para onde estava antes —
      arrastar é só um efeito, não navega permanentemente */
@@ -426,13 +424,7 @@ function initCanvas() {
     tx += (tTx - tx) * lf;
     ty += (tTy - ty) * lf;
 
-    const W = window.innerWidth, H = window.innerHeight;
-    const mpxTarget = drag ? 0 : ((mx - W / 2) / W) * -18;
-    const mpyTarget = drag ? 0 : ((my - H / 2) / H) * -11;
-    mpx += (mpxTarget - mpx) * 0.035;
-    mpy += (mpyTarget - mpy) * 0.035;
-
-    gallery.style.transform = `translate(${tx + mpx}px,${ty + mpy}px) scale(${s})`;
+    gallery.style.transform = `translate(${tx}px,${ty}px) scale(${s})`;
 
     zl.textContent = Math.round(s * 100) + '%';
     requestAnimationFrame(tick);
