@@ -293,12 +293,13 @@ add_shortcode('sastudio_gallery', function () {
     /* tamanho FIXO (não auto) — cada foto ocupa sempre a mesma caixa,
        com object-fit:cover a preencher/recortar, independentemente da
        proporção original. Sem isto, fotos em retrato ficavam muito mais
-       pequenas que as em paisagem, criando um vazio enorme entre elas. */
-    width: 92vw; height: 82vh;
+       pequenas que as em paisagem, criando um vazio enorme entre elas.
+       Menor que o painel todo (não colado às bordas), como na referência. */
+    width: 58vw; height: 64vh;
     object-fit: cover; display: block;
     pointer-events: none; -webkit-user-drag: none;
   }
-  @media (max-width: 700px) { .sg-photo-panel { padding: 1vh 1.5vw; } .sg-photo-panel img { width: 94vw; height: 60vh; } }
+  @media (max-width: 700px) { .sg-photo-panel { padding: 1vh 1.5vw; } .sg-photo-panel img { width: 84vw; height: 48vh; } }
   #sg-modal-loading {
     display: flex; align-items: center; justify-content: center;
     height: 60vh; font-size: 0.8rem; color: rgba(21,21,18,0.45);

@@ -257,12 +257,13 @@ add_shortcode('single_projetos', function () {
   .sp-photo-panel img {
     /* tamanho FIXO (não auto) — cada foto ocupa sempre a mesma caixa,
        com object-fit:cover a preencher/recortar, independentemente da
-       proporção original. */
-    width: 92vw; height: 82vh;
+       proporção original. Menor que o painel todo (não colado às
+       bordas), como na referência. */
+    width: 58vw; height: 64vh;
     object-fit: cover; display: block;
     pointer-events: none; -webkit-user-drag: none;
   }
-  @media (max-width: 700px) { .sp-photo-panel { padding: 1vh 1.5vw; } .sp-photo-panel img { width: 94vw; height: 60vh; } }
+  @media (max-width: 700px) { .sp-photo-panel { padding: 1vh 1.5vw; } .sp-photo-panel img { width: 84vw; height: 48vh; } }
 
   /* ── Outros projetos (relacionados), igual ao #sg-related/#lb-related ── */
   #sp-panel-related { display: flex; align-items: center; }
