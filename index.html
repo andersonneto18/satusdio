@@ -112,28 +112,18 @@
 
   <div id="lb-view">
     <div id="lb-track">
-      <section id="lb-hero" class="lb-panel">
-        <div id="lb-slides"></div>
-        <div id="lb-hero-ui">
-          <div id="lb-title-block">
-            <div id="lb-proj-meta"></div>
-            <h2 id="lb-proj-title"></h2>
-          </div>
+      <section id="lb-panel-main" class="lb-panel lb-panel-scrollable">
+        <div id="lb-loader"><span>A carregar projeto</span></div>
+        <div id="lb-main-top">
+          <div id="lb-proj-meta"></div>
+          <h1 id="lb-proj-title"></h1>
         </div>
-        <div id="lb-image-nav">
-          <button id="lb-prev">&#8249;</button>
-          <span id="lb-img-count"></span>
-          <button id="lb-next">&#8250;</button>
-        </div>
-        <div id="lb-scroll-cue">Scroll →</div>
-      </section>
-      <section id="lb-panel-content" class="lb-panel lb-panel-scrollable">
-        <div id="lb-content-section">
-          <div id="lb-loader"><span>A carregar projeto</span></div>
-          <div id="lb-main">
-            <div id="lb-content" class="lb-desc-col"></div>
-            <div id="lb-acf"></div>
+        <div id="lb-main-cols">
+          <div id="lb-acf" class="lb-col"></div>
+          <div id="lb-cover-col" class="lb-col">
+            <div id="lb-cover-media"></div>
           </div>
+          <div id="lb-content" class="lb-col lb-desc-col"></div>
         </div>
       </section>
       <section id="lb-panel-related" class="lb-panel lb-panel-scrollable">

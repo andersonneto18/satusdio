@@ -480,141 +480,34 @@ lbImg.addEventListener('mouseleave', () => {
   setTimeout(() => { lbHoverVid.pause(); lbHoverVid.currentTime = 0; }, 400);
 });
 const lbView      = document.getElementById('lb-view');
-const lbSlides    = document.getElementById('lb-slides');
+const lbCoverMedia = document.getElementById('lb-cover-media');
 const lbProjTitle = document.getElementById('lb-proj-title');
 const lbProjMeta  = document.getElementById('lb-proj-meta');
 const lbExtLink   = document.getElementById('lb-ext-link');
 const lbClose     = document.getElementById('lb-close');
-const lbPrev      = document.getElementById('lb-prev');
-const lbNext      = document.getElementById('lb-next');
-const lbImgCount  = document.getElementById('lb-img-count');
 const lbContent   = document.getElementById('lb-content');
 const lbLoader    = document.getElementById('lb-loader');
-const lbImageNav  = document.getElementById('lb-image-nav');
-
-let slideImages      = [];
-let currentSlide     = 0;
-let slideInterval    = null;
-let currentFeatSrc   = '';
-let currentHoverGif  = '';
-const SLIDE_DELAY = 5000;
-
-function startAutoPlay() {
-  stopAutoPlay();
-  if (slideImages.length < 2) return;
-  slideInterval = setInterval(() => {
-    const total   = slideImages.length;
-    const hasVideo = isVideoUrl(slideImages[0]);
-    const start   = hasVideo ? 1 : 0;
-    const next    = currentSlide + 1 >= total ? start : currentSlide + 1;
-    goToSlide(next, 1);
-  }, SLIDE_DELAY);
-}
-
-function stopAutoPlay() {
-  if (slideInterval) { clearInterval(slideInterval); slideInterval = null; }
-}
 
 function isVideoUrl(url) {
   return /\.(mp4|webm|mov|ogg)(\?|$)/i.test(url);
 }
 
-function buildSlides(urls) {
-  lbSlides.innerHTML = '';
-  currentSlide = 0;
-  let firstIsVideo = false;
-  urls.forEach((url, i) => {
-    const slide = document.createElement('div');
-    slide.className = 'lb-slide' + (i === 0 ? ' active' : '');
-    if (isVideoUrl(url)) {
-      const vid = document.createElement('video');
-      vid.src = url; vid.muted = true; vid.loop = false; vid.playsInline = true;
-      vid.preload = i === 0 ? 'auto' : 'none';
-      if (i === 0) {
-        firstIsVideo = true;
-        vid.addEventListener('ended', () => {
-          goToSlide(currentSlide + 1, 1);
-          startAutoPlay();
-        });
-      }
-      slide.appendChild(vid);
-    } else {
-      const img = document.createElement('img');
-      img.src = url; img.alt = ''; img.loading = i === 0 ? 'eager' : 'lazy';
-      slide.appendChild(img);
-    }
-    lbSlides.appendChild(slide);
-  });
-  const first = lbSlides.querySelector('.lb-slide.active');
-  if (first) {
-    gsap.set(first, { opacity: 1, x: 0 });
-    const vid = first.querySelector('video');
-    if (vid) vid.play();
+/* capa do projeto: imagem ou vídeo, estático, no centro do painel —
+   ao contrário do slideshow antigo, não passa automaticamente por
+   várias imagens; a galeria completa continua disponível como
+   painéis próprios mais à frente no #lb-track. */
+function setCoverMedia(featSrc, hoverGif) {
+  lbCoverMedia.innerHTML = '';
+  if (hoverGif && isVideoUrl(hoverGif)) {
+    const vid = document.createElement('video');
+    vid.src = hoverGif; vid.muted = true; vid.loop = true; vid.autoplay = true; vid.playsInline = true;
+    lbCoverMedia.appendChild(vid);
+  } else {
+    const img = document.createElement('img');
+    img.src = featSrc; img.alt = '';
+    lbCoverMedia.appendChild(img);
   }
-  updateCounter();
-  if (!firstIsVideo) startAutoPlay();
 }
-
-function updateCounter() {
-  lbImgCount.textContent = slideImages.length > 1
-    ? `${currentSlide + 1} / ${slideImages.length}` : '';
-  lbImageNav.style.display = slideImages.length > 1 ? 'flex' : 'none';
-}
-
-function goToSlide(n, dir) {
-  const slides = lbSlides.querySelectorAll('.lb-slide');
-  if (!slides.length) return;
-  const total  = slides.length;
-  const newIdx = ((n % total) + total) % total;
-  if (newIdx === currentSlide) return;
-
-  /* calcula direção se não foi passada */
-  if (dir === undefined) {
-    const fwd = (newIdx - currentSlide + total) % total;
-    dir = fwd <= total / 2 ? 1 : -1;
-  }
-
-  const offset = Math.round(window.innerWidth * 0.3);
-  const dur    = 0.72;
-  const ease   = 'power2.inOut';
-
-  const oldSlide = slides[currentSlide];
-  const oldVid   = oldSlide.querySelector('video');
-  if (oldVid) { oldVid.pause(); oldVid.currentTime = 0; }
-  slides[currentSlide].classList.remove('active');
-  currentSlide = newIdx;
-  slides[currentSlide].classList.add('active');
-  const newVid = slides[currentSlide].querySelector('video');
-
-  /* slide anterior sai */
-  gsap.killTweensOf(oldSlide);
-  gsap.fromTo(oldSlide,
-    { x: 0, opacity: 1 },
-    { x: -dir * offset, opacity: 0, duration: dur, ease,
-      onComplete: () => gsap.set(oldSlide, { x: 0 }) }
-  );
-
-  /* novo slide entra */
-  gsap.killTweensOf(slides[currentSlide]);
-  gsap.fromTo(slides[currentSlide],
-    { x: dir * offset, opacity: 0 },
-    { x: 0, opacity: 1, duration: dur, ease,
-      onComplete: () => { if (newVid) newVid.play(); } }
-  );
-
-  updateCounter();
-}
-
-lbPrev.addEventListener('click', e => {
-  e.stopPropagation();
-  goToSlide(currentSlide - 1, -1);
-  startAutoPlay();
-});
-lbNext.addEventListener('click', e => {
-  e.stopPropagation();
-  goToSlide(currentSlide + 1, 1);
-  startAutoPlay();
-});
 
 /* botão Back do browser fecha o lightbox */
 window.addEventListener('popstate', () => {
@@ -624,9 +517,7 @@ window.addEventListener('popstate', () => {
 /* keyboard navigation */
 document.addEventListener('keydown', e => {
   if (!lb.classList.contains('open')) return;
-  if (e.key === 'Escape')      closeProject();
-  if (e.key === 'ArrowRight') { goToSlide(currentSlide + 1, 1);  startAutoPlay(); }
-  if (e.key === 'ArrowLeft')  { goToSlide(currentSlide - 1, -1); startAutoPlay(); }
+  if (e.key === 'Escape') closeProject();
 });
 
 function openProject(pic) {
@@ -644,8 +535,6 @@ function openProject(pic) {
   const meta     = pic.dataset.sub || '';
   const featSrc  = pic.querySelector('img').src;
   const hoverGif = pic.dataset.hoverGif || '';
-  currentFeatSrc  = featSrc;
-  currentHoverGif = hoverGif;
 
   /* populate UI */
   lbProjTitle.textContent = title;
@@ -659,8 +548,7 @@ function openProject(pic) {
   populateRelated(pic);
   flushPrefetchQueue();
 
-  slideImages = hoverGif ? [hoverGif, featSrc] : [featSrc];
-  buildSlides(slideImages);
+  setCoverMedia(featSrc, hoverGif);
 
   lbImgEl.src = featSrc;
   lbHoverVid.src = hoverGif || '';
@@ -686,7 +574,6 @@ function openProject(pic) {
 }
 
 function closeProject() {
-  stopAutoPlay();
   history.pushState(null, document.title, '/');
   gsap.to(lbClose, { opacity: 0, pointerEvents: 'none', duration: 0.2 });
   gsap.to(lbView, { opacity: 0, duration: 0.35, ease: 'power2.in',
@@ -695,7 +582,7 @@ function closeProject() {
       lbView.classList.remove('show');
       lbView.style.opacity = '';
       lbView.scrollTop = 0;
-      lbSlides.innerHTML = '';
+      lbCoverMedia.innerHTML = '';
       lbContent.innerHTML = '';
       lbContent.classList.remove('visible');
       document.getElementById('lb-related-grid').innerHTML = '';
@@ -880,45 +767,11 @@ async function fetchProjectContent(id) {
     }
 
     if (galleryImgs.length) {
-      const newSlideImages = [
-        ...(currentHoverGif ? [currentHoverGif] : []),
-        currentFeatSrc,
-        ...galleryImgs.map(i => i.url)
-      ];
-
-      /* Se o vídeo inicial ainda está a correr, não o interrompe —
-         apenas acrescenta os slides extra ao DOM */
-      const activeVid = lbSlides.querySelector('.lb-slide.active video');
-      const vidPlaying = activeVid && !activeVid.paused && !activeVid.ended;
-
-      if (vidPlaying) {
-        const addFrom = slideImages.length;
-        slideImages = newSlideImages;
-        newSlideImages.slice(addFrom).forEach(url => {
-          const slide = document.createElement('div');
-          slide.className = 'lb-slide';
-          if (isVideoUrl(url)) {
-            const v = document.createElement('video');
-            v.src = url; v.muted = true; v.loop = false; v.playsInline = true; v.preload = 'none';
-            slide.appendChild(v);
-          } else {
-            const img = document.createElement('img');
-            img.src = url; img.alt = ''; img.loading = 'lazy';
-            slide.appendChild(img);
-          }
-          lbSlides.appendChild(slide);
-        });
-        updateCounter();
-      } else {
-        slideImages = newSlideImages;
-        buildSlides(slideImages);
-      }
-
       /* cada foto da galeria vira o seu próprio painel horizontal,
-         inserido a seguir ao painel de Descrição/Dados — sem faixa
-         de scroll interna, tal como o resto do #lb-track */
-      const contentPanel = document.getElementById('lb-panel-content');
-      if (contentPanel) {
+         inserido a seguir ao painel principal (capa/Dados/Descrição) —
+         sem faixa de scroll interna, tal como o resto do #lb-track */
+      const mainPanel = document.getElementById('lb-panel-main');
+      if (mainPanel) {
         const photoPanels = galleryImgs.map(({ url, caption }) => {
           const panel = document.createElement('section');
           panel.className = 'lb-panel lb-panel-scrollable lb-photo-panel';
@@ -926,7 +779,7 @@ async function fetchProjectContent(id) {
             (caption ? `<div class="lb-photo-caption">${caption}</div>` : '');
           return panel;
         });
-        contentPanel.after(...photoPanels);
+        mainPanel.after(...photoPanels);
       }
     }
 
@@ -1003,7 +856,7 @@ initDragScroll('lb-related-grid');
 
 /* ══════════════════════════════════════════════════
    LIGHTBOX — NAVEGAÇÃO HORIZONTAL ENTRE PAINÉIS
-   (Hero → Descrição/Dados → Galeria → Relacionados), ao
+   (Dados/Capa/Descrição → Galeria → Relacionados), ao
    estilo do scroll da home. A roda do rato desloca o
    #lb-track horizontalmente; dentro de um painel com
    overflow vertical (texto longo), o scroll nativo funciona
