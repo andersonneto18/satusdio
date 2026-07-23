@@ -339,17 +339,20 @@ add_shortcode('sastudio_gallery', function () {
      à volta. Se sobrar 1 foto sozinha (número ímpar), ocupa o painel
      todo. ── */
   .sg-photo-panel {
-    display: flex; align-items: stretch; justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     gap: 20px;
     background: #fff;
     padding: 2vh 2vw;
   }
-  .sg-photo-item { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; }
+  /* tamanho fixo pedido: 1320×750 — flex-shrink permite encolher
+     (mantendo a proporção via aspect-ratio) em ecrãs mais estreitos,
+     nunca ultrapassando 1320px de largura. */
+  .sg-photo-item { flex: 0 1 1320px; max-width: 100%; aspect-ratio: 1320 / 750; display: flex; flex-direction: column; }
   .sg-photo-item img {
     /* object-fit:cover preenche a caixa (pode recortar conforme a
        proporção original) — necessário para as duas fotos ficarem
        com a mesma altura lado a lado, independentemente da orientação. */
-    flex: 1 1 auto; min-height: 0; width: 100%;
+    width: 100%; height: 100%;
     object-fit: cover; display: block;
     pointer-events: none; -webkit-user-drag: none;
   }
