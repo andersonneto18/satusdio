@@ -184,17 +184,20 @@ function getMasonryConfig() {
   return BREAKPOINTS.find(c => vw <= c.maxW);
 }
 
-/* Cada foto usa sempre a SUA proporção real (dataset.aspect, vinda das
-   dimensões reais do WordPress) para decidir a altura: altura = largura
-   da coluna ÷ aspect. Fotos em retrato ficam mais compridas na
-   vertical, fotos em paisagem mais compridas na horizontal — nunca há
-   corte (object-fit: cover não recorta nada porque a caixa já é feita
-   à medida da proporção real). */
+/* Larguras de coluna variam ciclicamente — evita colunas todas iguais
+   (grelha de linhas retas), mas cada foto usa sempre a SUA proporção
+   real (dataset.aspect, vinda das dimensões reais do WordPress) para
+   decidir a altura: largura da coluna ÷ aspect, nunca cortando nada.
+   O fundo da coluna pode ficar um pouco aquém da altura do ecrã (em vez
+   de forçar a foto a esticar/cortar para encaixar exato) — essa folga
+   também ajuda a quebrar a linha reta contínua entre colunas vizinhas. */
+const WIDTH_MULTIPLIERS = [1.15, 0.80, 1.35, 0.90, 1.20, 0.75, 0.95, 1.05, 1.30, 0.85];
 const DEFAULT_ASPECT = 4 / 3;
 
 /* Para cada coluna: enche com fotos (na ordem em que aparecem) até
-   chegar perto da altura do ecrã, cada uma com a sua altura natural.
-   Novas colunas abrem-se à direita, reveladas ao fazer scroll horizontal. */
+   chegar perto da altura do ecrã, cada uma com a sua altura natural
+   (colW / aspect real). Novas colunas abrem-se à direita, reveladas ao
+   fazer scroll horizontal. */
 function layoutMasonry() {
   const { gap, approxCols } = getMasonryConfig();
   const vw = window.innerWidth;
@@ -204,10 +207,10 @@ function layoutMasonry() {
 
   const pics = Array.from(gallery.querySelectorAll('.pic'));
 
-  let idx = 0, x = gap;
+  let idx = 0, x = gap, colIdx = 0;
 
   while (idx < pics.length) {
-    const colW = baseColW;
+    const colW = baseColW * WIDTH_MULTIPLIERS[colIdx % WIDTH_MULTIPLIERS.length];
 
     const group = [];
     let usedH = 0;
@@ -235,6 +238,7 @@ function layoutMasonry() {
     });
 
     x += colW + gap;
+    colIdx++;
   }
 
   gallery.style.width  = x + 'px';
@@ -1318,7 +1322,9 @@ function initParallax() {
 
   function leaveActivePic() {
     if (!activePic) return;
+    const img = activePic.querySelector('img');
     activePic.style.zIndex = '';
+    gsap.to(img, { scale: 1.06, duration: 0.85, ease: 'power3.out' });
     if (activeVid) {
       const vid = activeVid;
       gsap.to(vid, { opacity: 0, duration: 0.3, onComplete: () => {
@@ -1341,7 +1347,9 @@ function initParallax() {
       if (activePic) leaveActivePic();
       /* entra no novo card */
       if (pic) {
+        const img = pic.querySelector('img');
         pic.style.zIndex = '100';
+        gsap.to(img, { scale: 1.14, duration: 0.7, ease: 'power2.out' });
         document.body.classList.add('on-pic');
         const vid = pic.querySelector('.pic-hover-vid');
         if (vid) {
