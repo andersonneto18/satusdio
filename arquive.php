@@ -636,11 +636,22 @@ add_shortcode('sastudio_gallery', function () {
      no media query de 900px). */
   function alignSgDescHeading() {
     var descCol = document.getElementById('sg-content');
+    var panel = document.getElementById('sg-panel-desc');
     if (!descCol) return;
-    if (window.innerWidth <= 900) { descCol.style.paddingTop = ''; return; }
+    descCol.style.paddingTop = '';
+    if (window.innerWidth <= 900 || !panel) return;
     var heading = document.querySelector('#sg-acf > .sg-section-heading');
-    if (!heading) { descCol.style.paddingTop = ''; return; }
-    descCol.style.paddingTop = heading.getBoundingClientRect().top + 'px';
+    if (!heading) return;
+
+    var target = heading.getBoundingClientRect().top;
+    descCol.style.paddingTop = target + 'px';
+
+    /* se este padding empurrar o conteúdo para além do ecrã, reduz até
+       caber sem scroll — alinhar os títulos nunca deve obrigar a rolar */
+    var overflow = panel.scrollHeight - panel.clientHeight;
+    if (overflow > 0) {
+      descCol.style.paddingTop = Math.max(0, target - overflow) + 'px';
+    }
   }
   window.addEventListener('resize', alignSgDescHeading);
 

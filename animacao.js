@@ -671,10 +671,21 @@ function buildContentGallery(images, captions = []) {
    ecrãs largos, onde Dados/Capa ficam lado a lado (ver #lb-main-cols
    nos media queries de 1024px/768px). */
 function alignDescHeading() {
-  if (window.innerWidth <= 1024) { lbContent.style.paddingTop = ''; return; }
+  lbContent.style.paddingTop = '';
+  if (window.innerWidth <= 1024) return;
   const heading = document.querySelector('#lb-acf > .lb-section-heading');
-  if (!heading) { lbContent.style.paddingTop = ''; return; }
-  lbContent.style.paddingTop = heading.getBoundingClientRect().top + 'px';
+  const panel = document.getElementById('lb-panel-desc');
+  if (!heading || !panel) return;
+
+  const target = heading.getBoundingClientRect().top;
+  lbContent.style.paddingTop = target + 'px';
+
+  /* se este padding empurrar o conteúdo para além do ecrã, reduz até
+     caber sem scroll — alinhar os títulos nunca deve obrigar a rolar */
+  const overflow = panel.scrollHeight - panel.clientHeight;
+  if (overflow > 0) {
+    lbContent.style.paddingTop = Math.max(0, target - overflow) + 'px';
+  }
 }
 window.addEventListener('resize', alignDescHeading);
 
