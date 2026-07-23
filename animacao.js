@@ -779,13 +779,20 @@ async function fetchProjectContent(id) {
          interna, tal como o resto do #lb-track */
       const descPanel = document.getElementById('lb-panel-desc');
       if (descPanel) {
-        const photoPanels = galleryImgs.map(({ url, caption }) => {
+        /* 2 fotos por painel, lado a lado (ver .lb-photo-panel) — se
+           sobrar 1 foto sozinha (número ímpar), ocupa o painel todo */
+        const photoPanels = [];
+        for (let i = 0; i < galleryImgs.length; i += 2) {
+          const pair = galleryImgs.slice(i, i + 2);
           const panel = document.createElement('section');
           panel.className = 'lb-panel lb-panel-scrollable lb-photo-panel';
-          panel.innerHTML = `<img src="${url}" alt="${caption}" loading="lazy"/>` +
-            (caption ? `<div class="lb-photo-caption">${caption}</div>` : '');
-          return panel;
-        });
+          panel.innerHTML = pair.map(({ url, caption }) => `
+            <div class="lb-photo-item">
+              <img src="${url}" alt="${caption}" loading="lazy"/>
+              ${caption ? `<div class="lb-photo-caption">${caption}</div>` : ''}
+            </div>`).join('');
+          photoPanels.push(panel);
+        }
         descPanel.after(...photoPanels);
       }
     }

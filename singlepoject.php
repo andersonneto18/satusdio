@@ -290,23 +290,27 @@ add_shortcode('single_projetos', function () {
     .sp-desc-spacer { display: none; }
   }
 
-  /* ── Galeria — cada foto é o seu próprio painel horizontal, tal como
-     o resto do #sp-track (igual ao .sg-photo-panel/.lb-photo-panel). ── */
+  /* ── Galeria — cada painel mostra 2 fotos lado a lado, quase de
+     ponta a ponta do ecrã, com um espaço pequeno entre elas (como na
+     referência) — em vez de 1 foto pequena centrada com muito vazio
+     à volta. Se sobrar 1 foto sozinha (número ímpar), ocupa o painel
+     todo (igual ao .sg-photo-panel/.lb-photo-panel). ── */
   .sp-photo-panel {
-    display: flex; align-items: center; justify-content: center;
+    display: flex; align-items: stretch; justify-content: center;
+    gap: 20px;
     background: #fff;
-    padding: 1.5vh 1.5vw;
+    padding: 2vh 2vw;
   }
-  .sp-photo-panel img {
-    /* tamanho FIXO (não auto) — cada foto ocupa sempre a mesma caixa,
-       com object-fit:cover a preencher/recortar, independentemente da
-       proporção original. Menor que o painel todo (não colado às
-       bordas), como na referência. */
-    width: 70vw; height: 74vh;
+  .sp-photo-item { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; }
+  .sp-photo-item img {
+    /* object-fit:cover preenche a caixa (pode recortar conforme a
+       proporção original) — necessário para as duas fotos ficarem
+       com a mesma altura lado a lado, independentemente da orientação. */
+    flex: 1 1 auto; min-height: 0; width: 100%;
     object-fit: cover; display: block;
     pointer-events: none; -webkit-user-drag: none;
   }
-  @media (max-width: 700px) { .sp-photo-panel { padding: 1vh 1.5vw; } .sp-photo-panel img { width: 90vw; height: 55vh; } }
+  @media (max-width: 700px) { .sp-photo-panel { flex-direction: column; gap: 12px; padding: 1.5vh 3vw; } }
 
   /* ── Outros projetos (relacionados), igual ao #sg-related/#lb-related ── */
   #sp-panel-related { display: flex; align-items: center; }
@@ -382,9 +386,11 @@ add_shortcode('single_projetos', function () {
         </div>
       </section>
 
-      <?php foreach ($gallery_urls as $url): ?>
+      <?php foreach (array_chunk($gallery_urls, 2) as $pair): ?>
       <section class="sp-panel sp-panel-scrollable sp-photo-panel">
-        <img src="<?php echo esc_url($url); ?>" loading="lazy" alt=""/>
+        <?php foreach ($pair as $url): ?>
+        <div class="sp-photo-item"><img src="<?php echo esc_url($url); ?>" loading="lazy" alt=""/></div>
+        <?php endforeach; ?>
       </section>
       <?php endforeach; ?>
 

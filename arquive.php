@@ -325,26 +325,27 @@ add_shortcode('sastudio_gallery', function () {
     #sg-content.sg-desc-col { padding: 2.5rem 5vw 3rem; }
     .sg-desc-spacer { display: none; }
   }
-  /* ── Galeria — cada foto é o seu próprio painel horizontal,
-     sem faixa de scroll interna, tal como o resto do #sg-track.
-     A foto não ocupa o ecrã todo — fica mais pequena, com borda
-     arredondada e espaço à volta (separação do resto do painel). ── */
+  /* ── Galeria — cada painel mostra 2 fotos lado a lado, quase de
+     ponta a ponta do ecrã, com um espaço pequeno entre elas (como na
+     referência) — em vez de 1 foto pequena centrada com muito vazio
+     à volta. Se sobrar 1 foto sozinha (número ímpar), ocupa o painel
+     todo. ── */
   .sg-photo-panel {
-    display: flex; align-items: center; justify-content: center;
+    display: flex; align-items: stretch; justify-content: center;
+    gap: 20px;
     background: #fff;
-    padding: 1.5vh 1.5vw;
+    padding: 2vh 2vw;
   }
-  .sg-photo-panel img {
-    /* tamanho FIXO (não auto) — cada foto ocupa sempre a mesma caixa,
-       com object-fit:cover a preencher/recortar, independentemente da
-       proporção original. Sem isto, fotos em retrato ficavam muito mais
-       pequenas que as em paisagem, criando um vazio enorme entre elas.
-       Menor que o painel todo (não colado às bordas), como na referência. */
-    width: 70vw; height: 74vh;
+  .sg-photo-item { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; }
+  .sg-photo-item img {
+    /* object-fit:cover preenche a caixa (pode recortar conforme a
+       proporção original) — necessário para as duas fotos ficarem
+       com a mesma altura lado a lado, independentemente da orientação. */
+    flex: 1 1 auto; min-height: 0; width: 100%;
     object-fit: cover; display: block;
     pointer-events: none; -webkit-user-drag: none;
   }
-  @media (max-width: 700px) { .sg-photo-panel { padding: 1vh 1.5vw; } .sg-photo-panel img { width: 90vw; height: 55vh; } }
+  @media (max-width: 700px) { .sg-photo-panel { flex-direction: column; gap: 12px; padding: 1.5vh 3vw; } }
   #sg-modal-loading {
     display: flex; align-items: center; justify-content: center;
     height: 60vh; font-size: 0.8rem; color: rgba(21,21,18,0.45);
@@ -714,9 +715,18 @@ add_shortcode('sastudio_gallery', function () {
       html += '</div>';
       html += '</section>';
       if (galleryImgs.length) {
-        html += galleryImgs.map(function (url) {
-          return '<section class="sg-panel sg-panel-scrollable sg-photo-panel"><img src="' + esc(url) + '" loading="lazy" alt=""/></section>';
-        }).join('');
+        /* 2 fotos por painel, lado a lado (ver .sg-photo-panel) — se
+           sobrar 1 foto sozinha (número ímpar), ocupa o painel todo */
+        var photoPanelsHtml = '';
+        for (var gi = 0; gi < galleryImgs.length; gi += 2) {
+          var pair = galleryImgs.slice(gi, gi + 2);
+          photoPanelsHtml += '<section class="sg-panel sg-panel-scrollable sg-photo-panel">' +
+            pair.map(function (url) {
+              return '<div class="sg-photo-item"><img src="' + esc(url) + '" loading="lazy" alt=""/></div>';
+            }).join('') +
+            '</section>';
+        }
+        html += photoPanelsHtml;
       }
       html += buildRelatedHtml(post);
       html += '</div>'; /* fim #sg-track */
