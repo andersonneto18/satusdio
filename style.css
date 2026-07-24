@@ -560,7 +560,7 @@
        .lb-desc-spacer). */
     #lb-proj-title, .lb-proj-title-spacer {
       font-family: 'Inter', sans-serif !important;
-      font-size: clamp(1.8rem, 3.2vw, 2.8rem) !important;
+      font-size: clamp(1.3rem, 2vw, 1.9rem) !important;
       font-weight: 300 !important; letter-spacing: 0.01em !important;
       line-height: 1.05 !important; color: var(--text) !important;
       margin: 0 !important;
@@ -751,7 +751,7 @@
        página (ver #lb-panel-desc), sem coluna ao lado. */
     #lb-panel-main {
       position: relative;
-      padding: 4.5rem 5vw 6rem;
+      padding: 8rem 5vw 6rem;
     }
     /* .lb-title-block (não só #lb-main-top): a mesma classe é
        reutilizada, invisível, dentro do painel da Descrição

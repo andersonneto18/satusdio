@@ -244,7 +244,7 @@ add_shortcode('sastudio_gallery', function () {
      a lado: Dados do projeto e a capa (imagem/vídeo estático, sem
      slideshow). A Descrição já não vive aqui — é o painel seguinte, a
      largura quase total da página (#sg-panel-desc), sem coluna ao lado. */
-  #sg-panel-main { position: relative; padding: 4.5rem 5vw 6rem; }
+  #sg-panel-main { position: relative; padding: 8rem 5vw 6rem; }
   /* .sg-title-block (não só #sg-main-top): a mesma classe é reutilizada,
      invisível, dentro do painel da Descrição (.sg-desc-spacer) — isto
      garante que o título "Descrição:" fica exatamente à mesma altura
@@ -257,7 +257,7 @@ add_shortcode('sastudio_gallery', function () {
   .sg-title-block .sg-meta { display: none; }
   .sg-title-block h1 {
     font-family: 'Inter', sans-serif; font-weight: 300;
-    font-size: clamp(1.8rem, 3.2vw, 2.8rem); line-height: 1.05;
+    font-size: clamp(1.3rem, 2vw, 1.9rem); line-height: 1.05;
     color: #151512; margin: 0; letter-spacing: 0.01em;
   }
   .sg-desc-spacer { visibility: hidden; pointer-events: none; }

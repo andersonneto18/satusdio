@@ -208,7 +208,7 @@ add_shortcode('single_projetos', function () {
      a lado: Dados do projeto e a capa (imagem/vídeo estático, sem
      slideshow). A Descrição já não vive aqui — é o painel seguinte, a
      largura quase total da página (#sp-panel-desc), sem coluna ao lado. */
-  #sp-panel-main { position: relative; padding: 4.5rem 5vw 6rem; }
+  #sp-panel-main { position: relative; padding: 8rem 5vw 6rem; }
   /* .sp-title-block (não só #sp-main-top): a mesma classe é reutilizada,
      invisível, dentro do painel da Descrição (.sp-desc-spacer) — isto
      garante que o título "Descrição:" fica exatamente à mesma altura
@@ -221,7 +221,7 @@ add_shortcode('single_projetos', function () {
   .sp-title-block .sp-meta { display: none; }
   .sp-title-block h1 {
     font-family: 'Inter', sans-serif; font-weight: 300;
-    font-size: clamp(1.8rem, 3.2vw, 2.8rem); line-height: 1.05;
+    font-size: clamp(1.3rem, 2vw, 1.9rem); line-height: 1.05;
     color: #151512; margin: 0; letter-spacing: 0.01em;
   }
   .sp-desc-spacer { visibility: hidden; pointer-events: none; }
