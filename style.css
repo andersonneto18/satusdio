@@ -554,11 +554,8 @@
     #lb-ext-link:hover { color: #fff; }
 
     /* título do painel principal — texto normal (não é mais overlay
-       sobre imagem de hero), por isso cor escura em vez de branca.
-       .lb-proj-title-spacer partilha este estilo — é a cópia invisível
-       usada no painel da Descrição para alinhar os títulos (ver
-       .lb-desc-spacer). */
-    #lb-proj-title, .lb-proj-title-spacer {
+       sobre imagem de hero), por isso cor escura em vez de branca. */
+    #lb-proj-title {
       font-family: 'Inter', sans-serif !important;
       font-size: clamp(1.3rem, 2vw, 1.9rem) !important;
       font-weight: 300 !important; letter-spacing: 0.01em !important;
@@ -650,13 +647,8 @@
       margin-top: 0.55rem; letter-spacing: 0.01em;
     }
 
-    /* meta mais visível e destacado. .lb-proj-meta-spacer partilha este
-       estilo — cópia invisível no painel da Descrição (ver
-       .lb-desc-spacer). */
-    /* removida a pedido do cliente (categoria · ano acima do título) —
-       display:none aqui apaga tanto a versão real como as cópias
-       invisíveis usadas para alinhar Descrição/Galeria com o título. */
-    #lb-proj-meta, .lb-proj-meta-spacer {
+    /* categoria · ano acima do título — removida a pedido do cliente. */
+    #lb-proj-meta {
       display: none !important;
     }
 
@@ -756,21 +748,10 @@
       position: relative;
       padding: 8rem 5vw 6rem;
     }
-    /* .lb-title-block (não só #lb-main-top): a mesma classe é
-       reutilizada, invisível, dentro do painel da Descrição
-       (.lb-desc-spacer) — isto garante que o título "Descrição:" fica
-       exatamente à mesma altura que "Dados do projeto:" por construção
-       em CSS (mesma marcação = mesma altura), sem depender de medir
-       posições em JS. */
-    /* max-width igual à largura da coluna Dados (#lb-acf: flex 0 1 360px)
-       — a cópia invisível (.lb-desc-spacer) vive num painel muito mais
-       largo, e sem este limite quebraria linha de forma diferente do
-       título real, dando uma altura diferente e desalinhando
-       "Descrição:" de "Dados do projeto:". */
+    /* max-width igual à largura da coluna Dados (#lb-acf: flex 0 1 360px). */
     .lb-title-block {
       max-width: 360px; margin: 0 0 3rem;
     }
-    .lb-desc-spacer { visibility: hidden; pointer-events: none; }
     #lb-main-cols {
       display: flex;
       align-items: start;
@@ -816,17 +797,14 @@
        largura quase total da página (sem coluna ao lado); o utilizador
        roda o rato (navegação horizontal já existente no site) para
        chegar a este painel e depois à Galeria. ── */
-    /* align-items:flex-start (não center) — o padding-top igual ao do
-       painel principal (8rem) + o .lb-desc-spacer invisível (ver
-       acima) fazem o título "Descrição:" ficar à mesma altura do
-       "Dados do projeto:" no painel anterior. */
+    /* align-items:flex-start (não center) — padding-top igual ao do painel
+       principal (8rem), sem mais nada por cima, faz "Descrição:" começar
+       exatamente à mesma altura do topo da imagem central. max-width mais
+       estreito (formato mais quadrado, não uma faixa larga) — a pedido do
+       admin. */
     #lb-panel-desc { display: flex; align-items: flex-start; }
-    /* #lb-desc-wrap (não #lb-content) carrega a largura/padding — o
-       #lb-content, cujo innerHTML é reescrito a cada projeto aberto,
-       fica aninhado lá dentro a seguir ao .lb-desc-spacer (estático,
-       nunca é apagado), para o spacer sobreviver às trocas de conteúdo. */
     #lb-desc-wrap.lb-desc-col {
-      width: 100%; max-width: 1300px; margin: 0 auto;
+      width: 100%; max-width: 700px; margin: 0 auto;
       padding: 8rem 3vw 5rem;
     }
     .lb-desc-col * { max-width: 100%; box-sizing: border-box; }
@@ -909,12 +887,11 @@
        referência) — em vez de 1 foto pequena centrada com muito vazio
        à volta. Painéis inseridos dinamicamente no #lb-track. Se sobrar
        1 foto sozinha (número ímpar), ocupa o painel todo. ── */
-    /* o painel usa a MESMA estrutura de topo do painel principal
-       (padding-top 8rem + .lb-title-block invisível, reaproveitando o
-       truque do .lb-desc-spacer) para as fotos começarem exatamente na
-       mesma altura (linha de cima) que a imagem central — como ambas
-       têm 68vh de altura, a linha de baixo também fica alinhada por
-       construção, sem precisar de medir nada em JS. */
+    /* o painel usa o MESMO padding-top do painel principal (8rem) para as
+       fotos começarem exatamente na mesma altura (linha de cima) que a
+       imagem central — como ambas têm 68vh de altura, a linha de baixo
+       também fica alinhada por construção, sem precisar de medir nada
+       em JS. */
     .lb-photo-panel {
       display: flex; flex-direction: column;
       padding: 8rem 2vw 2vh;
@@ -948,7 +925,6 @@
     }
     @media (max-width: 768px) {
       .lb-photo-panel { padding: 1.5vh 3vw; }
-      .lb-photo-panel .lb-desc-spacer { display: none; }
       .lb-photo-row { flex-direction: column; gap: 12px; }
       .lb-photo-item { height: 40vh; }
     }
@@ -1070,7 +1046,6 @@
       }
       #lb-acf { flex-basis: auto; min-width: 0; }
       #lb-cover-col { position: static; }
-      .lb-desc-spacer { display: none; }
       .footer-top {
         grid-template-columns: 1fr 1fr;
         gap: 2.5rem;

@@ -211,26 +211,15 @@ add_shortcode('single_projetos', function () {
      A Descrição já não vive aqui — é o painel seguinte, a largura quase
      total da página (#sp-panel-desc), sem coluna ao lado. */
   #sp-panel-main { position: relative; padding: 8rem 5vw 6rem; }
-  /* .sp-title-block (não só #sp-main-top): a mesma classe é reutilizada,
-     invisível, dentro do painel da Descrição (.sp-desc-spacer) — isto
-     garante que o título "Descrição:" fica exatamente à mesma altura
-     que "Dados do projeto:" por construção em CSS (mesma marcação =
-     mesma altura), sem depender de medir posições em JS. max-width
-     igual à largura da coluna Dados (#sp-acf: flex 0 1 360px) — sem
-     isto a cópia invisível (num painel muito mais largo) quebraria
-     linha de forma diferente do título real, dando uma altura
-     diferente e desalinhando "Descrição:" de "Dados do projeto:". */
+  /* max-width igual à largura da coluna Dados (#sp-acf: flex 0 1 360px). */
   .sp-title-block { max-width: 360px; margin: 0 0 3rem; }
-  /* removida a pedido do cliente (categoria · ano acima do título) —
-     display:none aqui apaga tanto a versão real como as cópias
-     invisíveis usadas para alinhar Descrição/Galeria com o título. */
+  /* removida a pedido do cliente (categoria · ano acima do título). */
   .sp-title-block .sp-meta { display: none; }
   .sp-title-block h1 {
     font-family: 'Inter', sans-serif; font-weight: 300;
     font-size: clamp(1.3rem, 2vw, 1.9rem); line-height: 1.05;
     color: #151512; margin: 0; letter-spacing: 0.01em;
   }
-  .sp-desc-spacer { visibility: hidden; pointer-events: none; }
   #sp-main-cols {
     display: flex; align-items: start; gap: 4vw;
     max-width: 1800px; margin: 0 auto;
@@ -272,13 +261,14 @@ add_shortcode('single_projetos', function () {
      largura quase total da página (sem coluna ao lado); o utilizador
      roda o rato (navegação horizontal já existente) para chegar a
      este painel e depois à Galeria. ── */
-  /* align-items:flex-start (não center) — o padding-top igual ao do
-     painel principal (8rem) + o .sp-desc-spacer invisível (ver acima)
-     fazem o título "Descrição:" ficar à mesma altura do "Dados do
-     projeto:" no painel anterior. */
+  /* align-items:flex-start (não center) — padding-top igual ao do painel
+     principal (8rem), sem mais nada por cima, faz "Descrição:" começar
+     exatamente à mesma altura do topo da imagem central. max-width mais
+     estreito (formato mais quadrado, não uma faixa larga) — a pedido do
+     admin. */
   #sp-panel-desc { display: flex; align-items: flex-start; }
   #sp-content.sp-desc-col {
-    width: 100%; max-width: 1300px; margin: 0 auto;
+    width: 100%; max-width: 700px; margin: 0 auto;
     padding: 8rem 3vw 5rem;
   }
   .sp-section-heading {
@@ -303,7 +293,6 @@ add_shortcode('single_projetos', function () {
   #sp-acf { flex-basis: auto; min-width: 0; }
     #sp-cover-col { position: static; }
     #sp-content.sp-desc-col { padding: 2.5rem 5vw 3rem; }
-    .sp-desc-spacer { display: none; }
   }
 
   /* ── Galeria — cada painel mostra 2 fotos lado a lado, quase de
@@ -311,12 +300,11 @@ add_shortcode('single_projetos', function () {
      referência) — em vez de 1 foto pequena centrada com muito vazio
      à volta. Se sobrar 1 foto sozinha (número ímpar), ocupa o painel
      todo (igual ao .sg-photo-panel/.lb-photo-panel).
-     O painel usa a MESMA estrutura de topo do painel principal
-     (padding-top 8rem + .sp-title-block invisível, reaproveitando o
-     truque do .sp-desc-spacer) para as fotos começarem exatamente na
-     mesma altura (linha de cima) que a imagem central — como ambas têm
-     68vh de altura, a linha de baixo também fica alinhada por
-     construção, sem precisar de medir nada em JS. ── */
+     O painel usa o MESMO padding-top do painel principal (8rem) para as
+     fotos começarem exatamente na mesma altura (linha de cima) que a
+     imagem central — como ambas têm 68vh de altura, a linha de baixo
+     também fica alinhada por construção, sem precisar de medir nada em
+     JS. ── */
   .sp-photo-panel {
     display: flex; flex-direction: column;
     padding: 8rem 2vw 2vh;
@@ -337,7 +325,6 @@ add_shortcode('single_projetos', function () {
   }
   @media (max-width: 700px) {
     .sp-photo-panel { padding: 1.5vh 3vw; }
-    .sp-photo-panel .sp-desc-spacer { display: none; }
     .sp-photo-row { flex-direction: column; gap: 12px; }
     .sp-photo-item { height: 40vh; }
   }
@@ -407,10 +394,6 @@ add_shortcode('single_projetos', function () {
 
       <section id="sp-panel-desc" class="sp-panel sp-panel-scrollable">
         <div id="sp-content" class="sp-desc-col">
-          <div class="sp-title-block sp-desc-spacer" aria-hidden="true">
-            <div class="sp-meta"><?php echo esc_html($meta_line); ?></div>
-            <h1><?php echo esc_html($title); ?></h1>
-          </div>
           <h3 class="sp-section-heading">Descrição:</h3>
           <div class="sp-desc"><?php echo $desc ? $desc : '<p>Sem descrição para este projeto.</p>'; ?></div>
         </div>
@@ -418,10 +401,6 @@ add_shortcode('single_projetos', function () {
 
       <?php foreach (array_chunk($gallery_urls, 2) as $pair): ?>
       <section class="sp-panel sp-panel-scrollable sp-photo-panel">
-        <div class="sp-title-block sp-desc-spacer" aria-hidden="true">
-          <div class="sp-meta"><?php echo esc_html($meta_line); ?></div>
-          <h1><?php echo esc_html($title); ?></h1>
-        </div>
         <div class="sp-photo-row">
           <?php foreach ($pair as $url): ?>
           <div class="sp-photo-item"><img src="<?php echo esc_url($url); ?>" loading="lazy" alt=""/></div>

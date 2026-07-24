@@ -578,13 +578,6 @@ function openProject(pic) {
   /* populate UI */
   lbProjTitle.textContent = title;
   lbProjMeta.textContent  = meta;
-  /* cópia invisível do título/meta no painel da Descrição — ver
-     .lb-desc-spacer em style.css, garante o alinhamento com "Dados do
-     projeto:" só com CSS (mesma marcação = mesma altura). */
-  const lbTitleSpacer = document.querySelector('.lb-proj-title-spacer');
-  const lbMetaSpacer  = document.querySelector('.lb-proj-meta-spacer');
-  if (lbTitleSpacer) lbTitleSpacer.textContent = title;
-  if (lbMetaSpacer)  lbMetaSpacer.textContent  = meta;
   if (lbExtLink) lbExtLink.href = href || '#';
   lbContent.classList.remove('visible');
   lbContent.innerHTML     = '';
@@ -833,10 +826,6 @@ async function fetchProjectContent(id) {
           const panel = document.createElement('section');
           panel.className = 'lb-panel lb-panel-scrollable lb-photo-panel';
           panel.innerHTML = `
-            <div class="lb-title-block lb-desc-spacer" aria-hidden="true">
-              <div class="lb-proj-meta-spacer">${lbProjMeta.textContent}</div>
-              <h1 class="lb-proj-title-spacer">${lbProjTitle.textContent}</h1>
-            </div>
             <div class="lb-photo-row">` +
             pair.map(({ url, caption }) => `
               <div class="lb-photo-item">
