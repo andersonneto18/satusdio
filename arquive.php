@@ -248,7 +248,7 @@ add_shortcode('sastudio_gallery', function () {
      total da página (#sg-panel-desc), sem coluna ao lado. */
   #sg-panel-main { position: relative; padding: 8rem 5vw 6rem; }
   /* max-width igual à largura da coluna Dados (#sg-acf: flex 0 1 360px). */
-  .sg-title-block { max-width: 360px; margin: 0 0 3rem; }
+  .sg-title-block { max-width: 500px; margin: 0 0 3rem; }
   /* removida a pedido do cliente (categoria · ano acima do título). */
   .sg-title-block .sg-meta { display: none; }
   .sg-title-block h1 {
@@ -261,7 +261,7 @@ add_shortcode('sastudio_gallery', function () {
     max-width: 1800px; margin: 0 auto;
   }
   .sg-col { flex: 1 1 0; min-width: 0; }
-  #sg-acf { flex: 0 1 360px; min-width: 240px; }
+  #sg-acf { flex: 0 1 500px; min-width: 320px; }
   /* sticky: a capa fica fixa no ecrã enquanto o utilizador rola para
      ler a lista de Dados do projeto (quando é mais alta que a capa),
      em vez de subir/descer junto com o texto. */

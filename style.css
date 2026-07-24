@@ -748,9 +748,9 @@
       position: relative;
       padding: 8rem 5vw 6rem;
     }
-    /* max-width igual à largura da coluna Dados (#lb-acf: flex 0 1 360px). */
+    /* max-width igual à largura da coluna Dados (#lb-acf: flex 0 1 500px). */
     .lb-title-block {
-      max-width: 360px; margin: 0 0 3rem;
+      max-width: 500px; margin: 0 0 3rem;
     }
     #lb-main-cols {
       display: flex;
@@ -760,7 +760,7 @@
       margin: 0 auto;
     }
     .lb-col { flex: 1 1 0; min-width: 0; }
-    #lb-acf { flex: 0 1 360px; min-width: 240px; }
+    #lb-acf { flex: 0 1 500px; min-width: 320px; }
     /* sticky: a capa fica fixa no ecrã enquanto o utilizador rola para
        ler a lista de Dados do projeto (quando é mais alta que a capa),
        em vez de subir/descer junto com o texto. */
