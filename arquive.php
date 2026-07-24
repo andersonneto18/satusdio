@@ -10,22 +10,23 @@ add_shortcode('sastudio_gallery', function () {
     ob_start();
     ?>
 <style>
-  /* Grelha agora é um canvas fullscreen (arrastar/zoom/scroll horizontal),
-     igual ao mecanismo da home (#vp/#gallery) — por isso a página fica
-     fixa (sem scroll nativo), tal como lá. */
-  html, body { overflow: hidden !important; height: 100% !important; }
+  /* O CSS partilhado ("Galeria Portfolio", ativo em todo o site) põe
+     overflow:hidden no body para a home (app fullscreen sem scroll nativo).
+     Nesta página isso bloqueia o scroll normal — contraria-se aqui. */
+  html, body { overflow: auto !important; height: auto !important; }
 
   #sg-root, #sg-root * { box-sizing: border-box; }
   #sg-root {
-    position: fixed; inset: 0;
-    display: flex; flex-direction: column;
     font-family: 'Inter', sans-serif;
     color: #151512;
+    max-width: 1920px;
+    margin: 0 auto;
+    padding: 8rem 3vw 5rem;
   }
   #sg-header {
     display: flex; align-items: flex-end; justify-content: space-between;
-    flex: 0 0 auto; flex-wrap: wrap; gap: 1rem;
-    padding: 3rem 3vw 1.5rem;
+    flex-wrap: wrap; gap: 1rem;
+    margin-bottom: 2.5rem; padding-bottom: 1.5rem;
     border-bottom: 1px solid rgba(21,21,18,0.12);
   }
   #sg-label {
@@ -40,38 +41,7 @@ add_shortcode('sastudio_gallery', function () {
   #sg-count { font-size: 0.75rem; color: rgba(21,21,18,0.4); white-space: nowrap; }
   #sg-controls {
     display: flex; align-items: center; justify-content: space-between;
-    flex: 0 0 auto; flex-wrap: wrap; gap: 1rem;
-    padding: 1.2rem 3vw;
-  }
-  /* ── Canvas da grelha — mesma mecânica da home: #sg-viewport é a
-     "janela" fixa (overflow hidden), #sg-grid é a tela que se desloca
-     (translateX/Y + scale) por baixo do rato/roda, com cada .sg-card
-     posicionado em absoluto (ver layoutSgMasonry, cópia de
-     layoutMasonry do animacao.js). ── */
-  #sg-viewport {
-    position: relative;
-    flex: 1 1 auto;
-    overflow: hidden;
-    user-select: none; -webkit-user-select: none;
-    cursor: grab;
-  }
-  #sg-viewport.sg-dragging { cursor: grabbing; }
-  #sg-root.is-list-view #sg-viewport { display: none; }
-  #sg-hud {
-    position: absolute; bottom: 1.4rem; left: 50%;
-    transform: translateX(-50%);
-    display: flex; align-items: center; gap: 1rem;
-    z-index: 5; opacity: 0; pointer-events: none;
-    transition: opacity 0.8s ease;
-  }
-  #sg-hud span { font-size: 0.5rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(21,21,18,0.4); }
-  #sg-hud .sg-hud-sep { color: rgba(122,92,58,0.35); }
-  #sg-zoom-label {
-    position: absolute; bottom: 1.4rem; right: 1.5rem;
-    font-size: 0.5rem; letter-spacing: 0.15em;
-    color: rgba(21,21,18,0.4); z-index: 5; opacity: 0;
-    pointer-events: none; font-variant-numeric: tabular-nums;
-    transition: opacity 0.8s ease;
+    flex-wrap: wrap; gap: 1rem; margin-bottom: 2.5rem;
   }
   /* ── Dropdowns Categoria/Location/Status/Typology, como no i-mad.com ── */
   #sg-dropdowns { display: flex; gap: 0.5rem; flex-wrap: wrap; }
@@ -118,24 +88,23 @@ add_shortcode('sastudio_gallery', function () {
     border: none; outline: none; background: none;
     font-family: inherit; font-size: 0.75rem; color: #151512; width: 180px;
   }
-  /* masonry como um canvas — cada card usa a proporção REAL da imagem
+  /* masonry via colunas CSS — cada card usa a proporção REAL da imagem
      (largura/altura vinda do WordPress), sem esticar nem recortar, tal
-     como no i-mad.com; mas em vez de colunas CSS com scroll vertical da
-     página, é o JS (layoutSgMasonry) que posiciona cada card em
-     absoluto dentro de #sg-grid, e novas colunas revelam-se ao arrastar/
-     rodar a roda do rato para os lados (ver initSgCanvas). */
+     como no i-mad.com. 3 colunas desktop, 2 tablet e telemóvel — com só
+     1 coluna a variedade de alturas desaparece (fica tudo empilhado na
+     mesma coluna), por isso mantém-se sempre pelo menos 2. */
   #sg-grid {
-    position: absolute; left: 0; top: 0; width: 100%;
-    transform-origin: 0 0;
-    will-change: transform;
+    column-count: 3; column-gap: 20px;
   }
+  @media (max-width: 1100px) { #sg-grid { column-count: 2; } }
+  @media (max-width: 760px)  { #sg-grid { column-count: 2; column-gap: 12px; } }
   .sg-card {
-    position: absolute;
     cursor: pointer;
-    will-change: transform;
+    break-inside: avoid;
+    margin-bottom: 20px;
   }
   .sg-card-img {
-    position: absolute; inset: 0;
+    position: relative;
     overflow: hidden; background: #e8e7e3;
     border-radius: 16px;
   }
@@ -162,11 +131,7 @@ add_shortcode('sastudio_gallery', function () {
   .sg-card:hover .sg-card-overlay { opacity: 1; }
   .sg-card-overlay .sg-card-title { font-size: 0.85rem; color: #fff; }
   .sg-card-overlay .sg-card-sub { font-size: 0.7rem; color: rgba(255,255,255,0.75); margin-top: 0.2rem; }
-  #sg-empty {
-    position: absolute; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.85rem; color: rgba(21,21,18,0.5);
-  }
+  #sg-empty { font-size: 0.85rem; color: rgba(21,21,18,0.5); padding: 3rem 0; }
 
   /* ── Botão de alternar grid/lista, como no i-mad.com ── */
   #sg-view-toggle {
@@ -180,15 +145,9 @@ add_shortcode('sastudio_gallery', function () {
   #sg-view-toggle.active { background: #151512; color: #fff; border-color: #151512; }
   #sg-view-toggle svg { width: 16px; height: 16px; }
 
-  /* ── Vista em lista — a única parte da página que continua com scroll
-     vertical normal (a barra da roda do rato aqui não faz zoom/pan,
-     é só o próprio overflow-y do bloco). ── */
-  #sg-list {
-    display: none;
-    flex: 1 1 auto;
-    overflow-y: auto;
-    padding: 0 3vw 3rem;
-  }
+  /* ── Vista em lista ── */
+  #sg-list { display: none; }
+  #sg-root.is-list-view #sg-grid { display: none; }
   #sg-root.is-list-view #sg-list { display: block; }
   .sg-list-row {
     display: grid;
@@ -462,15 +421,7 @@ add_shortcode('sastudio_gallery', function () {
       </div>
     </div>
   </div>
-  <div id="sg-viewport">
-    <div id="sg-grid"></div>
-    <div id="sg-hud">
-      <span>Scroll para navegar</span>
-      <span class="sg-hud-sep">·</span>
-      <span>Arraste para interagir</span>
-    </div>
-    <div id="sg-zoom-label">100%</div>
-  </div>
+  <div id="sg-grid"></div>
   <div id="sg-list"></div>
   <div id="sg-empty" style="display:none;">Sem projetos para mostrar.</div>
 </div>
@@ -493,8 +444,7 @@ add_shortcode('sastudio_gallery', function () {
   var WP_API      = WP_API_BASE + '/projects?_embed&per_page=100&orderby=date&order=desc';
   var CUSTOM_API  = WP_API_BASE.replace('/wp/v2', '/sastudio/v2');
 
-  var grid     = document.getElementById('sg-grid');
-  var viewport = document.getElementById('sg-viewport');
+  var grid    = document.getElementById('sg-grid');
   var list    = document.getElementById('sg-list');
   var viewToggle = document.getElementById('sg-view-toggle');
   var count   = document.getElementById('sg-count');
@@ -510,11 +460,6 @@ add_shortcode('sastudio_gallery', function () {
   var allPosts = [];
   var projectCache = {};
   var listBuilt = false;
-  /* true enquanto/logo após arrastar o canvas da grelha — o click nativo
-     do card ainda dispara mesmo depois de arrastar, por isso o listener
-     de click de cada card ignora-o quando esta flag está ativa (ver
-     initSgCanvas). */
-  var sgCanvasDragMoved = false;
 
   /* ── Vista em lista (como no i-mad.com): miniatura, título, categoria,
      localização e ano — construída uma vez a partir de allPosts. ── */
@@ -681,240 +626,6 @@ add_shortcode('sastudio_gallery', function () {
     setTimeout(next, 500);
   }
 
-  /* ══════════════════════════════════════════════════
-     MASONRY LAYOUT — cópia de layoutMasonry() do animacao.js,
-     adaptada a #sg-grid/.sg-card e a viewport.clientWidth/Height
-     (em vez de window.innerWidth/Height, porque aqui a grelha só
-     ocupa a área abaixo do cabeçalho, não o ecrã todo).
-  ══════════════════════════════════════════════════ */
-  var SG_BREAKPOINTS = [
-    { maxW: 480,  gap: 8,  approxCols: 2 },
-    { maxW: 768,  gap: 8,  approxCols: 2 },
-    { maxW: 1100, gap: 16, approxCols: 3 },
-    { maxW: Infinity, gap: 20, approxCols: 3 },
-  ];
-  var SG_DEFAULT_ASPECT = 4 / 3;
-
-  function getSgMasonryConfig() {
-    var vw = viewport.clientWidth;
-    for (var i = 0; i < SG_BREAKPOINTS.length; i++) {
-      if (vw <= SG_BREAKPOINTS[i].maxW) return SG_BREAKPOINTS[i];
-    }
-    return SG_BREAKPOINTS[SG_BREAKPOINTS.length - 1];
-  }
-
-  function layoutSgMasonry() {
-    var cfg = getSgMasonryConfig();
-    var gap = cfg.gap, approxCols = cfg.approxCols;
-    var vw = viewport.clientWidth;
-    var vh = viewport.clientHeight;
-    var baseColW = (vw - gap * (approxCols + 1)) / approxCols;
-    var targetH  = vh - gap * 2;
-
-    var cards = allCards.filter(function (c) { return c.el.style.display !== 'none'; }).map(function (c) { return c.el; });
-
-    var idx = 0, x = gap;
-
-    while (idx < cards.length) {
-      var group = [];
-      var sumH = 0;
-      while (idx < cards.length) {
-        var card    = cards[idx];
-        var aspect  = parseFloat(card.dataset.aspect) || SG_DEFAULT_ASPECT;
-        var h       = baseColW / aspect;
-        if (group.length && sumH + h + group.length * gap > targetH && idx < cards.length - 1) break;
-        group.push({ card: card, h: h });
-        sumH += h;
-        idx++;
-        if (sumH + (group.length - 1) * gap >= targetH) break;
-      }
-
-      var nGaps = Math.max(group.length - 1, 0) * gap;
-      var scale = (targetH - nGaps) / sumH;
-      var colW  = baseColW * scale;
-
-      var y = gap;
-      group.forEach(function (g) {
-        var scaledH = g.h * scale;
-        g.card.style.left   = x + 'px';
-        g.card.style.top    = y + 'px';
-        g.card.style.width  = colW + 'px';
-        g.card.style.height = scaledH + 'px';
-        y += scaledH + gap;
-      });
-
-      x += colW + gap;
-    }
-
-    grid.style.width  = (cards.length ? x : vw) + 'px';
-    grid.style.height = vh + 'px';
-  }
-
-  /* ══════════════════════════════════════════════════
-     CANVAS — zoom (scroll/ctrl), pan (arrastar), igual à home
-     (initCanvas em animacao.js), mas isolado a #sg-viewport (não à
-     window toda) para não interferir com o cabeçalho, filtros,
-     pesquisa, vista em lista ou o modal do projeto.
-  ══════════════════════════════════════════════════ */
-  var sgCanvasStarted = false;
-  function initSgCanvas() {
-    if (sgCanvasStarted) return;
-    sgCanvasStarted = true;
-
-    var zl = document.getElementById('sg-zoom-label');
-    var hud = document.getElementById('sg-hud');
-
-    var s = 1, tx = 0, ty = 0;
-    var tS = 1, tTx = 0, tTy = 0;
-    var rawTx = 0, rawTy = 0;
-    var drag = false, dragMoved = false;
-    var dragOriginTx = 0, dragOriginTy = 0, dragStartX = 0, dragStartY = 0;
-
-    var ELASTIC_MAX = 90;
-    function elasticPull(delta) { return ELASTIC_MAX * delta / (ELASTIC_MAX + Math.abs(delta)); }
-
-    function getSgBounds(sc) {
-      var W = viewport.clientWidth;
-      var H = viewport.clientHeight;
-      var gW = grid.offsetWidth;
-      var gH = grid.offsetHeight;
-      var mg = 55;
-      var xMin = -(gW * sc - W) - mg;
-      var xMax = 0;
-      var yMin = -(gH * sc - H) - mg;
-      var yMax = 0;
-      return { xMin: xMin, xMax: xMax, yMin: yMin, yMax: yMax };
-    }
-
-    function clampSg() {
-      var b = getSgBounds(tS);
-      if (drag) return;
-      tTx = Math.max(b.xMin, Math.min(b.xMax, tTx));
-      tTy = Math.max(b.yMin, Math.min(b.yMax, tTy));
-      rawTx = tTx; rawTy = tTy;
-    }
-
-    (function tick() {
-      clampSg();
-      var lf = 0.085;
-      s  += (tS  - s)  * lf;
-      tx += (tTx - tx) * lf;
-      ty += (tTy - ty) * lf;
-      grid.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + s + ')';
-      if (zl) zl.textContent = Math.round(s * 100) + '%';
-      requestAnimationFrame(tick);
-    })();
-
-    function clampSgS(v) { return Math.max(0.8, Math.min(2.5, v)); }
-
-    function zoomAt(cx, cy, factor) {
-      var ns = clampSgS(tS * factor);
-      tTx = cx - (cx - tTx) * (ns / tS);
-      tTy = cy - (cy - tTy) * (ns / tS);
-      tS  = ns;
-      clampSg();
-    }
-
-    function localXY(clientX, clientY) {
-      var r = viewport.getBoundingClientRect();
-      return { x: clientX - r.left, y: clientY - r.top };
-    }
-
-    if (hud) {
-      hud.style.opacity = '1';
-      setTimeout(function () { hud.style.opacity = '0'; }, 4000);
-    }
-    if (zl) zl.style.opacity = '1';
-
-    viewport.addEventListener('wheel', function (e) {
-      if (modal.classList.contains('sg-open')) return;
-      e.preventDefault();
-
-      if (e.ctrlKey) {
-        var p = localXY(e.clientX, e.clientY);
-        zoomAt(p.x, p.y, e.deltaY < 0 ? 1.1 : 0.91);
-        return;
-      }
-
-      var delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-      rawTx -= delta * 1.3;
-      tTx = rawTx;
-    }, { passive: false });
-
-    viewport.addEventListener('mousedown', function (e) {
-      drag = true; dragMoved = false;
-      sgCanvasDragMoved = false;
-      dragOriginTx = tTx; dragOriginTy = tTy;
-      dragStartX = e.clientX; dragStartY = e.clientY;
-      viewport.classList.add('sg-dragging');
-    });
-
-    window.addEventListener('mousemove', function (e) {
-      if (!drag) return;
-      var dx = e.clientX - dragStartX;
-      var dy = e.clientY - dragStartY;
-      if (Math.abs(dx) > 4 || Math.abs(dy) > 4) { dragMoved = true; sgCanvasDragMoved = true; }
-      tTx = dragOriginTx + elasticPull(dx);
-      tTy = dragOriginTy + elasticPull(dy);
-    });
-
-    window.addEventListener('mouseup', function () {
-      if (!drag) return;
-      drag = false;
-      viewport.classList.remove('sg-dragging');
-      tTx = dragOriginTx; tTy = dragOriginTy;
-      rawTx = tTx; rawTy = tTy;
-      /* só limpa a flag no próximo frame — o click nativo do card
-         (disparado logo a seguir a este mouseup) ainda precisa de a ver ativa */
-      setTimeout(function () { sgCanvasDragMoved = false; }, 0);
-    });
-
-    var lastDist = 0;
-    viewport.addEventListener('touchstart', function (e) {
-      if (e.touches.length === 1) {
-        drag = true; dragMoved = false;
-        sgCanvasDragMoved = false;
-        dragOriginTx = tTx; dragOriginTy = tTy;
-        dragStartX = e.touches[0].clientX; dragStartY = e.touches[0].clientY;
-      } else if (e.touches.length === 2) {
-        drag = false;
-        lastDist = Math.hypot(e.touches[1].clientX - e.touches[0].clientX, e.touches[1].clientY - e.touches[0].clientY);
-      }
-    }, { passive: true });
-
-    viewport.addEventListener('touchmove', function (e) {
-      e.preventDefault();
-      if (e.touches.length === 1 && drag) {
-        var dx = e.touches[0].clientX - dragStartX;
-        var dy = e.touches[0].clientY - dragStartY;
-        if (Math.abs(dx) > 4 || Math.abs(dy) > 4) { dragMoved = true; sgCanvasDragMoved = true; }
-        tTx = dragOriginTx + elasticPull(dx);
-        tTy = dragOriginTy + elasticPull(dy);
-      } else if (e.touches.length === 2) {
-        var d  = Math.hypot(e.touches[1].clientX - e.touches[0].clientX, e.touches[1].clientY - e.touches[0].clientY);
-        var p  = localXY((e.touches[0].clientX + e.touches[1].clientX) / 2, (e.touches[0].clientY + e.touches[1].clientY) / 2);
-        zoomAt(p.x, p.y, d / lastDist); lastDist = d;
-      }
-    }, { passive: false });
-
-    viewport.addEventListener('touchend', function () {
-      if (drag) {
-        drag = false;
-        tTx = dragOriginTx; tTy = dragOriginTy;
-        rawTx = tTx; rawTy = tTy;
-        setTimeout(function () { sgCanvasDragMoved = false; }, 0);
-      }
-    });
-
-    viewport.addEventListener('dblclick', function (e) {
-      var reset = Math.abs(tS - 1) > 0.08 || Math.abs(tTx) > 8 || Math.abs(tTy) > 8;
-      if (reset) { tS = 1; tTx = 0; tTy = 0; } else {
-        var p = localXY(e.clientX, e.clientY);
-        zoomAt(p.x, p.y, 2.2);
-      }
-    });
-  }
-
   function filterCards() {
     var q = search.value.trim().toLowerCase();
     var visible = 0;
@@ -927,7 +638,6 @@ add_shortcode('sastudio_gallery', function () {
       if (show) visible++;
     });
     count.textContent = visible + ' projetos';
-    layoutSgMasonry();
   }
 
   function openModal(post, sourceImgSrc, opts) {
@@ -1221,7 +931,7 @@ add_shortcode('sastudio_gallery', function () {
   fetch(WP_API)
     .then(function (r) { return r.json(); })
     .then(function (posts) {
-      if (!posts || !posts.length) { empty.style.display = 'flex'; return; }
+      if (!posts || !posts.length) { empty.style.display = 'block'; return; }
       allPosts = posts;
       buildDropdowns();
       search.addEventListener('input', filterCards);
@@ -1237,13 +947,12 @@ add_shortcode('sastudio_gallery', function () {
         var cat   = terms[0] ? terms[0].name : '';
         var sub   = cat ? (cat + ' · ' + year) : String(year);
 
-        /* proporção real da imagem (largura/altura do WordPress) — usada
-           por layoutSgMasonry (canvas) para dar a cada card a altura
-           correspondente à foto real, sem esticar nem recortar, tal como
-           no i-mad.com */
+        /* proporção real da imagem (largura/altura do WordPress) — cada
+           card fica com a altura correspondente à foto real, sem esticar
+           nem recortar, tal como no i-mad.com */
         var mw = media && media.media_details ? media.media_details.width : 0;
         var mh = media && media.media_details ? media.media_details.height : 0;
-        var aspect = (mw && mh) ? (mw / mh) : 0;
+        var aspectStyle = (mw && mh) ? ' style="aspect-ratio:' + mw + '/' + mh + '"' : '';
 
         /* vídeo em hover (campo ACF hover_gif), igual ao index.html — ao
            passar o rato num card, se houver vídeo associado, mostra-o por
@@ -1255,9 +964,8 @@ add_shortcode('sastudio_gallery', function () {
 
         var card = document.createElement('div');
         card.className = 'sg-card';
-        if (aspect) card.dataset.aspect = aspect;
         card.innerHTML =
-          '<div class="sg-card-img">' +
+          '<div class="sg-card-img"' + aspectStyle + '>' +
             '<img src="' + esc(imgUrl) + '" alt="' + esc(title) + '" loading="lazy"/>' +
             hoverVidHtml +
             '<div class="sg-card-overlay">' +
@@ -1265,13 +973,7 @@ add_shortcode('sastudio_gallery', function () {
               '<div class="sg-card-sub">' + esc(sub) + '</div>' +
             '</div>' +
           '</div>';
-        /* ignora o click nativo se este veio logo a seguir a um arrastar
-           do canvas (ver initSgCanvas/sgCanvasDragMoved) — sem isto,
-           arrastar a grelha para navegar abria o projeto por baixo do rato. */
-        card.addEventListener('click', function () {
-          if (sgCanvasDragMoved) return;
-          openModal(post, imgUrl);
-        });
+        card.addEventListener('click', function () { openModal(post, imgUrl); });
         card.addEventListener('mouseenter', function () { prefetchProject(post.id); });
 
         var hoverVidEl = card.querySelector('.sg-card-hover-vid');
@@ -1297,15 +999,11 @@ add_shortcode('sastudio_gallery', function () {
 
       count.textContent = allCards.length + ' projetos';
       backgroundPrefetchAll(posts.map(function (p) { return p.id; }));
-
-      layoutSgMasonry();
-      initSgCanvas();
-      window.addEventListener('resize', layoutSgMasonry);
     })
     .catch(function (err) {
       console.warn('SASTUDIO gallery:', err);
       empty.textContent = 'Não foi possível carregar os projetos.';
-      empty.style.display = 'flex';
+      empty.style.display = 'block';
     });
 })();
 </script>
