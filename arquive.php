@@ -309,7 +309,7 @@ add_shortcode('sastudio_gallery', function () {
   #sg-panel-desc { display: flex; align-items: flex-start; }
   #sg-content.sg-desc-col {
     width: 100%; max-width: 1300px; margin: 0 auto;
-    padding: 4.5rem 8vw 5rem;
+    padding: 4.5rem 3vw 5rem;
   }
   .sg-section-heading {
     font-family: 'Inter', sans-serif !important; font-size: 1rem !important;

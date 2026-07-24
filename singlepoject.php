@@ -273,7 +273,7 @@ add_shortcode('single_projetos', function () {
   #sp-panel-desc { display: flex; align-items: flex-start; }
   #sp-content.sp-desc-col {
     width: 100%; max-width: 1300px; margin: 0 auto;
-    padding: 4.5rem 8vw 5rem;
+    padding: 4.5rem 3vw 5rem;
   }
   .sp-section-heading {
     font-family: 'Inter', sans-serif !important; font-size: 1rem !important;

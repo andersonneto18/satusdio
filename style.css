@@ -819,7 +819,7 @@
        nunca é apagado), para o spacer sobreviver às trocas de conteúdo. */
     #lb-desc-wrap.lb-desc-col {
       width: 100%; max-width: 1300px; margin: 0 auto;
-      padding: 4.5rem 8vw 5rem;
+      padding: 4.5rem 3vw 5rem;
     }
     .lb-desc-col * { max-width: 100%; box-sizing: border-box; }
     .lb-desc-col p {
