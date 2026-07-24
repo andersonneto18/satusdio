@@ -578,6 +578,13 @@ function openProject(pic) {
   /* populate UI */
   lbProjTitle.textContent = title;
   lbProjMeta.textContent  = meta;
+  /* cópia invisível do título/meta no painel da Descrição — ver
+     .lb-desc-spacer em style.css, garante o alinhamento com "Dados do
+     projeto:" só com CSS (mesma marcação = mesma altura). */
+  const lbTitleSpacer = document.querySelector('.lb-proj-title-spacer');
+  const lbMetaSpacer  = document.querySelector('.lb-proj-meta-spacer');
+  if (lbTitleSpacer) lbTitleSpacer.textContent = title;
+  if (lbMetaSpacer)  lbMetaSpacer.textContent  = meta;
   if (lbExtLink) lbExtLink.href = href || '#';
   lbContent.classList.remove('visible');
   lbContent.innerHTML     = '';
@@ -707,8 +714,8 @@ async function fetchProjectContent(id) {
   lbContent.innerHTML = '';
   lbLoader.style.display = 'flex';
 
-  const lbAcfContent = document.getElementById('lb-acf-content');
-  if (lbAcfContent) { lbAcfContent.innerHTML = ''; lbAcfContent.style.display = ''; }
+  const lbAcf = document.getElementById('lb-acf');
+  if (lbAcf) lbAcf.innerHTML = '';
   document.querySelectorAll('#lb-track .lb-photo-panel').forEach(p => p.remove());
 
   try {
@@ -738,7 +745,7 @@ async function fetchProjectContent(id) {
     }
 
     /* ── Dados do projeto (coluna direita) ── */
-    if (lbAcfContent) {
+    if (lbAcf) {
       const yearMatch = lbProjMeta.textContent.match(/\d{4}/);
       const year = yearMatch ? yearMatch[0] : '';
 
@@ -752,7 +759,7 @@ async function fetchProjectContent(id) {
         { label: 'Ano',         value: year },
       ];
       const filled = metaFields.filter(f => f.value?.trim());
-      lbAcfContent.innerHTML = `
+      lbAcf.innerHTML = `
         <h2 class="lb-section-heading">Dados do projeto:</h2>
         <div class="lb-acf-table">
           ${filled.map(f => `
@@ -761,6 +768,7 @@ async function fetchProjectContent(id) {
               <span class="lb-acf-value">${f.value}</span>
             </div>`).join('')}
         </div>`;
+      lbAcf.style.display = '';
     }
 
     /* ── Galeria ── */
@@ -826,6 +834,10 @@ async function fetchProjectContent(id) {
           const panel = document.createElement('section');
           panel.className = 'lb-panel lb-panel-scrollable lb-photo-panel';
           panel.innerHTML = `
+            <div class="lb-title-block lb-desc-spacer" aria-hidden="true">
+              <div class="lb-proj-meta-spacer">${lbProjMeta.textContent}</div>
+              <h1 class="lb-proj-title-spacer">${lbProjTitle.textContent}</h1>
+            </div>
             <div class="lb-photo-row">` +
             pair.map(({ url, caption }) => `
               <div class="lb-photo-item">
@@ -842,7 +854,7 @@ async function fetchProjectContent(id) {
   } catch (err) {
     console.error('[SASTUDIO]', err);
     lbContent.innerHTML = '<p class="lb-msg">Não foi possível carregar o conteúdo.</p>';
-    if (lbAcfContent) lbAcfContent.style.display = 'none';
+    if (lbAcf) lbAcf.style.display = 'none';
   } finally {
     lbLoader.style.display = 'none';
     lbContent.classList.add('visible');

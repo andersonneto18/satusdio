@@ -58,6 +58,17 @@ add_shortcode('single_projetos', function () {
     $year     = get_the_date('Y', $post_id);
     $feat_url = get_the_post_thumbnail_url($post_id, 'full');
 
+    // categoria: primeira taxonomia associada ao post type "projects" que tenha termos neste post
+    $cat_name = '';
+    foreach ( get_object_taxonomies('projects') as $tax ) {
+        $terms = get_the_terms($post_id, $tax);
+        if ( $terms && ! is_wp_error($terms) && ! empty($terms) ) {
+            $cat_name = $terms[0]->name;
+            break;
+        }
+    }
+    $meta_line = $cat_name ? ($cat_name . ' · ' . $year) : $year;
+
     $desc = trim( (string) get_field('project_descriprion', $post_id) );
 
     $meta_fields = array_filter([
@@ -193,23 +204,27 @@ add_shortcode('single_projetos', function () {
   }
 
   /* ── Painel principal (Dados | Capa) ──
-     o título deixou de ficar acima das duas colunas — agora vive DENTRO
-     da coluna Dados do projeto (#sp-acf), num "slot" com a mesma altura
-     da capa (.sp-title-slot: 55vh, igual a #sp-cover-media) e
-     display:flex/align-items:center, para o título ficar sempre centrado
-     verticalmente com a imagem central, seja qual for o comprimento do
-     texto. A Descrição já não vive aqui — é o painel seguinte, a
+     título/categoria no topo (#sp-main-top), depois duas colunas lado
+     a lado: Dados do projeto e a capa (imagem/vídeo estático, sem
+     slideshow). A Descrição já não vive aqui — é o painel seguinte, a
      largura quase total da página (#sp-panel-desc), sem coluna ao lado. */
   #sp-panel-main { position: relative; padding: 8rem 5vw 6rem; }
-  .sp-title-slot {
-    height: 55vh;
-    display: flex; align-items: center;
-  }
-  .sp-title-slot h1 {
+  /* .sp-title-block (não só #sp-main-top): a mesma classe é reutilizada,
+     invisível, dentro do painel da Descrição (.sp-desc-spacer) — isto
+     garante que o título "Descrição:" fica exatamente à mesma altura
+     que "Dados do projeto:" por construção em CSS (mesma marcação =
+     mesma altura), sem depender de medir posições em JS. */
+  .sp-title-block { max-width: 1800px; margin: 0 auto 3rem; }
+  /* removida a pedido do cliente (categoria · ano acima do título) —
+     display:none aqui apaga tanto a versão real como as cópias
+     invisíveis usadas para alinhar Descrição/Galeria com o título. */
+  .sp-title-block .sp-meta { display: none; }
+  .sp-title-block h1 {
     font-family: 'Inter', sans-serif; font-weight: 300;
     font-size: clamp(1.3rem, 2vw, 1.9rem); line-height: 1.05;
-    color: #151512; margin: 0; letter-spacing: 0.01em; max-width: 100%;
+    color: #151512; margin: 0; letter-spacing: 0.01em;
   }
+  .sp-desc-spacer { visibility: hidden; pointer-events: none; }
   #sp-main-cols {
     display: flex; align-items: start; gap: 4vw;
     max-width: 1800px; margin: 0 auto;
@@ -251,15 +266,14 @@ add_shortcode('single_projetos', function () {
      largura quase total da página (sem coluna ao lado); o utilizador
      roda o rato (navegação horizontal já existente) para chegar a
      este painel e depois à Galeria. ── */
-  /* align-items:flex-start (não center) — padding-top = padding-top do
-     painel principal (8rem) + metade da altura da capa (27.5vh, metade
-     de 55vh) faz o título "Descrição:" ficar exatamente à altura do
-     CENTRO da imagem central do painel anterior (onde agora também
-     está centrado o título do projeto, ver .sp-title-slot acima). */
+  /* align-items:flex-start (não center) — o padding-top igual ao do
+     painel principal (4.5rem) + o .sp-desc-spacer invisível (ver acima)
+     fazem o título "Descrição:" ficar à mesma altura do "Dados do
+     projeto:" no painel anterior. */
   #sp-panel-desc { display: flex; align-items: flex-start; }
   #sp-content.sp-desc-col {
     width: 100%; max-width: 1300px; margin: 0 auto;
-    padding: calc(8rem + 27.5vh) 3vw 5rem;
+    padding: 4.5rem 3vw 5rem;
   }
   .sp-section-heading {
     font-family: 'Inter', sans-serif !important; font-size: 1rem !important;
@@ -270,8 +284,8 @@ add_shortcode('single_projetos', function () {
   .sp-acf-table { width: 100%; }
   .sp-acf-row {
     display: grid; grid-template-columns: 140px 1fr; gap: 1rem;
-    padding: 0.5rem 0; border-bottom: 1px solid rgba(21,21,18,0.09);
-    align-items: start; font-size: 0.68rem;
+    padding: 0.85rem 0; border-bottom: 1px solid rgba(21,21,18,0.09);
+    align-items: start; font-size: 0.85rem;
   }
   .sp-acf-row:first-child { border-top: 1px solid rgba(21,21,18,0.09); }
   .sp-acf-label { font-weight: 400; color: #151512; }
@@ -281,10 +295,7 @@ add_shortcode('single_projetos', function () {
   #sp-acf { flex-basis: auto; min-width: 0; }
     #sp-cover-col { position: static; }
     #sp-content.sp-desc-col { padding: 2.5rem 5vw 3rem; }
-    /* colunas empilhadas (Dados por cima da Capa) — o titulo nao
-       precisa de ocupar 55vh vazios so' para se centrar com a imagem,
-       que ja nao esta ao lado. */
-    .sp-title-slot { height: auto; padding: 1rem 0; }
+    .sp-desc-spacer { display: none; }
   }
 
   /* ── Galeria — cada painel mostra 2 fotos lado a lado, quase de
@@ -292,14 +303,15 @@ add_shortcode('single_projetos', function () {
      referência) — em vez de 1 foto pequena centrada com muito vazio
      à volta. Se sobrar 1 foto sozinha (número ímpar), ocupa o painel
      todo (igual ao .sg-photo-panel/.lb-photo-panel).
-     O painel usa o MESMO padding-top do painel principal (8rem) para as
-     fotos começarem exatamente na mesma altura (linha de cima) que a
-     imagem central — como ambas têm 55vh de altura, a linha de baixo
-     também fica alinhada por construção, sem precisar de medir nada em
-     JS nem de spacers invisíveis. ── */
+     O painel usa a MESMA estrutura de topo do painel principal
+     (padding-top 4.5rem + .sp-title-block invisível, reaproveitando o
+     truque do .sp-desc-spacer) para as fotos começarem exatamente na
+     mesma altura (linha de cima) que a imagem central — como ambas têm
+     55vh de altura, a linha de baixo também fica alinhada por
+     construção, sem precisar de medir nada em JS. ── */
   .sp-photo-panel {
     display: flex; flex-direction: column;
-    padding: 8rem 2vw 2vh;
+    padding: 4.5rem 2vw 2vh;
     background: #fff;
   }
   .sp-photo-row { display: flex; align-items: flex-start; justify-content: center; gap: 20px; }
@@ -317,6 +329,7 @@ add_shortcode('single_projetos', function () {
   }
   @media (max-width: 700px) {
     .sp-photo-panel { padding: 1.5vh 3vw; }
+    .sp-photo-panel .sp-desc-spacer { display: none; }
     .sp-photo-row { flex-direction: column; gap: 12px; }
     .sp-photo-item { height: 40vh; }
   }
@@ -356,10 +369,13 @@ add_shortcode('single_projetos', function () {
   <div id="sp-viewport">
     <div id="sp-track">
       <section id="sp-panel-main" class="sp-panel sp-panel-scrollable">
+        <div id="sp-main-top" class="sp-title-block">
+          <div class="sp-meta"><?php echo esc_html($meta_line); ?></div>
+          <h1><?php echo esc_html($title); ?></h1>
+        </div>
         <div id="sp-main-cols">
+          <?php if (!empty($meta_fields)): ?>
           <div id="sp-acf" class="sp-col">
-            <div class="sp-title-slot"><h1><?php echo esc_html($title); ?></h1></div>
-            <?php if (!empty($meta_fields)): ?>
             <h3 class="sp-section-heading">Dados do projeto:</h3>
             <div class="sp-acf-table">
               <?php foreach ($meta_fields as $f): ?>
@@ -369,8 +385,8 @@ add_shortcode('single_projetos', function () {
                 </div>
               <?php endforeach; ?>
             </div>
-            <?php endif; ?>
           </div>
+          <?php endif; ?>
           <div id="sp-cover-col" class="sp-col">
             <div id="sp-cover-media"<?php echo $cover_is_video ? ' data-video-src="' . esc_url($cover_url) . '"' : ''; ?> style="view-transition-name: sp-hero-<?php echo (int) $post_id; ?>">
               <?php if ($cover_url && !$cover_is_video): ?>
@@ -383,6 +399,10 @@ add_shortcode('single_projetos', function () {
 
       <section id="sp-panel-desc" class="sp-panel sp-panel-scrollable">
         <div id="sp-content" class="sp-desc-col">
+          <div class="sp-title-block sp-desc-spacer" aria-hidden="true">
+            <div class="sp-meta"><?php echo esc_html($meta_line); ?></div>
+            <h1><?php echo esc_html($title); ?></h1>
+          </div>
           <h3 class="sp-section-heading">Descrição:</h3>
           <div class="sp-desc"><?php echo $desc ? $desc : '<p>Sem descrição para este projeto.</p>'; ?></div>
         </div>
@@ -390,6 +410,10 @@ add_shortcode('single_projetos', function () {
 
       <?php foreach (array_chunk($gallery_urls, 2) as $pair): ?>
       <section class="sp-panel sp-panel-scrollable sp-photo-panel">
+        <div class="sp-title-block sp-desc-spacer" aria-hidden="true">
+          <div class="sp-meta"><?php echo esc_html($meta_line); ?></div>
+          <h1><?php echo esc_html($title); ?></h1>
+        </div>
         <div class="sp-photo-row">
           <?php foreach ($pair as $url): ?>
           <div class="sp-photo-item"><img src="<?php echo esc_url($url); ?>" loading="lazy" alt=""/></div>
