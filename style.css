@@ -668,7 +668,7 @@
     }
     #lb-content p {
       font-family: 'Inter', sans-serif !important;
-      font-size: 1.12rem !important; line-height: 1.85 !important;
+      font-size: 0.82rem !important; line-height: 1.65 !important;
       color: rgba(21,21,18,0.82) !important; margin-bottom: 1.4rem !important;
       break-inside: avoid; font-weight: 300 !important;
       text-align: justify !important;
@@ -817,7 +817,7 @@
        roda o rato (navegação horizontal já existente no site) para
        chegar a este painel e depois à Galeria. ── */
     /* align-items:flex-start (não center) — o padding-top igual ao do
-       painel principal (4.5rem) + o .lb-desc-spacer invisível (ver
+       painel principal (8rem) + o .lb-desc-spacer invisível (ver
        acima) fazem o título "Descrição:" ficar à mesma altura do
        "Dados do projeto:" no painel anterior. */
     #lb-panel-desc { display: flex; align-items: flex-start; }
@@ -827,7 +827,7 @@
        nunca é apagado), para o spacer sobreviver às trocas de conteúdo. */
     #lb-desc-wrap.lb-desc-col {
       width: 100%; max-width: 1300px; margin: 0 auto;
-      padding: 4.5rem 3vw 5rem;
+      padding: 8rem 3vw 5rem;
     }
     .lb-desc-col * { max-width: 100%; box-sizing: border-box; }
     .lb-desc-col p {
@@ -862,11 +862,12 @@
       line-height: 1.1 !important;
     }
 
-    /* ── DESCRIÇÃO (coluna esquerda) ── */
+    /* ── DESCRIÇÃO (coluna esquerda) — texto mais pequeno para caber mais
+       dentro da altura da imagem central, sem ser preciso rolar tanto. ── */
     #lb-content p {
       font-family: 'Inter', sans-serif !important;
-      font-size: 1.12rem !important;
-      line-height: 1.85 !important;
+      font-size: 0.82rem !important;
+      line-height: 1.65 !important;
       font-weight: 300 !important;
       color: rgba(21,21,18,0.82) !important;
       margin-bottom: 1.4rem !important;
@@ -909,14 +910,14 @@
        à volta. Painéis inseridos dinamicamente no #lb-track. Se sobrar
        1 foto sozinha (número ímpar), ocupa o painel todo. ── */
     /* o painel usa a MESMA estrutura de topo do painel principal
-       (padding-top 4.5rem + .lb-title-block invisível, reaproveitando o
+       (padding-top 8rem + .lb-title-block invisível, reaproveitando o
        truque do .lb-desc-spacer) para as fotos começarem exatamente na
        mesma altura (linha de cima) que a imagem central — como ambas
        têm 68vh de altura, a linha de baixo também fica alinhada por
        construção, sem precisar de medir nada em JS. */
     .lb-photo-panel {
       display: flex; flex-direction: column;
-      padding: 4.5rem 2vw 2vh;
+      padding: 8rem 2vw 2vh;
       background: var(--bg);
     }
     .lb-photo-row { display: flex; align-items: flex-start; justify-content: center; gap: 20px; }

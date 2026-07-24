@@ -309,20 +309,22 @@ add_shortcode('sastudio_gallery', function () {
      roda o rato (navegação horizontal já existente) para chegar a
      este painel e depois à Galeria. ── */
   /* align-items:flex-start (não center) — o padding-top igual ao do
-     painel principal (4.5rem) + o .sg-desc-spacer invisível (ver acima)
+     painel principal (8rem) + o .sg-desc-spacer invisível (ver acima)
      fazem o título "Descrição:" ficar à mesma altura do "Dados do
      projeto:" no painel anterior. */
   #sg-panel-desc { display: flex; align-items: flex-start; }
   #sg-content.sg-desc-col {
     width: 100%; max-width: 1300px; margin: 0 auto;
-    padding: 4.5rem 3vw 5rem;
+    padding: 8rem 3vw 5rem;
   }
   .sg-section-heading {
     font-family: 'Inter', sans-serif !important; font-size: 1rem !important;
     font-weight: 300 !important; white-space: nowrap !important;
     color: #151512; margin: 0 0 2rem; line-height: 1.1;
   }
-  .sg-desc { font-size: 1rem; line-height: 1.85; color: rgba(21,21,18,0.82); text-align: justify; }
+  /* texto mais pequeno para caber mais dentro da altura da imagem
+     central, sem ser preciso rolar tanto. */
+  .sg-desc { font-size: 0.82rem; line-height: 1.65; color: rgba(21,21,18,0.82); text-align: justify; }
   .sg-acf-table { width: 100%; }
   .sg-acf-row {
     display: grid; grid-template-columns: 140px 1fr; gap: 1rem;
@@ -345,14 +347,14 @@ add_shortcode('sastudio_gallery', function () {
      à volta. Se sobrar 1 foto sozinha (número ímpar), ocupa o painel
      todo. ── */
   /* o painel usa a MESMA estrutura de topo do painel principal
-     (padding-top 4.5rem + .sg-title-block invisível, reaproveitando o
+     (padding-top 8rem + .sg-title-block invisível, reaproveitando o
      truque do .sg-desc-spacer) para as fotos começarem exatamente na
      mesma altura (linha de cima) que a imagem central — como ambas têm
      68vh de altura, a linha de baixo também fica alinhada por
      construção, sem precisar de medir nada em JS. */
   .sg-photo-panel {
     display: flex; flex-direction: column;
-    padding: 4.5rem 2vw 2vh;
+    padding: 8rem 2vw 2vh;
     background: #fff;
   }
   .sg-photo-row { display: flex; align-items: flex-start; justify-content: center; gap: 20px; }
