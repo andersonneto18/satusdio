@@ -660,17 +660,11 @@
       display: none !important;
     }
 
-    /* ── CONTENT DESCRIPTION ──
-       descrições longas passam a fluir em 2 colunas (como um jornal) —
-       o texto distribui-se automaticamente entre as duas, sem cortar
-       nenhum parágrafo a meio (ver break-inside:avoid em #lb-content p,
-       abaixo). O título "Descrição:" (<h2 class="lb-section-heading">,
-       primeiro filho de #lb-content) continua a ocupar a largura toda
-       via column-span:all, já existente mais abaixo. */
+    /* ── CONTENT DESCRIPTION ── */
     #lb-content {
       padding: 0 !important;
-      columns: 2 !important;
-      column-gap: 4rem !important;
+      columns: unset !important;
+      column-gap: unset !important;
     }
     #lb-content p {
       font-family: 'Inter', sans-serif !important;
@@ -823,7 +817,7 @@
        roda o rato (navegação horizontal já existente no site) para
        chegar a este painel e depois à Galeria. ── */
     /* align-items:flex-start (não center) — o padding-top igual ao do
-       painel principal (8rem) + o .lb-desc-spacer invisível (ver
+       painel principal (4.5rem) + o .lb-desc-spacer invisível (ver
        acima) fazem o título "Descrição:" ficar à mesma altura do
        "Dados do projeto:" no painel anterior. */
     #lb-panel-desc { display: flex; align-items: flex-start; }
@@ -833,7 +827,7 @@
        nunca é apagado), para o spacer sobreviver às trocas de conteúdo. */
     #lb-desc-wrap.lb-desc-col {
       width: 100%; max-width: 1300px; margin: 0 auto;
-      padding: 8rem 3vw 5rem;
+      padding: 4.5rem 3vw 5rem;
     }
     .lb-desc-col * { max-width: 100%; box-sizing: border-box; }
     .lb-desc-col p {
@@ -922,7 +916,7 @@
        construção, sem precisar de medir nada em JS. */
     .lb-photo-panel {
       display: flex; flex-direction: column;
-      padding: 8rem 2vw 2vh;
+      padding: 4.5rem 2vw 2vh;
       background: var(--bg);
     }
     .lb-photo-row { display: flex; align-items: flex-start; justify-content: center; gap: 20px; }
@@ -1122,7 +1116,6 @@
       #lb-acf { flex-basis: auto; min-width: 0; }
       #lb-cover-col { position: static; }
       #lb-desc-wrap.lb-desc-col { padding: 2.5rem 5vw 3rem; }
-      #lb-content { columns: 1 !important; }
       #lb-content p { font-size: 0.95rem !important; }
 
       /* ACF TABLE */

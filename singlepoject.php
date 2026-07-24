@@ -273,23 +273,20 @@ add_shortcode('single_projetos', function () {
      roda o rato (navegação horizontal já existente) para chegar a
      este painel e depois à Galeria. ── */
   /* align-items:flex-start (não center) — o padding-top igual ao do
-     painel principal (8rem) + o .sp-desc-spacer invisível (ver acima)
+     painel principal (4.5rem) + o .sp-desc-spacer invisível (ver acima)
      fazem o título "Descrição:" ficar à mesma altura do "Dados do
      projeto:" no painel anterior. */
   #sp-panel-desc { display: flex; align-items: flex-start; }
   #sp-content.sp-desc-col {
     width: 100%; max-width: 1300px; margin: 0 auto;
-    padding: 8rem 3vw 5rem;
+    padding: 4.5rem 3vw 5rem;
   }
   .sp-section-heading {
     font-family: 'Inter', sans-serif !important; font-size: 1rem !important;
     font-weight: 300 !important; white-space: nowrap !important;
     color: #151512; margin: 0 0 2rem; line-height: 1.1;
   }
-  /* descrições longas fluem em 2 colunas (como um jornal); "Descrição:"
-     (fora deste bloco) continua a ocupar a largura toda normalmente. */
-  .sp-desc { font-size: 1rem; line-height: 1.85; color: rgba(21,21,18,0.82); text-align: justify; columns: 2; column-gap: 4rem; }
-  .sp-desc p { break-inside: avoid; }
+  .sp-desc { font-size: 1rem; line-height: 1.85; color: rgba(21,21,18,0.82); text-align: justify; }
   .sp-acf-table { width: 100%; }
   .sp-acf-row {
     display: grid; grid-template-columns: 140px 1fr; gap: 1rem;
@@ -305,7 +302,6 @@ add_shortcode('single_projetos', function () {
     #sp-cover-col { position: static; }
     #sp-content.sp-desc-col { padding: 2.5rem 5vw 3rem; }
     .sp-desc-spacer { display: none; }
-    .sp-desc { columns: 1; }
   }
 
   /* ── Galeria — cada painel mostra 2 fotos lado a lado, quase de
@@ -321,7 +317,7 @@ add_shortcode('single_projetos', function () {
      construção, sem precisar de medir nada em JS. ── */
   .sp-photo-panel {
     display: flex; flex-direction: column;
-    padding: 8rem 2vw 2vh;
+    padding: 4.5rem 2vw 2vh;
     background: #fff;
   }
   .sp-photo-row { display: flex; align-items: flex-start; justify-content: center; gap: 20px; }
