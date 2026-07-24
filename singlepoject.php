@@ -204,17 +204,23 @@ add_shortcode('single_projetos', function () {
   }
 
   /* ── Painel principal (Dados | Capa) ──
-     título/categoria no topo (#sp-main-top), depois duas colunas lado
-     a lado: Dados do projeto e a capa (imagem/vídeo estático, sem
-     slideshow). A Descrição já não vive aqui — é o painel seguinte, a
-     largura quase total da página (#sp-panel-desc), sem coluna ao lado. */
+     título/categoria (#sp-main-top) vivem DENTRO da coluna Dados
+     (#sp-acf), como primeiro elemento — assim o título começa
+     exatamente na mesma altura que a imagem central (mesmo topo, já que
+     as duas colunas arrancam juntas), sem ficar mais alto do que ela.
+     A Descrição já não vive aqui — é o painel seguinte, a largura quase
+     total da página (#sp-panel-desc), sem coluna ao lado. */
   #sp-panel-main { position: relative; padding: 8rem 5vw 6rem; }
   /* .sp-title-block (não só #sp-main-top): a mesma classe é reutilizada,
      invisível, dentro do painel da Descrição (.sp-desc-spacer) — isto
      garante que o título "Descrição:" fica exatamente à mesma altura
      que "Dados do projeto:" por construção em CSS (mesma marcação =
-     mesma altura), sem depender de medir posições em JS. */
-  .sp-title-block { max-width: 1800px; margin: 0 auto 3rem; }
+     mesma altura), sem depender de medir posições em JS. max-width
+     igual à largura da coluna Dados (#sp-acf: flex 0 1 360px) — sem
+     isto a cópia invisível (num painel muito mais largo) quebraria
+     linha de forma diferente do título real, dando uma altura
+     diferente e desalinhando "Descrição:" de "Dados do projeto:". */
+  .sp-title-block { max-width: 360px; margin: 0 0 3rem; }
   /* removida a pedido do cliente (categoria · ano acima do título) —
      display:none aqui apaga tanto a versão real como as cópias
      invisíveis usadas para alinhar Descrição/Galeria com o título. */
@@ -369,13 +375,13 @@ add_shortcode('single_projetos', function () {
   <div id="sp-viewport">
     <div id="sp-track">
       <section id="sp-panel-main" class="sp-panel sp-panel-scrollable">
-        <div id="sp-main-top" class="sp-title-block">
-          <div class="sp-meta"><?php echo esc_html($meta_line); ?></div>
-          <h1><?php echo esc_html($title); ?></h1>
-        </div>
         <div id="sp-main-cols">
-          <?php if (!empty($meta_fields)): ?>
           <div id="sp-acf" class="sp-col">
+            <div id="sp-main-top" class="sp-title-block">
+              <div class="sp-meta"><?php echo esc_html($meta_line); ?></div>
+              <h1><?php echo esc_html($title); ?></h1>
+            </div>
+            <?php if (!empty($meta_fields)): ?>
             <h3 class="sp-section-heading">Dados do projeto:</h3>
             <div class="sp-acf-table">
               <?php foreach ($meta_fields as $f): ?>
@@ -385,8 +391,8 @@ add_shortcode('single_projetos', function () {
                 </div>
               <?php endforeach; ?>
             </div>
+            <?php endif; ?>
           </div>
-          <?php endif; ?>
           <div id="sp-cover-col" class="sp-col">
             <div id="sp-cover-media"<?php echo $cover_is_video ? ' data-video-src="' . esc_url($cover_url) . '"' : ''; ?> style="view-transition-name: sp-hero-<?php echo (int) $post_id; ?>">
               <?php if ($cover_url && !$cover_is_video): ?>

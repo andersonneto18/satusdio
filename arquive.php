@@ -240,17 +240,23 @@ add_shortcode('sastudio_gallery', function () {
   }
 
   /* ── Painel principal (Dados | Capa) ──
-     título/categoria no topo (#sg-main-top), depois duas colunas lado
-     a lado: Dados do projeto e a capa (imagem/vídeo estático, sem
-     slideshow). A Descrição já não vive aqui — é o painel seguinte, a
-     largura quase total da página (#sg-panel-desc), sem coluna ao lado. */
+     título/categoria (#sg-main-top) vivem DENTRO da coluna Dados
+     (#sg-acf), como primeiro elemento — assim o título começa
+     exatamente na mesma altura que a imagem central (mesmo topo, já que
+     as duas colunas arrancam juntas), sem ficar mais alto do que ela.
+     A Descrição já não vive aqui — é o painel seguinte, a largura quase
+     total da página (#sg-panel-desc), sem coluna ao lado. */
   #sg-panel-main { position: relative; padding: 8rem 5vw 6rem; }
   /* .sg-title-block (não só #sg-main-top): a mesma classe é reutilizada,
      invisível, dentro do painel da Descrição (.sg-desc-spacer) — isto
      garante que o título "Descrição:" fica exatamente à mesma altura
      que "Dados do projeto:" por construção em CSS (mesma marcação =
-     mesma altura), sem depender de medir posições em JS. */
-  .sg-title-block { max-width: 1800px; margin: 0 auto 3rem; }
+     mesma altura), sem depender de medir posições em JS. max-width
+     igual à largura da coluna Dados (#sg-acf: flex 0 1 360px) — sem
+     isto a cópia invisível (num painel muito mais largo) quebraria
+     linha de forma diferente do título real, dando uma altura
+     diferente e desalinhando "Descrição:" de "Dados do projeto:". */
+  .sg-title-block { max-width: 360px; margin: 0 0 3rem; }
   /* removida a pedido do cliente (categoria · ano acima do título) —
      display:none aqui apaga tanto a versão real como as cópias
      invisíveis usadas para alinhar Descrição/Galeria com o título. */
@@ -717,16 +723,16 @@ add_shortcode('sastudio_gallery', function () {
 
       var html = '<div id="sg-track">';
       html += '<section id="sg-panel-main" class="sg-panel sg-panel-scrollable">';
-      html += '<div id="sg-main-top" class="sg-title-block">' + titleBlockHtml + '</div>';
       html += '<div id="sg-main-cols">';
+      html += '<div id="sg-acf" class="sg-col">';
+      html += '<div id="sg-main-top" class="sg-title-block">' + titleBlockHtml + '</div>';
       if (metaFields.length) {
-        html += '<div id="sg-acf" class="sg-col">';
         html += '<h3 class="sg-section-heading">Dados do projeto:</h3>';
         html += '<div class="sg-acf-table">' + metaFields.map(function (f) {
           return '<div class="sg-acf-row"><span class="sg-acf-label">' + esc(f.label) + ':</span><span class="sg-acf-value">' + esc(f.value) + '</span></div>';
         }).join('') + '</div>';
-        html += '</div>';
       }
+      html += '</div>'; /* fim #sg-acf */
       html += '<div id="sg-cover-col" class="sg-col"><div id="sg-cover-media">' + (coverUrl ? coverHtml : '') + '</div></div>';
       html += '</div>'; /* fim #sg-main-cols */
       html += '</section>';

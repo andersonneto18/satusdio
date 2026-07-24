@@ -746,8 +746,11 @@
     /* ── MAIN LAYOUT (Dados | Capa) ──
        flex (não grid): dois blocos lado a lado — Dados do projeto e a
        capa (imagem/vídeo estático, tamanho contido). Título/categoria
-       ficam acima (#lb-main-top), fora das colunas. A Descrição já não
-       vive aqui — é o painel seguinte, a largura quase total da
+       (#lb-main-top) vivem DENTRO da coluna Dados (#lb-acf), como
+       primeiro elemento — assim o título começa exatamente na mesma
+       altura que a imagem central (mesmo topo, já que as duas colunas
+       arrancam juntas), sem ficar mais alto do que ela. A Descrição já
+       não vive aqui — é o painel seguinte, a largura quase total da
        página (ver #lb-panel-desc), sem coluna ao lado. */
     #lb-panel-main {
       position: relative;
@@ -759,8 +762,13 @@
        exatamente à mesma altura que "Dados do projeto:" por construção
        em CSS (mesma marcação = mesma altura), sem depender de medir
        posições em JS. */
+    /* max-width igual à largura da coluna Dados (#lb-acf: flex 0 1 360px)
+       — a cópia invisível (.lb-desc-spacer) vive num painel muito mais
+       largo, e sem este limite quebraria linha de forma diferente do
+       título real, dando uma altura diferente e desalinhando
+       "Descrição:" de "Dados do projeto:". */
     .lb-title-block {
-      max-width: 1800px; margin: 0 auto 3rem;
+      max-width: 360px; margin: 0 0 3rem;
     }
     .lb-desc-spacer { visibility: hidden; pointer-events: none; }
     #lb-main-cols {
@@ -833,7 +841,7 @@
     }
     #lb-acf { padding-top: 0 !important; margin-top: 0 !important; }
     #lb-content > .lb-section-heading,
-    #lb-acf    > .lb-section-heading {
+    #lb-acf-content > .lb-section-heading {
       margin-top: 0 !important;
       padding-top: 0 !important;
       font-family: 'Inter', sans-serif !important;

@@ -714,8 +714,8 @@ async function fetchProjectContent(id) {
   lbContent.innerHTML = '';
   lbLoader.style.display = 'flex';
 
-  const lbAcf = document.getElementById('lb-acf');
-  if (lbAcf) lbAcf.innerHTML = '';
+  const lbAcfContent = document.getElementById('lb-acf-content');
+  if (lbAcfContent) { lbAcfContent.innerHTML = ''; lbAcfContent.style.display = ''; }
   document.querySelectorAll('#lb-track .lb-photo-panel').forEach(p => p.remove());
 
   try {
@@ -745,7 +745,7 @@ async function fetchProjectContent(id) {
     }
 
     /* ── Dados do projeto (coluna direita) ── */
-    if (lbAcf) {
+    if (lbAcfContent) {
       const yearMatch = lbProjMeta.textContent.match(/\d{4}/);
       const year = yearMatch ? yearMatch[0] : '';
 
@@ -759,7 +759,7 @@ async function fetchProjectContent(id) {
         { label: 'Ano',         value: year },
       ];
       const filled = metaFields.filter(f => f.value?.trim());
-      lbAcf.innerHTML = `
+      lbAcfContent.innerHTML = `
         <h2 class="lb-section-heading">Dados do projeto:</h2>
         <div class="lb-acf-table">
           ${filled.map(f => `
@@ -768,7 +768,6 @@ async function fetchProjectContent(id) {
               <span class="lb-acf-value">${f.value}</span>
             </div>`).join('')}
         </div>`;
-      lbAcf.style.display = '';
     }
 
     /* ── Galeria ── */
@@ -854,7 +853,7 @@ async function fetchProjectContent(id) {
   } catch (err) {
     console.error('[SASTUDIO]', err);
     lbContent.innerHTML = '<p class="lb-msg">Não foi possível carregar o conteúdo.</p>';
-    if (lbAcf) lbAcf.style.display = 'none';
+    if (lbAcfContent) lbAcfContent.style.display = 'none';
   } finally {
     lbLoader.style.display = 'none';
     lbContent.classList.add('visible');
