@@ -317,8 +317,8 @@ add_shortcode('sastudio_gallery', function () {
   .sg-acf-table { width: 100%; }
   .sg-acf-row {
     display: grid; grid-template-columns: 140px 1fr; gap: 1rem;
-    padding: 0.85rem 0; border-bottom: 1px solid rgba(21,21,18,0.09);
-    align-items: start; font-size: 0.85rem;
+    padding: 0.5rem 0; border-bottom: 1px solid rgba(21,21,18,0.09);
+    align-items: start; font-size: 0.68rem;
   }
   .sg-acf-row:first-child { border-top: 1px solid rgba(21,21,18,0.09); }
   .sg-acf-label { font-weight: 400; color: #151512; }

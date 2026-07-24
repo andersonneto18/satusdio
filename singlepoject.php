@@ -270,8 +270,8 @@ add_shortcode('single_projetos', function () {
   .sp-acf-table { width: 100%; }
   .sp-acf-row {
     display: grid; grid-template-columns: 140px 1fr; gap: 1rem;
-    padding: 0.85rem 0; border-bottom: 1px solid rgba(21,21,18,0.09);
-    align-items: start; font-size: 0.85rem;
+    padding: 0.5rem 0; border-bottom: 1px solid rgba(21,21,18,0.09);
+    align-items: start; font-size: 0.68rem;
   }
   .sp-acf-row:first-child { border-top: 1px solid rgba(21,21,18,0.09); }
   .sp-acf-label { font-weight: 400; color: #151512; }

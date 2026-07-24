@@ -869,7 +869,7 @@
       display: grid;
       grid-template-columns: 140px 1fr;
       gap: 1rem;
-      padding: 0.85rem 0;
+      padding: 0.5rem 0;
       border-bottom: 1px solid rgba(21,21,18,0.09);
       align-items: start;
     }
@@ -878,12 +878,12 @@
     }
     .lb-acf-label {
       font-family: 'Inter', sans-serif;
-      font-size: 0.8rem; font-weight: 400;
+      font-size: 0.68rem; font-weight: 400;
       color: var(--text);
     }
     .lb-acf-value {
       font-family: 'Inter', sans-serif;
-      font-size: 0.8rem; font-weight: 300;
+      font-size: 0.68rem; font-weight: 300;
       color: rgba(21,21,18,0.75);
       line-height: 1.55;
     }
