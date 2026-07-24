@@ -240,27 +240,23 @@ add_shortcode('sastudio_gallery', function () {
   }
 
   /* ── Painel principal (Dados | Capa) ──
-     título/categoria no topo (#sg-main-top), depois duas colunas lado
-     a lado: Dados do projeto e a capa (imagem/vídeo estático, sem
-     slideshow). A Descrição já não vive aqui — é o painel seguinte, a
+     o título deixou de ficar acima das duas colunas — agora vive DENTRO
+     da coluna Dados do projeto (#sg-acf), num "slot" com a mesma altura
+     da capa (.sg-title-slot: 55vh, igual a #sg-cover-media) e
+     display:flex/align-items:center, para o título ficar sempre centrado
+     verticalmente com a imagem central, seja qual for o comprimento do
+     texto. A Descrição já não vive aqui — é o painel seguinte, a
      largura quase total da página (#sg-panel-desc), sem coluna ao lado. */
   #sg-panel-main { position: relative; padding: 8rem 5vw 6rem; }
-  /* .sg-title-block (não só #sg-main-top): a mesma classe é reutilizada,
-     invisível, dentro do painel da Descrição (.sg-desc-spacer) — isto
-     garante que o título "Descrição:" fica exatamente à mesma altura
-     que "Dados do projeto:" por construção em CSS (mesma marcação =
-     mesma altura), sem depender de medir posições em JS. */
-  .sg-title-block { max-width: 1800px; margin: 0 auto 3rem; }
-  /* removida a pedido do cliente (categoria · ano acima do título) —
-     display:none aqui apaga tanto a versão real como as cópias
-     invisíveis usadas para alinhar Descrição/Galeria com o título. */
-  .sg-title-block .sg-meta { display: none; }
-  .sg-title-block h1 {
+  .sg-title-slot {
+    height: 55vh;
+    display: flex; align-items: center;
+  }
+  .sg-title-slot h1 {
     font-family: 'Inter', sans-serif; font-weight: 300;
     font-size: clamp(1.3rem, 2vw, 1.9rem); line-height: 1.05;
-    color: #151512; margin: 0; letter-spacing: 0.01em;
+    color: #151512; margin: 0; letter-spacing: 0.01em; max-width: 100%;
   }
-  .sg-desc-spacer { visibility: hidden; pointer-events: none; }
   #sg-main-cols {
     display: flex; align-items: start; gap: 4vw;
     max-width: 1800px; margin: 0 auto;
@@ -302,14 +298,15 @@ add_shortcode('sastudio_gallery', function () {
      largura quase total da página (sem coluna ao lado); o utilizador
      roda o rato (navegação horizontal já existente) para chegar a
      este painel e depois à Galeria. ── */
-  /* align-items:flex-start (não center) — o padding-top igual ao do
-     painel principal (4.5rem) + o .sg-desc-spacer invisível (ver acima)
-     fazem o título "Descrição:" ficar à mesma altura do "Dados do
-     projeto:" no painel anterior. */
+  /* align-items:flex-start (não center) — padding-top = padding-top do
+     painel principal (8rem) + metade da altura da capa (27.5vh, metade
+     de 55vh) faz o título "Descrição:" ficar exatamente à altura do
+     CENTRO da imagem central do painel anterior (onde agora também
+     está centrado o título do projeto, ver .sg-title-slot acima). */
   #sg-panel-desc { display: flex; align-items: flex-start; }
   #sg-content.sg-desc-col {
     width: 100%; max-width: 1300px; margin: 0 auto;
-    padding: 4.5rem 3vw 5rem;
+    padding: calc(8rem + 27.5vh) 3vw 5rem;
   }
   .sg-section-heading {
     font-family: 'Inter', sans-serif !important; font-size: 1rem !important;
@@ -331,22 +328,24 @@ add_shortcode('sastudio_gallery', function () {
     #sg-acf { flex-basis: auto; min-width: 0; }
     #sg-cover-col { position: static; }
     #sg-content.sg-desc-col { padding: 2.5rem 5vw 3rem; }
-    .sg-desc-spacer { display: none; }
+    /* colunas empilhadas (Dados por cima da Capa) — o titulo nao
+       precisa de ocupar 55vh vazios so' para se centrar com a imagem,
+       que ja nao esta ao lado. */
+    .sg-title-slot { height: auto; padding: 1rem 0; }
   }
   /* ── Galeria — cada painel mostra 2 fotos lado a lado, quase de
      ponta a ponta do ecrã, com um espaço pequeno entre elas (como na
      referência) — em vez de 1 foto pequena centrada com muito vazio
      à volta. Se sobrar 1 foto sozinha (número ímpar), ocupa o painel
      todo. ── */
-  /* o painel usa a MESMA estrutura de topo do painel principal
-     (padding-top 4.5rem + .sg-title-block invisível, reaproveitando o
-     truque do .sg-desc-spacer) para as fotos começarem exatamente na
-     mesma altura (linha de cima) que a imagem central — como ambas têm
-     55vh de altura, a linha de baixo também fica alinhada por
-     construção, sem precisar de medir nada em JS. */
+  /* o painel usa o MESMO padding-top do painel principal (8rem) para as
+     fotos começarem exatamente na mesma altura (linha de cima) que a
+     imagem central — como ambas têm 55vh de altura, a linha de baixo
+     também fica alinhada por construção, sem precisar de medir nada em
+     JS nem de spacers invisíveis. */
   .sg-photo-panel {
     display: flex; flex-direction: column;
-    padding: 4.5rem 2vw 2vh;
+    padding: 8rem 2vw 2vh;
     background: #fff;
   }
   .sg-photo-row { display: flex; align-items: flex-start; justify-content: center; gap: 20px; }
@@ -364,7 +363,6 @@ add_shortcode('sastudio_gallery', function () {
   }
   @media (max-width: 700px) {
     .sg-photo-panel { padding: 1.5vh 3vw; }
-    .sg-photo-panel .sg-desc-spacer { display: none; }
     .sg-photo-row { flex-direction: column; gap: 12px; }
     .sg-photo-item { height: 40vh; }
   }
@@ -677,9 +675,6 @@ add_shortcode('sastudio_gallery', function () {
       ? post._embedded['wp:featuredmedia'][0].source_url : '';
     var title = post.title.rendered;
     var year  = new Date(post.date).getFullYear();
-    var terms = (post._embedded && post._embedded['wp:term']) ? [].concat.apply([], post._embedded['wp:term']) : [];
-    var cat   = terms[0] ? terms[0].name : '';
-    var meta  = cat ? (cat + ' · ' + year) : String(year);
 
     var req = projectCache[id]
       ? Promise.resolve(projectCache[id])
@@ -713,26 +708,23 @@ add_shortcode('sastudio_gallery', function () {
         ? '<video src="' + esc(coverUrl) + '" muted autoplay playsinline></video>'
         : '<img src="' + esc(coverUrl) + '" alt=""/>';
 
-      var titleBlockHtml = '<div class="sg-meta">' + esc(meta) + '</div><h1>' + esc(title) + '</h1>';
-
       var html = '<div id="sg-track">';
       html += '<section id="sg-panel-main" class="sg-panel sg-panel-scrollable">';
-      html += '<div id="sg-main-top" class="sg-title-block">' + titleBlockHtml + '</div>';
       html += '<div id="sg-main-cols">';
+      html += '<div id="sg-acf" class="sg-col">';
+      html += '<div class="sg-title-slot"><h1>' + esc(title) + '</h1></div>';
       if (metaFields.length) {
-        html += '<div id="sg-acf" class="sg-col">';
         html += '<h3 class="sg-section-heading">Dados do projeto:</h3>';
         html += '<div class="sg-acf-table">' + metaFields.map(function (f) {
           return '<div class="sg-acf-row"><span class="sg-acf-label">' + esc(f.label) + ':</span><span class="sg-acf-value">' + esc(f.value) + '</span></div>';
         }).join('') + '</div>';
-        html += '</div>';
       }
+      html += '</div>'; /* fim #sg-acf */
       html += '<div id="sg-cover-col" class="sg-col"><div id="sg-cover-media">' + (coverUrl ? coverHtml : '') + '</div></div>';
       html += '</div>'; /* fim #sg-main-cols */
       html += '</section>';
       html += '<section id="sg-panel-desc" class="sg-panel sg-panel-scrollable">';
       html += '<div id="sg-content" class="sg-desc-col">';
-      html += '<div class="sg-title-block sg-desc-spacer" aria-hidden="true">' + titleBlockHtml + '</div>';
       html += '<h3 class="sg-section-heading">Descrição:</h3>';
       html += '<div class="sg-desc">' + (desc || '<p>Sem descrição para este projeto.</p>') + '</div>';
       html += '</div>';
@@ -744,7 +736,6 @@ add_shortcode('sastudio_gallery', function () {
         for (var gi = 0; gi < galleryImgs.length; gi += 2) {
           var pair = galleryImgs.slice(gi, gi + 2);
           photoPanelsHtml += '<section class="sg-panel sg-panel-scrollable sg-photo-panel">' +
-            '<div class="sg-title-block sg-desc-spacer" aria-hidden="true">' + titleBlockHtml + '</div>' +
             '<div class="sg-photo-row">' +
             pair.map(function (url) {
               return '<div class="sg-photo-item"><img src="' + esc(url) + '" loading="lazy" alt=""/></div>';
