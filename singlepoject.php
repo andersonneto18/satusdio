@@ -214,7 +214,7 @@ add_shortcode('single_projetos', function () {
      garante que o título "Descrição:" fica exatamente à mesma altura
      que "Dados do projeto:" por construção em CSS (mesma marcação =
      mesma altura), sem depender de medir posições em JS. */
-  .sp-title-block { max-width: 1800px; margin: 0 auto 1.2rem; }
+  .sp-title-block { max-width: 1800px; margin: 0 auto 3rem; }
   /* removida a pedido do cliente (categoria · ano acima do título) —
      display:none aqui apaga tanto a versão real como as cópias
      invisíveis usadas para alinhar Descrição/Galeria com o título. */
@@ -284,8 +284,8 @@ add_shortcode('single_projetos', function () {
   .sp-acf-table { width: 100%; }
   .sp-acf-row {
     display: grid; grid-template-columns: 140px 1fr; gap: 1rem;
-    padding: 0.55rem 0; border-bottom: 1px solid rgba(21,21,18,0.09);
-    align-items: start; font-size: 0.72rem;
+    padding: 0.85rem 0; border-bottom: 1px solid rgba(21,21,18,0.09);
+    align-items: start; font-size: 0.85rem;
   }
   .sp-acf-row:first-child { border-top: 1px solid rgba(21,21,18,0.09); }
   .sp-acf-label { font-weight: 400; color: #151512; }
