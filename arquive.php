@@ -322,7 +322,10 @@ add_shortcode('sastudio_gallery', function () {
     font-weight: 300 !important; white-space: nowrap !important;
     color: #151512; margin: 0 0 2rem; line-height: 1.1;
   }
-  .sg-desc { font-size: 1rem; line-height: 1.85; color: rgba(21,21,18,0.82); text-align: justify; }
+  /* descrições longas fluem em 2 colunas (como um jornal); "Descrição:"
+     (fora deste bloco) continua a ocupar a largura toda normalmente. */
+  .sg-desc { font-size: 1rem; line-height: 1.85; color: rgba(21,21,18,0.82); text-align: justify; columns: 2; column-gap: 4rem; }
+  .sg-desc p { break-inside: avoid; }
   .sg-acf-table { width: 100%; }
   .sg-acf-row {
     display: grid; grid-template-columns: 140px 1fr; gap: 1rem;
@@ -338,6 +341,7 @@ add_shortcode('sastudio_gallery', function () {
     #sg-cover-col { position: static; }
     #sg-content.sg-desc-col { padding: 2.5rem 5vw 3rem; }
     .sg-desc-spacer { display: none; }
+    .sg-desc { columns: 1; }
   }
   /* ── Galeria — cada painel mostra 2 fotos lado a lado, quase de
      ponta a ponta do ecrã, com um espaço pequeno entre elas (como na

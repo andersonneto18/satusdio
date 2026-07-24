@@ -286,7 +286,10 @@ add_shortcode('single_projetos', function () {
     font-weight: 300 !important; white-space: nowrap !important;
     color: #151512; margin: 0 0 2rem; line-height: 1.1;
   }
-  .sp-desc { font-size: 1rem; line-height: 1.85; color: rgba(21,21,18,0.82); text-align: justify; }
+  /* descrições longas fluem em 2 colunas (como um jornal); "Descrição:"
+     (fora deste bloco) continua a ocupar a largura toda normalmente. */
+  .sp-desc { font-size: 1rem; line-height: 1.85; color: rgba(21,21,18,0.82); text-align: justify; columns: 2; column-gap: 4rem; }
+  .sp-desc p { break-inside: avoid; }
   .sp-acf-table { width: 100%; }
   .sp-acf-row {
     display: grid; grid-template-columns: 140px 1fr; gap: 1rem;
@@ -302,6 +305,7 @@ add_shortcode('single_projetos', function () {
     #sp-cover-col { position: static; }
     #sp-content.sp-desc-col { padding: 2.5rem 5vw 3rem; }
     .sp-desc-spacer { display: none; }
+    .sp-desc { columns: 1; }
   }
 
   /* ── Galeria — cada painel mostra 2 fotos lado a lado, quase de

@@ -660,11 +660,17 @@
       display: none !important;
     }
 
-    /* ── CONTENT DESCRIPTION ── */
+    /* ── CONTENT DESCRIPTION ──
+       descrições longas passam a fluir em 2 colunas (como um jornal) —
+       o texto distribui-se automaticamente entre as duas, sem cortar
+       nenhum parágrafo a meio (ver break-inside:avoid em #lb-content p,
+       abaixo). O título "Descrição:" (<h2 class="lb-section-heading">,
+       primeiro filho de #lb-content) continua a ocupar a largura toda
+       via column-span:all, já existente mais abaixo. */
     #lb-content {
       padding: 0 !important;
-      columns: unset !important;
-      column-gap: unset !important;
+      columns: 2 !important;
+      column-gap: 4rem !important;
     }
     #lb-content p {
       font-family: 'Inter', sans-serif !important;
@@ -1116,6 +1122,7 @@
       #lb-acf { flex-basis: auto; min-width: 0; }
       #lb-cover-col { position: static; }
       #lb-desc-wrap.lb-desc-col { padding: 2.5rem 5vw 3rem; }
+      #lb-content { columns: 1 !important; }
       #lb-content p { font-size: 0.95rem !important; }
 
       /* ACF TABLE */
