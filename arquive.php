@@ -301,10 +301,11 @@ add_shortcode('sastudio_gallery', function () {
      principal (8rem), sem mais nada por cima, faz "Descrição:" começar
      exatamente à mesma altura do topo da imagem central. max-width mais
      estreito (formato mais quadrado, não uma faixa larga) — a pedido do
-     admin. */
+     admin. margin:0 (não auto) — fica encostado à esquerda, perto da
+     imagem central, em vez de centrado no ecrã todo (o que a afastava). */
   #sg-panel-desc { display: flex; align-items: flex-start; }
   #sg-content.sg-desc-col {
-    width: 100%; max-width: 700px; margin: 0 auto;
+    width: 100%; max-width: 700px; margin: 0;
     padding: 8rem 3vw 5rem;
   }
   .sg-section-heading {
