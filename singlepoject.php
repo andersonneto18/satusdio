@@ -253,7 +253,7 @@ add_shortcode('single_projetos', function () {
      altura, para os cards ficarem visualmente consistentes entre
      projetos; object-fit:cover ajusta a imagem a essa caixa (pode
      recortar as margens conforme a proporção original). */
-  #sp-cover-media { width: 65%; height: 55vh; margin: 0 auto; position: relative; }
+  #sp-cover-media { width: 80%; height: 68vh; margin: 0 auto; position: relative; }
   #sp-cover-media img,
   #sp-cover-media video {
     width: 100%; height: 100%;
@@ -313,7 +313,7 @@ add_shortcode('single_projetos', function () {
      (padding-top 4.5rem + .sp-title-block invisível, reaproveitando o
      truque do .sp-desc-spacer) para as fotos começarem exatamente na
      mesma altura (linha de cima) que a imagem central — como ambas têm
-     55vh de altura, a linha de baixo também fica alinhada por
+     68vh de altura, a linha de baixo também fica alinhada por
      construção, sem precisar de medir nada em JS. ── */
   .sp-photo-panel {
     display: flex; flex-direction: column;
@@ -321,10 +321,10 @@ add_shortcode('single_projetos', function () {
     background: #fff;
   }
   .sp-photo-row { display: flex; align-items: flex-start; justify-content: center; gap: 20px; }
-  /* mesma altura da imagem central (capa, #sp-cover-media: 55vh) —
+  /* mesma altura da imagem central (capa, #sp-cover-media: 68vh) —
      fica alinhada com ela; a largura preenche o espaço disponível
      lado a lado (2 por painel), recortando via object-fit:cover. */
-  .sp-photo-item { flex: 1 1 0; min-width: 0; height: 55vh; display: flex; flex-direction: column; }
+  .sp-photo-item { flex: 1 1 0; min-width: 0; height: 68vh; display: flex; flex-direction: column; }
   .sp-photo-item img {
     /* object-fit:cover preenche a caixa (pode recortar conforme a
        proporção original) — necessário para as duas fotos ficarem

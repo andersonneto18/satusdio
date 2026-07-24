@@ -289,7 +289,7 @@ add_shortcode('sastudio_gallery', function () {
      altura, para os cards ficarem visualmente consistentes entre
      projetos; object-fit:cover ajusta a imagem a essa caixa (pode
      recortar as margens conforme a proporção original). */
-  #sg-cover-media { width: 65%; height: 55vh; margin: 0 auto; position: relative; }
+  #sg-cover-media { width: 80%; height: 68vh; margin: 0 auto; position: relative; }
   #sg-cover-media img,
   #sg-cover-media video {
     width: 100%; height: 100%;
@@ -348,7 +348,7 @@ add_shortcode('sastudio_gallery', function () {
      (padding-top 4.5rem + .sg-title-block invisível, reaproveitando o
      truque do .sg-desc-spacer) para as fotos começarem exatamente na
      mesma altura (linha de cima) que a imagem central — como ambas têm
-     55vh de altura, a linha de baixo também fica alinhada por
+     68vh de altura, a linha de baixo também fica alinhada por
      construção, sem precisar de medir nada em JS. */
   .sg-photo-panel {
     display: flex; flex-direction: column;
@@ -356,10 +356,10 @@ add_shortcode('sastudio_gallery', function () {
     background: #fff;
   }
   .sg-photo-row { display: flex; align-items: flex-start; justify-content: center; gap: 20px; }
-  /* mesma altura da imagem central (capa, #sg-cover-media: 55vh) —
+  /* mesma altura da imagem central (capa, #sg-cover-media: 68vh) —
      fica alinhada com ela; a largura preenche o espaço disponível
      lado a lado (2 por painel), recortando via object-fit:cover. */
-  .sg-photo-item { flex: 1 1 0; min-width: 0; height: 55vh; display: flex; flex-direction: column; }
+  .sg-photo-item { flex: 1 1 0; min-width: 0; height: 68vh; display: flex; flex-direction: column; }
   .sg-photo-item img {
     /* object-fit:cover preenche a caixa (pode recortar conforme a
        proporção original) — necessário para as duas fotos ficarem

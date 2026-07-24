@@ -796,7 +796,7 @@
        altura, para os cards ficarem visualmente consistentes entre
        projetos; object-fit:cover ajusta a imagem a essa caixa (pode
        recortar as margens conforme a proporção original). */
-    #lb-cover-media { width: 65%; height: 55vh; margin: 0 auto; position: relative; }
+    #lb-cover-media { width: 80%; height: 68vh; margin: 0 auto; position: relative; }
     #lb-cover-media img,
     #lb-cover-media video {
       width: 100%; height: 100%;
@@ -912,7 +912,7 @@
        (padding-top 4.5rem + .lb-title-block invisível, reaproveitando o
        truque do .lb-desc-spacer) para as fotos começarem exatamente na
        mesma altura (linha de cima) que a imagem central — como ambas
-       têm 55vh de altura, a linha de baixo também fica alinhada por
+       têm 68vh de altura, a linha de baixo também fica alinhada por
        construção, sem precisar de medir nada em JS. */
     .lb-photo-panel {
       display: flex; flex-direction: column;
@@ -920,12 +920,12 @@
       background: var(--bg);
     }
     .lb-photo-row { display: flex; align-items: flex-start; justify-content: center; gap: 20px; }
-    /* mesma altura da imagem central (capa, #lb-cover-media: 55vh) —
+    /* mesma altura da imagem central (capa, #lb-cover-media: 68vh) —
        fica alinhada com ela; a largura preenche o espaço disponível
        lado a lado (2 por painel), recortando via object-fit:cover. */
     .lb-photo-item {
       flex: 1 1 0; min-width: 0;
-      height: 55vh;
+      height: 68vh;
       display: flex; flex-direction: column;
     }
     .lb-photo-item img {
