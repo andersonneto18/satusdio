@@ -273,13 +273,13 @@ add_shortcode('single_projetos', function () {
      roda o rato (navegação horizontal já existente) para chegar a
      este painel e depois à Galeria. ── */
   /* align-items:flex-start (não center) — o padding-top igual ao do
-     painel principal (4.5rem) + o .sp-desc-spacer invisível (ver acima)
+     painel principal (8rem) + o .sp-desc-spacer invisível (ver acima)
      fazem o título "Descrição:" ficar à mesma altura do "Dados do
      projeto:" no painel anterior. */
   #sp-panel-desc { display: flex; align-items: flex-start; }
   #sp-content.sp-desc-col {
     width: 100%; max-width: 1300px; margin: 0 auto;
-    padding: 4.5rem 3vw 5rem;
+    padding: 8rem 3vw 5rem;
   }
   .sp-section-heading {
     font-family: 'Inter', sans-serif !important; font-size: 1rem !important;
@@ -321,7 +321,7 @@ add_shortcode('single_projetos', function () {
      construção, sem precisar de medir nada em JS. ── */
   .sp-photo-panel {
     display: flex; flex-direction: column;
-    padding: 4.5rem 2vw 2vh;
+    padding: 8rem 2vw 2vh;
     background: #fff;
   }
   .sp-photo-row { display: flex; align-items: flex-start; justify-content: center; gap: 20px; }

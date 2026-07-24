@@ -823,7 +823,7 @@
        roda o rato (navegação horizontal já existente no site) para
        chegar a este painel e depois à Galeria. ── */
     /* align-items:flex-start (não center) — o padding-top igual ao do
-       painel principal (4.5rem) + o .lb-desc-spacer invisível (ver
+       painel principal (8rem) + o .lb-desc-spacer invisível (ver
        acima) fazem o título "Descrição:" ficar à mesma altura do
        "Dados do projeto:" no painel anterior. */
     #lb-panel-desc { display: flex; align-items: flex-start; }
@@ -833,7 +833,7 @@
        nunca é apagado), para o spacer sobreviver às trocas de conteúdo. */
     #lb-desc-wrap.lb-desc-col {
       width: 100%; max-width: 1300px; margin: 0 auto;
-      padding: 4.5rem 3vw 5rem;
+      padding: 8rem 3vw 5rem;
     }
     .lb-desc-col * { max-width: 100%; box-sizing: border-box; }
     .lb-desc-col p {
@@ -922,7 +922,7 @@
        construção, sem precisar de medir nada em JS. */
     .lb-photo-panel {
       display: flex; flex-direction: column;
-      padding: 4.5rem 2vw 2vh;
+      padding: 8rem 2vw 2vh;
       background: var(--bg);
     }
     .lb-photo-row { display: flex; align-items: flex-start; justify-content: center; gap: 20px; }
