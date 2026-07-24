@@ -250,7 +250,7 @@ add_shortcode('sastudio_gallery', function () {
      garante que o título "Descrição:" fica exatamente à mesma altura
      que "Dados do projeto:" por construção em CSS (mesma marcação =
      mesma altura), sem depender de medir posições em JS. */
-  .sg-title-block { max-width: 1800px; margin: 0 auto 3rem; }
+  .sg-title-block { max-width: 1800px; margin: 0 auto 1.2rem; }
   /* removida a pedido do cliente (categoria · ano acima do título) —
      display:none aqui apaga tanto a versão real como as cópias
      invisíveis usadas para alinhar Descrição/Galeria com o título. */
@@ -320,8 +320,8 @@ add_shortcode('sastudio_gallery', function () {
   .sg-acf-table { width: 100%; }
   .sg-acf-row {
     display: grid; grid-template-columns: 140px 1fr; gap: 1rem;
-    padding: 0.85rem 0; border-bottom: 1px solid rgba(21,21,18,0.09);
-    align-items: start; font-size: 0.85rem;
+    padding: 0.55rem 0; border-bottom: 1px solid rgba(21,21,18,0.09);
+    align-items: start; font-size: 0.72rem;
   }
   .sg-acf-row:first-child { border-top: 1px solid rgba(21,21,18,0.09); }
   .sg-acf-label { font-weight: 400; color: #151512; }

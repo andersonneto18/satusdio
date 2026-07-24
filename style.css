@@ -760,7 +760,7 @@
        em CSS (mesma marcação = mesma altura), sem depender de medir
        posições em JS. */
     .lb-title-block {
-      max-width: 1800px; margin: 0 auto 3rem;
+      max-width: 1800px; margin: 0 auto 1.2rem;
     }
     .lb-desc-spacer { visibility: hidden; pointer-events: none; }
     #lb-main-cols {
@@ -876,7 +876,7 @@
       display: grid;
       grid-template-columns: 140px 1fr;
       gap: 1rem;
-      padding: 0.85rem 0;
+      padding: 0.55rem 0;
       border-bottom: 1px solid rgba(21,21,18,0.09);
       align-items: start;
     }
@@ -885,12 +885,12 @@
     }
     .lb-acf-label {
       font-family: 'Inter', sans-serif;
-      font-size: 0.8rem; font-weight: 400;
+      font-size: 0.72rem; font-weight: 400;
       color: var(--text);
     }
     .lb-acf-value {
       font-family: 'Inter', sans-serif;
-      font-size: 0.8rem; font-weight: 300;
+      font-size: 0.72rem; font-weight: 300;
       color: rgba(21,21,18,0.75);
       line-height: 1.55;
     }
